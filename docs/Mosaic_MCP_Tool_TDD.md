@@ -66,13 +66,14 @@ flowchart TD
 | LLM & Embedding Models | Azure OpenAI Service | Provides enterprise-grade, secure, and scalable access to GPT and embedding models. |
 | Hosting | Azure Container Apps | Best-in-class for containerized microservices. Superior KEDA-based autoscaling is ideal for handling variable loads of persistent MCP/SSE connections (FR-1, FR-4). |
 | Communication | FastAPI with SSE | Modern, high-performance ASGI framework that natively supports Server-Sent Events (FR-3). |
-| Hybrid Search | Azure AI Search | Natively supports vector, keyword, and hybrid search, fulfilling FR-5. |
-| Graph Database | Azure Cosmos DB (Gremlin API) | Managed graph database for codebase dependency analysis (FR-6, FR-4). |
-| Long-Term Memory | Azure Cosmos DB (NoSQL API) | Scalable, schema-flexible NoSQL store for persistent agent memory (FR-10, FR-4). |
-| Short-Term Memory | Azure Cache for Redis | High-speed in-memory cache for conversational state and session data (FR-10). |
+| **Authentication** | **Azure Managed Identity** | **Secure, credential-free authentication across all Azure services. Eliminates connection string management and follows 2025 security best practices.** |
+| Hybrid Search | Azure AI Search (Basic tier) | Natively supports vector, keyword, and hybrid search, fulfilling FR-5. Uses managed identity authentication. |
+| Graph Database | Azure Cosmos DB (Gremlin API - Serverless) | Managed graph database for codebase dependency analysis (FR-6, FR-4). Uses serverless pricing model with managed identity authentication. |
+| Long-Term Memory | Azure Cosmos DB (NoSQL API) | Scalable, schema-flexible NoSQL store for persistent agent memory (FR-10, FR-4). Uses managed identity authentication. |
+| Short-Term Memory | Azure Cache for Redis (with Entra ID) | High-speed in-memory cache with Azure AD authentication enabled for secure, managed identity access (FR-10). |
 | Memory Consolidation | Azure Functions (Timer Trigger) | Serverless, event-driven compute for running the background memory consolidation task (FR-11). |
 | Semantic Reranking | Azure Machine Learning Endpoint | The "AI Foundry" for custom models. Provides a secure, scalable, and fully managed endpoint for hosting the cross-encoder model (FR-8). |
-| Developer Tooling | Azure Developer CLI (azd) | Streamlines provisioning and deployment workflows for developers and CI/CD pipelines. |
+| Developer Tooling | Azure Developer CLI (azd) with AVM | Streamlines provisioning and deployment workflows using Azure Verified Modules for consistency and best practices. |
 
 ## 4.0 Detailed Component Design
 
@@ -90,11 +91,47 @@ The Mosaic MCP Server will be deployed as a Docker container to Azure Container 
 
 **Implementation Plan:** We will build the MCP server capabilities directly on FastAPI, creating a small set of internal utility classes to handle MCP message formatting and the SSE lifecycle.
 
+#### 4.1.3 Managed Identity Authentication (2025 Security Update)
+
+**Authentication Strategy:** All Azure service connections use Azure Managed Identity with `DefaultAzureCredential` from the Azure Identity SDK. This eliminates the need for connection strings, API keys, and manual credential management.
+
+**Implementation Pattern:**
+```python
+from azure.identity import DefaultAzureCredential
+from semantic_kernel.connectors.ai.azure_openai import AzureChatCompletion
+
+credential = DefaultAzureCredential()
+chat_service = AzureChatCompletion(
+    deployment_name="gpt-4",
+    endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    ad_token_provider=get_bearer_token_provider(
+        credential, "https://cognitiveservices.azure.com/.default"
+    )
+)
+```
+
+**Benefits:**
+- Zero credential management overhead
+- Automatic token rotation and renewal
+- Enhanced security with no stored secrets
+- Seamless integration with Container Apps system-assigned identity
+
 ### 4.2 RetrievalPlugin (FR-5, FR-6, FR-7)
 
-- **HybridSearch (Native Function):** Implemented using the official, built-in AzureAISearchMemoryStore Semantic Kernel connector.
-- **GraphCode (Native Function):** Uses the standard gremlinpython library to connect to the Cosmos DB Gremlin endpoint.
+- **HybridSearch (Native Function):** Implemented using the official, built-in AzureAISearchMemoryStore Semantic Kernel connector with managed identity authentication.
+- **GraphCode (Native Function):** Uses the standard gremlinpython library to connect to the Cosmos DB Gremlin endpoint with managed identity authentication.
 - **AggregateCandidates (Native Function):** A utility function to combine and de-duplicate results.
+
+#### 4.2.1 Serverless Gremlin Configuration (FR-6 Implementation)
+
+**Pricing Model:** Azure Cosmos DB with Gremlin API uses serverless pricing model for cost-effective, consumption-based billing.
+
+**Configuration:** 
+- Capabilities: `EnableGremlin` + `EnableServerless`
+- No throughput provisioning required (serverless auto-scales)
+- Pay only for consumed Request Units (RUs) and storage
+
+**Authentication:** Uses managed identity authentication with proper role assignments for secure, credential-free access to graph operations.
 
 ### 4.3 RefinementPlugin (FR-8)
 

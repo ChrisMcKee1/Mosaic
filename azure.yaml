@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: mosaic
+metadata:
+    template: azd-init@1.17.2
+services:
+    mosaic:
+        project: .
+        host: containerapp
+        language: python
+        env:
+          AZURE_AI_SEARCH_ENDPOINT: ${AZURE_AI_SEARCH_ENDPOINT}
+          AZURE_COSMOS_CONNECTION_STRING: ${AZURE_COSMOS_CONNECTION_STRING}
+          AZURE_REDIS_CONNECTION_STRING: ${AZURE_REDIS_CONNECTION_STRING}
+          AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+          AZURE_ML_WORKSPACE_NAME: ${AZURE_ML_WORKSPACE_NAME}
+          AZURE_FUNCTIONS_ENDPOINT: ${AZURE_FUNCTIONS_ENDPOINT}
+    memory-consolidator:
+        project: ./functions/memory-consolidator
+        host: function
+        language: python
+resources:
+    mosaic:
+        type: host.containerapp
+        port: 80
+    memory-consolidator:
+        type: host.function

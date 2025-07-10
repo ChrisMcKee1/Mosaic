@@ -165,6 +165,9 @@ cython_debug/
 # Local History for Visual Studio Code
 .history/
 
+# Cursor IDE
+.cursor/
+
 # Azure specific
 .azure/
 *.azureProfile
@@ -187,9 +190,18 @@ logs/
 
 # MCP Tools Directory - DO NOT COMMIT
 conport/
+context_portal/
+conport_backup/
+*_backup/
+*.backup
 
-# Claude Code local settings
+# Claude Code local settings (sensitive data)
 .claude/settings.local.json
+
+# Cursor IDE - entire directory and files
+.cursor/
+.cursorignore
+.cursorrules
 
 # Environment variables
 .env
@@ -235,3 +247,5 @@ site/
 .Trashes
 ehthumbs.db
 Thumbs.db
+/.venv-conport
+.azure
