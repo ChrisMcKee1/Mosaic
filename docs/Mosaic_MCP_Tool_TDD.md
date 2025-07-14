@@ -150,28 +150,47 @@ chat_service = AzureChatCompletion(
 
 **Authentication:** Uses managed identity authentication with Cosmos DB Contributor role for secure, credential-free access.
 
-#### 4.2.2 Code Ingestion Pipeline (FR-6.1 through FR-6.5) - CRITICAL IMPLEMENTATION GAP
+#### 4.2.2 Universal Graph Ingestion System (FR-6.1 through FR-6.5) - CRITICAL IMPLEMENTATION GAP
 
-**CURRENT STATUS:** The existing RetrievalPlugin can query graph relationships but lacks the fundamental code ingestion pipeline to populate the graph. This represents a critical architectural gap that must be addressed.
+**CURRENT STATUS:** The existing RetrievalPlugin can query graph relationships but lacks the fundamental graph ingestion pipeline to populate the graph. This represents a critical architectural gap that must be addressed.
 
-**Repository Access (FR-6.1):**
+**ARCHITECTURAL PARADIGM SHIFT:** Instead of building language-specific parsers, we implement a **universal graph node insertion system** that is completely content-agnostic. This enables ingestion of any structured content: code, documentation, file structures, dependency graphs, etc.
 
-- **Technology Stack:** GitPython for repository operations, pathlib for filesystem traversal
-- **Implementation:** `IngestRepositoryFunction` to clone repos, select branches, filter file types
-- **Authentication:** Support for GitHub tokens, SSH keys, and local repository access
+**Universal Node Insertion (FR-6.1):**
 
-**Code Parsing (FR-6.2):**
+- **Content-Agnostic Design:** Single MCP function to insert any type of node into the graph
+- **Flexible Node Types:** Support for files, classes, functions, markdown documents, directories, dependencies, etc.
+- **Relationship Mapping:** Universal relationship system using typed connections
+- **Metadata Support:** Extensible metadata system for any content type
 
-- **Python Code:** Use `ast` module for parsing Python files into AST
-- **Multi-language Support:** tree-sitter for TypeScript, JavaScript, Java, C#, Go
-- **Extraction Logic:** Extract classes, functions, imports, docstrings, and dependencies
+**Repository Structure Ingestion (FR-6.2):**
 
-**Graph Construction (FR-6.3):**
+- **File System Traversal:** Universal file/directory structure ingestion
+- **Content Type Detection:** Automatic detection of file types and content patterns
+- **Hierarchical Relationships:** Parent-child relationships for file structures
+- **Cross-References:** Automatic detection of references between files (imports, links, etc.)
 
-- **Entity Creation:** Transform parsed code into Document and LibraryNode entities
-- **Embedding Generation:** Use Azure OpenAI text-embedding-3-small for code snippets
-- **Relationship Mapping:** Build dependency_ids and used_by_lib arrays automatically
-- **Cosmos DB Population:** Batch insert/update operations with proper error handling
+**Content Parsing (FR-6.3):**
+
+- **Code Parsing:** Optional language-specific parsers for detailed code analysis
+- **Markdown Processing:** Link extraction and cross-reference detection
+- **Configuration Files:** YAML, JSON, TOML parsing for dependency information
+- **Documentation Links:** Automatic relationship detection between documentation files
+
+**Universal Graph Construction (FR-6.4):**
+
+- **Node Creation:** Generic node creation with type, content, and metadata
+- **Relationship Inference:** Automatic relationship detection based on content patterns
+- **Embedding Generation:** Content-aware embedding generation for any node type
+- **Cosmos DB Population:** Universal storage pattern for all node types
+
+**Example Node Types:**
+- `file_node`: Represents any file in the repository
+- `directory_node`: Represents folder structures
+- `code_entity`: Classes, functions, methods (language-specific)
+- `markdown_document`: Documentation files with cross-references
+- `dependency_reference`: External dependencies and imports
+- `configuration_item`: Settings, environment variables, etc.
 
 **Real-time Updates (FR-6.4):**
 
@@ -261,25 +280,120 @@ This plugin improves the precision of retrieved context.
 }
 ```
 
-### 5.2 Graph Relationship Schema (OmniRAG Pattern)
+### 5.2 Universal Graph Schema with Content-Agnostic Node System
 
-**Library Document Example:**
+**Universal Node Document Example:**
 ```json
 {
-  "id": "pypi_flask",
-  "libtype": "pypi",
-  "libname": "flask", 
-  "developers": ["contact@palletsprojects.com"],
-  "dependency_ids": ["pypi_werkzeug", "pypi_jinja2", "pypi_click"],
-  "used_by_lib": ["pypi_flask_sqlalchemy", "pypi_flask_restful"],
-  "embedding": [0.012, "...", -0.045]
+  "id": "repo_myproject_src_auth_py",
+  "node_type": "file_node",
+  "name": "auth.py",
+  "path": "src/auth.py",
+  "content_type": "python",
+  "repository_context": {
+    "repo_url": "https://github.com/myorg/myproject",
+    "branch": "feature/auth-improvements",
+    "commit_hash": "abc123def456",
+    "source_type": "local",
+    "last_modified": "2025-07-14T10:30:00Z"
+  },
+  "content_summary": "User authentication module with login/logout functionality",
+  "relationships": {
+    "contains": ["repo_myproject_src_auth_py_User_class", "repo_myproject_src_auth_py_login_function"],
+    "imports": ["repo_myproject_src_database_py", "repo_myproject_src_utils_py"],
+    "parent": "repo_myproject_src_directory",
+    "references": ["docs_authentication_md"]
+  },
+  "embedding": [0.012, "...", -0.045],
+  "metadata": {
+    "file_size": 1024,
+    "line_count": 45,
+    "created_by": "developer",
+    "last_updated": "2025-07-14T10:30:00Z",
+    "tags": ["authentication", "security", "user-management"]
+  }
 }
 ```
 
-**Relationship Types:** Embedded in JSON arrays within NoSQL documents
-- `dependency_ids`: Libraries this library depends on
-- `developers`: Developer/maintainer identifiers  
-- `used_by_lib`: Libraries that depend on this library
+**Code Entity Node Example:**
+```json
+{
+  "id": "repo_myproject_src_auth_py_User_class",
+  "node_type": "code_entity",
+  "name": "User",
+  "path": "src/auth.py",
+  "content_type": "python_class",
+  "repository_context": {
+    "repo_url": "https://github.com/myorg/myproject",
+    "branch": "feature/auth-improvements",
+    "commit_hash": "abc123def456",
+    "source_type": "local",
+    "last_modified": "2025-07-14T10:30:00Z"
+  },
+  "content_summary": "User class with authentication and session management",
+  "relationships": {
+    "contained_by": "repo_myproject_src_auth_py",
+    "uses": ["repo_myproject_src_database_py_Database_class"],
+    "methods": ["repo_myproject_src_auth_py_User_login_method", "repo_myproject_src_auth_py_User_logout_method"]
+  },
+  "embedding": [0.012, "...", -0.045],
+  "metadata": {
+    "language": "python",
+    "entity_type": "class",
+    "docstring": "User authentication and session management class",
+    "start_line": 10,
+    "end_line": 45
+  }
+}
+```
+
+**Documentation Node Example:**
+```json
+{
+  "id": "docs_authentication_md",
+  "node_type": "markdown_document",
+  "name": "authentication.md",
+  "path": "docs/authentication.md",
+  "content_type": "markdown",
+  "repository_context": {
+    "repo_url": "https://github.com/myorg/myproject",
+    "branch": "main",
+    "source_type": "remote",
+    "last_modified": "2025-07-10T14:20:00Z"
+  },
+  "content_summary": "Documentation for authentication system implementation",
+  "relationships": {
+    "documents": ["repo_myproject_src_auth_py", "repo_myproject_src_auth_py_User_class"],
+    "links_to": ["docs_user_guide_md", "docs_security_md"],
+    "parent": "docs_directory"
+  },
+  "embedding": [0.012, "...", -0.045],
+  "metadata": {
+    "doc_type": "technical_documentation",
+    "sections": ["Overview", "Implementation", "API Reference"],
+    "word_count": 1250
+  }
+}
+```
+
+**Universal Relationship Types:**
+- `contains`: Parent-child relationships (directory → file, file → class)
+- `imports`: Code dependencies and imports
+- `references`: Cross-references between any content types
+- `documents`: Documentation describing code entities
+- `links_to`: Hyperlinks and cross-references in documentation
+- `depends_on`: General dependency relationships
+- `uses`: Usage relationships between entities
+- `implements`: Implementation relationships
+
+**Node Type Categories:**
+- `file_node`: Any file in the repository
+- `directory_node`: Folder structures
+- `code_entity`: Classes, functions, methods, variables
+- `markdown_document`: Documentation files
+- `configuration_item`: Config files, environment variables
+- `dependency_reference`: External dependencies and packages
+- `custom_node`: Extensible for any other content type
 
 ## 6.0 MCP Interface Definition
 
@@ -287,14 +401,29 @@ This plugin improves the precision of retrieved context.
 |-------------------|-------------|
 | `mosaic.retrieval.hybrid_search(query: str) -> List[Document]` | Performs parallel vector and keyword search. |
 | `mosaic.retrieval.query_code_graph(library_id: str, relationship_type: str) -> List[LibraryNode]` | Queries embedded graph relationships in NoSQL documents using OmniRAG pattern. |
-| **CODE INGESTION FUNCTIONS (CRITICAL IMPLEMENTATION GAP)** | |
-| `mosaic.ingestion.ingest_repository(repo_url: str, branch: str, filters: List[str]) -> IngestionResult` | **[MISSING]** Clones repository, parses code, constructs graph, populates Cosmos DB. |
-| `mosaic.ingestion.parse_codebase(repo_path: str, languages: List[str]) -> CodeGraph` | **[MISSING]** Parses existing codebase into structured graph representation. |
+| **UNIVERSAL GRAPH INGESTION FUNCTIONS (CRITICAL IMPLEMENTATION GAP)** | |
+| `mosaic.ingestion.insert_node(node_type: str, name: str, path: str, content_summary: str, metadata: dict) -> NodeResult` | **[MISSING]** Universal node insertion for any content type. |
+| `mosaic.ingestion.create_relationship(source_id: str, target_id: str, relationship_type: str, metadata: dict) -> RelationshipResult` | **[MISSING]** Creates typed relationships between any nodes. |
+| `mosaic.ingestion.ingest_file_structure(root_path: str, filters: List[str]) -> StructureResult` | **[MISSING]** Ingests file/directory structure as graph nodes. |
+| `mosaic.ingestion.ingest_repository(repo_url: str, branch: str, filters: List[str]) -> IngestionResult` | **[MISSING]** Clones repository and ingests complete structure. |
+| `mosaic.ingestion.parse_content_references(node_id: str, content: str) -> List[Reference]` | **[MISSING]** Extracts cross-references from any content type. |
+| `mosaic.ingestion.update_node_content(node_id: str, content_summary: str, metadata: dict) -> UpdateResult` | **[MISSING]** Updates existing node content and metadata. |
+| `mosaic.ingestion.query_nodes_by_type(node_type: str, filters: dict) -> List[Node]` | **[MISSING]** Queries nodes by type and optional filters. |
+| `mosaic.ingestion.traverse_relationships(node_id: str, relationship_type: str, depth: int) -> List[Node]` | **[MISSING]** Traverses graph relationships from a starting node. |
+| **SPECIALIZED CONTENT PROCESSORS** | |
+| `mosaic.ingestion.process_code_file(file_path: str, language: str) -> List[CodeEntity]` | **[MISSING]** Optional: Extract code entities from programming files. |
+| `mosaic.ingestion.process_markdown_file(file_path: str) -> MarkdownDocument` | **[MISSING]** Optional: Extract links and references from markdown. |
+| `mosaic.ingestion.process_config_file(file_path: str, config_type: str) -> List[ConfigItem]` | **[MISSING]** Optional: Extract configuration items and dependencies. |
 | `mosaic.ingestion.subscribe_repository_branch(repo_url: str, branch: str, webhook_url: str) -> SubscriptionResult` | **[MISSING]** Sets up GitHub App webhook subscription for repository branch monitoring. |
 | `mosaic.ingestion.update_graph_manual(changes: List[FileChange]) -> UpdateResult` | **[MISSING]** Manual graph updates with streaming progress (Pattern B). |
 | `mosaic.ingestion.analyze_code_changes(file_paths: List[str]) -> DependencyAnalysis` | **[MISSING]** Analyzes code dependencies and impact of changes (both patterns). |
 | `mosaic.ingestion.get_update_progress(operation_id: str) -> ProgressStatus` | **[MISSING]** Stream-compatible status for long-running operations. |
 | `mosaic.ingestion.insert_generated_code(code: str, context: dict) -> InsertResult` | **[MISSING]** Inserts AI-generated code into graph with correlation. |
+| **LOCAL/REMOTE STATE MANAGEMENT** | |
+| `mosaic.ingestion.transition_local_to_remote(entity_ids: List[str], commit_hash: str) -> TransitionResult` | **[MISSING]** Transitions local entities to remote after successful commit. |
+| `mosaic.ingestion.create_local_variant(remote_entity_id: str, local_changes: dict) -> LocalEntityResult` | **[MISSING]** Creates local variant of remote entity for development. |
+| `mosaic.ingestion.resolve_state_conflicts(repo_url: str, branch: str) -> ConflictResolution` | **[MISSING]** Resolves local/remote state conflicts during sync. |
+| `mosaic.ingestion.query_by_source_type(source_type: str, repo_context: dict) -> List[CodeEntity]` | **[MISSING]** Queries entities by source type and repository context. |
 | **EXISTING FUNCTIONS** | |
 | `mosaic.refinement.rerank(query: str, documents: List[Document]) -> List[Document]` | Reranks a list of documents for semantic relevance to a query. |
 | `mosaic.memory.save(session_id: str, content: str, type: str)` | Saves a piece of information to the agent's memory. |

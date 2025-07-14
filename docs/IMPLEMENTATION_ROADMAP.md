@@ -73,17 +73,19 @@ The Mosaic MCP Tool has a **critical architectural gap**: while the system inclu
 
 ### ❌ **CRITICAL MISSING COMPONENTS** (Blocking AI-Assisted Development)
 
-#### 1. **Code Ingestion Pipeline** - **🚨 HIGHEST PRIORITY**
+#### 1. **Universal Graph Ingestion System** - **🚨 HIGHEST PRIORITY**
 - **Status:** ❌ **COMPLETELY MISSING**
-- **Impact:** **CRITICAL** - Without this, the system cannot populate the knowledge graph
+- **Impact:** **CRITICAL** - Without this, the system cannot populate the knowledge graph with any content
+- **Paradigm Shift:** Content-agnostic graph node insertion system (not just code)
 - **Missing Components:**
-  - Repository cloning and access
-  - Multi-language code parsing (AST, tree-sitter)
-  - Code structure extraction (classes, functions, imports)
-  - Dependency graph construction
-  - Entity embedding generation
-  - Cosmos DB population logic
-- **Required MCP Functions:** `mosaic.ingestion.ingest_repository`, `mosaic.ingestion.parse_codebase`
+  - Universal node insertion system for any content type
+  - Flexible relationship management system
+  - Content-agnostic file structure ingestion
+  - Cross-reference extraction from any content
+  - Repository cloning and structure traversal
+  - Node metadata and embedding generation
+  - Cosmos DB universal storage patterns
+- **Required MCP Functions:** `mosaic.ingestion.insert_node`, `mosaic.ingestion.create_relationship`, `mosaic.ingestion.ingest_file_structure`, `mosaic.ingestion.ingest_repository`
 
 #### 2. **Real-time Graph Updates** - **🚨 HIGH PRIORITY**
 
@@ -144,7 +146,19 @@ The Mosaic MCP Tool has a **critical architectural gap**: while the system inclu
   - Conflict resolution for concurrent updates
 - **Required MCP Functions:** `mosaic.ingestion.insert_generated_code`
 
-#### 4. **Dependency Analysis Engine** - **🚨 MEDIUM PRIORITY**
+#### 4. **Local/Remote State Management** - **🚨 HIGH PRIORITY**
+- **Status:** ❌ **COMPLETELY MISSING**
+- **Impact:** **HIGH** - Critical for realistic developer workflows
+- **Missing Components:**
+  - Shared graph architecture supporting simultaneous local/remote entities
+  - Source type tracking system ("local" | "remote" | "unknown")
+  - State transition engine for local→remote conversion after commits
+  - Conflict resolution for mismatched local/remote states
+  - Repository context tracking (repo_url, branch, commit_hash, timestamps)
+  - Local variant creation for development workflows
+- **Required MCP Functions:** `mosaic.ingestion.transition_local_to_remote`, `mosaic.ingestion.create_local_variant`, `mosaic.ingestion.resolve_state_conflicts`, `mosaic.ingestion.query_by_source_type`
+
+#### 5. **Dependency Analysis Engine** - **🚨 MEDIUM PRIORITY**
 - **Status:** ❌ **COMPLETELY MISSING**
 - **Impact:** **MEDIUM** - Limits sophisticated dependency understanding
 - **Missing Components:**
@@ -156,68 +170,68 @@ The Mosaic MCP Tool has a **critical architectural gap**: while the system inclu
 
 ## 🛠️ **IMPLEMENTATION ROADMAP** (Optimal Order)
 
-### **Phase 1: Foundation - Repository Access & Basic Parsing** (Weeks 1-3)
+### **Phase 1: Foundation - Universal Graph System & Repository Access** (Weeks 1-3)
 **Priority:** 🚨 **CRITICAL**
 
-#### Week 1: Repository Access System
+#### Week 1: Universal Node Insertion System
 - **Research Phase:**
-  - Use Context7 MCP tool to research latest GitPython versions and alternatives
+  - Use Context7 MCP tool to research graph database best practices
+  - Validate content-agnostic node insertion patterns
+  - Cross-reference with web search for universal graph architectures
+  - Research flexible relationship modeling approaches
+
+- **Implementation:**
+  - Create `UniversalGraphPlugin` with content-agnostic node insertion
+  - Implement `insert_node` function for any content type
+  - Add `create_relationship` function for typed connections
+  - Create flexible metadata system for extensible content types
+  - Build universal embedding generation for any content
+
+- **Testing:**
+  - Node insertion tests with various content types
+  - Relationship creation and traversal validation
+  - Metadata flexibility testing
+  - Embedding generation verification
+
+#### Week 2: File Structure Ingestion
+- **Research Phase:**
+  - Use Context7 to research file system traversal best practices
+  - Validate cross-platform file handling approaches
+  - Research content type detection algorithms
+  - Cross-reference with web search for hierarchical structure processing
+
+- **Implementation:**
+  - Create `FileStructurePlugin` with universal file handling
+  - Implement `ingest_file_structure` for directory traversal
+  - Add content type detection and classification
+  - Create hierarchical relationship mapping (parent/child)
+  - Build cross-reference extraction from various content types
+
+- **Testing:**
+  - File structure ingestion tests
+  - Content type detection validation
+  - Hierarchical relationship verification
+  - Cross-reference extraction accuracy
+
+#### Week 3: Repository Access & Structure Processing
+- **Research Phase:**
+  - Use Context7 to research latest GitPython versions and alternatives
   - Validate GitHub/GitLab API compatibility for 2025
-  - Cross-reference with web search for authentication best practices
   - Research repository security patterns and token management
+  - Investigate content-agnostic repository processing
 
 - **Implementation:**
-  - Create `RepositoryAccessPlugin` with Semantic Kernel integration
-  - Implement `clone_repository(repo_url, branch, auth_token)`
+  - Create `RepositoryAccessPlugin` with universal content support
+  - Implement `ingest_repository` for complete repository processing
   - Add support for GitHub, GitLab, and local repositories
-  - Create file system traversal with configurable filtering
-  - Add error handling for network issues and authentication failures
+  - Create content-agnostic processing pipeline
+  - Build repository structure graph construction
 
 - **Testing:**
-  - Unit tests for repository cloning
-  - Integration tests with GitHub/GitLab
-  - Authentication flow validation
-  - Error scenario testing
-
-#### Week 2: Python Code Parsing
-- **Research Phase:**
-  - Use Context7 to research latest Python AST best practices
-  - Validate compatibility with Python 3.10+ features
-  - Research code analysis libraries (ast, astroid, libcst)
-  - Cross-reference with web search for performance optimizations
-
-- **Implementation:**
-  - Create `PythonParserPlugin` with AST integration
-  - Implement class, function, and import extraction
-  - Add docstring and type annotation parsing
-  - Create dependency relationship mapping
-  - Build code structure representation
-
-- **Testing:**
-  - Parser tests with various Python code patterns
-  - AST validation for edge cases
-  - Performance testing with large codebases
-  - Error handling for malformed code
-
-#### Week 3: Multi-language Support Foundation
-- **Research Phase:**
-  - Use Context7 to research tree-sitter latest versions
-  - Validate language grammar support for TypeScript, JavaScript, Java, C#
-  - Research cross-language dependency tracking
-  - Investigate language-specific parsing tools
-
-- **Implementation:**
-  - Create `MultiLanguageParserPlugin` with tree-sitter
-  - Implement TypeScript and JavaScript parsing
-  - Add basic Java and C# support
-  - Create unified code representation model
-  - Build language-agnostic dependency extraction
-
-- **Testing:**
-  - Multi-language parsing validation
-  - Cross-language dependency tests
-  - Performance benchmarks
-  - Grammar compatibility verification
+  - Repository cloning and access tests
+  - Multi-content-type processing validation
+  - Repository structure graph verification
+  - Authentication flow testing
 
 ### **Phase 2: Graph Construction & Population** (Weeks 4-6)
 **Priority:** 🚨 **CRITICAL**
@@ -344,6 +358,30 @@ The Mosaic MCP Tool has a **critical architectural gap**: while the system inclu
   - Conflict resolution validation
   - Performance benchmarking for concurrent updates
   - Monitoring system verification
+
+### **Phase 3.5: Local/Remote State Management** (Week 9.5)
+**Priority:** 🚨 **HIGH**
+
+#### Week 9.5: Local/Remote State Management System
+- **Research Phase:**
+  - Use Context7 to research Git workflow patterns and state management
+  - Validate conflict resolution algorithms for distributed systems
+  - Research entity versioning and transition patterns
+  - Cross-reference with web search for developer workflow optimization
+
+- **Implementation:**
+  - Create `LocalRemoteStatePlugin` with state transition management
+  - Implement `transition_local_to_remote` for post-commit workflows
+  - Add `create_local_variant` for development branching
+  - Create `resolve_state_conflicts` for sync conflicts
+  - Build `query_by_source_type` for filtered entity queries
+  - Add repository context tracking and timestamp management
+
+- **Testing:**
+  - Local→remote transition accuracy tests
+  - Conflict resolution validation
+  - State consistency verification
+  - Developer workflow simulation testing
 
 ### **Phase 4: AI Integration & Advanced Features** (Weeks 10-12)
 **Priority:** 🚨 **HIGH**
@@ -472,6 +510,15 @@ The Mosaic MCP Tool has a **critical architectural gap**: while the system inclu
 - [ ] Performance optimization for large codebases
 - [ ] Update conflict resolution
 
+### **Phase 3.5 Success Metrics**
+- [ ] Local→remote state transition accuracy for post-commit workflows
+- [ ] Conflict resolution for mismatched local/remote entity states
+- [ ] State consistency verification across simultaneous local/remote entities
+- [ ] Developer workflow simulation with pull→modify→commit→sync cycles
+- [ ] Repository context tracking (repo_url, branch, commit_hash, timestamps)
+- [ ] Local variant creation for development branching scenarios
+- [ ] Source type querying and filtering functionality
+
 ### **Phase 4 Success Metrics**
 - [ ] AI-generated code integration with correlation
 - [ ] Dependency impact analysis with recommendations
@@ -491,7 +538,8 @@ The Mosaic MCP Tool has a **critical architectural gap**: while the system inclu
 1. **Repository Access + Python Parsing** (Weeks 1-2) - **CRITICAL PATH**
 2. **Graph Construction + DB Population** (Weeks 4-6) - **CRITICAL PATH**
 3. **Real-time Updates** (Weeks 7-9) - **HIGH PRIORITY**
-4. **AI Integration** (Weeks 10-12) - **MEDIUM PRIORITY**
+4. **Local/Remote State Management** (Week 9.5) - **HIGH PRIORITY**
+5. **AI Integration** (Weeks 10-12) - **MEDIUM PRIORITY**
 
 ### **Quality Gates**
 - **Testing:** Comprehensive unit and integration tests for each component

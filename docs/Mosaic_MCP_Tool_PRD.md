@@ -86,13 +86,13 @@ This plugin will handle the first stage of the context funnel: gathering a broad
 
 *Problem Solved:* Addresses "Context is More Than a Prompt" by moving beyond single-method retrieval to capture both semantic (intent-based) and lexical (keyword-based) relevance within a unified data platform.
 
-**FR-6: Graph-Based Code Analysis (GraphCode tool):** Provide comprehensive codebase ingestion, parsing, and graph construction capabilities with the following sub-requirements:
+**FR-6: Universal Graph Ingestion System:** Provide comprehensive, content-agnostic graph ingestion capabilities that can handle any type of structured content, not just code, with the following sub-requirements:
 
-**FR-6.1: Repository Ingestion:** The plugin MUST provide functions to clone, access, and traverse repositories from various sources (GitHub, GitLab, local filesystem) with support for branch selection and filtering.
+**FR-6.1: Universal Node Insertion:** The plugin MUST provide a universal node insertion system that can accept any content type (code, documentation, configuration, file structures) and create appropriate graph nodes with flexible metadata and relationship systems.
 
-**FR-6.2: Code Parsing & Analysis:** The plugin MUST implement multi-language code parsing using appropriate tools (Python AST, tree-sitter for other languages) to extract code structure, dependencies, and relationships.
+**FR-6.2: Content-Agnostic Structure Ingestion:** The plugin MUST support ingestion of file systems, directory structures, and hierarchical content organization regardless of content type (code files, markdown documents, configuration files, etc.).
 
-**FR-6.3: Graph Construction:** The plugin MUST transform parsed code into graph entities (files, functions, classes, imports) and populate the unified Cosmos DB backend with proper embeddings and relationship mappings.
+**FR-6.3: Universal Relationship Management:** The plugin MUST provide a flexible relationship system that can connect any node types through typed relationships (contains, imports, references, documents, links_to, depends_on, uses, implements).
 
 **FR-6.4: Real-time Updates:** The plugin MUST support incremental graph updates through two distinct usage patterns:
 
@@ -116,14 +116,43 @@ This plugin will handle the first stage of the context funnel: gathering a broad
 
 **FR-6.6: Query Functions:** The plugin MUST expose query functions to traverse the constructed dependency graph and retrieve code context for AI-assisted development.
 
+**FR-6.7: Local/Remote State Management:** The plugin MUST support simultaneous local and remote code entity tracking to support realistic developer workflows where remote repositories serve as reference while local changes evolve the graph.
+
+**Technical Requirements:**
+- **Shared Graph:** Local and remote entities coexist in the same graph structure
+- **Source Type Tracking:** Optional `source_type` field ("local" | "remote" | "unknown")
+- **State Transitions:** Automatic local→remote conversion upon successful commits
+- **Conflict Resolution:** Handle cases where remote code exists but entity is marked local
+- **Repository Context:** Track repo_url, branch, commit_hash, and modification timestamps
+- **Workflow Support:** Enable developers to pull remote reference while making local changes
+
 **Required MCP Functions:**
-- `mosaic.ingestion.ingest_repository` - Full repository ingestion
-- `mosaic.ingestion.parse_codebase` - Code parsing and entity extraction
+
+**Universal Graph Functions:**
+- `mosaic.ingestion.insert_node` - Universal node insertion for any content type
+- `mosaic.ingestion.create_relationship` - Create typed relationships between any nodes
+- `mosaic.ingestion.ingest_file_structure` - Ingest file/directory structure as graph nodes
+- `mosaic.ingestion.ingest_repository` - Clone repository and ingest complete structure
+- `mosaic.ingestion.parse_content_references` - Extract cross-references from any content
+- `mosaic.ingestion.update_node_content` - Update existing node content and metadata
+- `mosaic.ingestion.query_nodes_by_type` - Query nodes by type and filters
+- `mosaic.ingestion.traverse_relationships` - Traverse graph relationships
+
+**Real-time Updates:**
 - `mosaic.ingestion.subscribe_repository_branch` - Branch subscription setup
 - `mosaic.ingestion.update_graph_manual` - Manual updates with streaming
-- `mosaic.ingestion.analyze_code_changes` - Dependency impact analysis
 - `mosaic.ingestion.get_update_progress` - Stream-compatible status
-- `mosaic.ingestion.insert_generated_code` - AI-generated code integration
+
+**Local/Remote State Management:**
+- `mosaic.ingestion.transition_local_to_remote` - State transition management
+- `mosaic.ingestion.create_local_variant` - Local development support
+- `mosaic.ingestion.resolve_state_conflicts` - Conflict resolution
+- `mosaic.ingestion.query_by_source_type` - Source-specific querying
+
+**Optional Specialized Processors:**
+- `mosaic.ingestion.process_code_file` - Extract code entities from programming files
+- `mosaic.ingestion.process_markdown_file` - Extract links from markdown documents
+- `mosaic.ingestion.process_config_file` - Extract configuration dependencies
 
 *Problem Solved:* Directly mitigates "Dependency Blindness" by providing the AI with a structural understanding of the codebase, allowing it to foresee the impact of changes. Enables true AI-assisted development by maintaining a live, queryable representation of the codebase.
 
