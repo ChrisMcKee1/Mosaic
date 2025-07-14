@@ -1,5 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
+# Mosaic MCP Tool - Simplified OmniRAG Architecture
+# Unified Azure Cosmos DB backend for vector search, graph analysis, and memory
+# FastMCP framework with OAuth 2.1 authentication and Streamable HTTP transport
 name: mosaic
 metadata:
     template: azd-init@1.17.2
@@ -9,12 +12,26 @@ services:
         host: containerapp
         language: python
         env:
-          AZURE_AI_SEARCH_ENDPOINT: ${AZURE_AI_SEARCH_ENDPOINT}
-          AZURE_COSMOS_CONNECTION_STRING: ${AZURE_COSMOS_CONNECTION_STRING}
-          AZURE_REDIS_CONNECTION_STRING: ${AZURE_REDIS_CONNECTION_STRING}
+          # OmniRAG Pattern Configuration (Microsoft CosmosAIGraph-based)
+          MOSAIC_COSMOS_ENDPOINT: ${MOSAIC_COSMOS_ENDPOINT}
+          MOSAIC_DATABASE_NAME: ${MOSAIC_DATABASE_NAME}
+          MOSAIC_LIBRARIES_CONTAINER: ${MOSAIC_LIBRARIES_CONTAINER}
+          MOSAIC_MEMORIES_CONTAINER: ${MOSAIC_MEMORIES_CONTAINER}
+          MOSAIC_DOCUMENTS_CONTAINER: ${MOSAIC_DOCUMENTS_CONTAINER}
+          MOSAIC_CONFIG_CONTAINER: ${MOSAIC_CONFIG_CONTAINER}
+          # Additional Service Endpoints
+          AZURE_REDIS_ENDPOINT: ${AZURE_REDIS_ENDPOINT}
           AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
           AZURE_ML_WORKSPACE_NAME: ${AZURE_ML_WORKSPACE_NAME}
           AZURE_FUNCTIONS_ENDPOINT: ${AZURE_FUNCTIONS_ENDPOINT}
+          # Managed Identity Configuration (no connection strings)
+          AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+          AZURE_USE_MANAGED_IDENTITY: ${AZURE_USE_MANAGED_IDENTITY}
+          # OAuth 2.1 Configuration (FR-14)
+          AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+          MCP_OAUTH_ENABLED: true
+          MCP_OAUTH_PROVIDER: entra_id
+          # Note: AZURE_OAUTH_CLIENT_ID must be set after App Registration creation
     memory-consolidator:
         project: ./functions/memory-consolidator
         host: function

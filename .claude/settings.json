@@ -71,11 +71,5 @@
         ]
       }
     ]
-  },
-  "apiKeyHelper": {
-    "azure": {
-      "command": "az account get-access-token --query accessToken --output tsv",
-      "description": "Get Azure access token for authentication"
-    }
   }
 }

@@ -28,9 +28,7 @@ keywords = ["mcp", "ai", "context", "semantic-kernel", "azure", "llm"]
 
 dependencies = [
     # Core MCP Server and Communication (FR-1, FR-3)
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
-    "sse-starlette>=1.6.0",
+    "fastmcp>=0.1.0",
     "httpx>=0.25.0",
     
     # Semantic Kernel Framework (FR-2)
@@ -41,18 +39,11 @@ dependencies = [
     "azure-keyvault-secrets>=4.7.0",
     "azure-storage-blob>=12.19.0",
     
-    # Azure AI Search (FR-5)
-    "azure-search-documents>=11.4.0",
-    
-    # Azure Cosmos DB (FR-6, FR-10)
+    # Azure Cosmos DB (FR-6, FR-10) - OmniRAG unified backend
     "azure-cosmos>=4.5.0",
-    "gremlinpython>=3.7.0",
     
     # Azure Cache for Redis (FR-10)
     "redis>=5.0.0",
-    
-    # Azure OpenAI (FR-11, FR-12)
-    "openai>=1.0.0",
     
     # Azure Functions (FR-11)
     "azure-functions>=1.18.0",
@@ -72,6 +63,9 @@ dependencies = [
     # Async and Networking
     "aiofiles>=23.2.0",
     "aiohttp>=3.9.0",
+    
+    # Authentication and Security (FR-14)
+    "PyJWT>=2.8.0",
     
     # Type Hints and Development
     "typing-extensions>=4.8.0",

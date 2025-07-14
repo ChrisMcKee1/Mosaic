@@ -45,13 +45,27 @@ module resources 'resources.bicep' = {
     mosaicExists: mosaicExists
   }
 }
+// Core Infrastructure Outputs
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = resources.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT
 output AZURE_RESOURCE_MOSAIC_ID string = resources.outputs.AZURE_RESOURCE_MOSAIC_ID
-output AZURE_AI_SEARCH_ENDPOINT string = resources.outputs.AZURE_AI_SEARCH_ENDPOINT
-output AZURE_COSMOS_ENDPOINT string = resources.outputs.AZURE_COSMOS_ENDPOINT
-output AZURE_REDIS_ENDPOINT string = resources.outputs.AZURE_REDIS_ENDPOINT
 output AZURE_CLIENT_ID string = resources.outputs.AZURE_CLIENT_ID
 output AZURE_USE_MANAGED_IDENTITY string = resources.outputs.AZURE_USE_MANAGED_IDENTITY
+
+// OmniRAG Pattern Outputs (Microsoft CosmosAIGraph-based)
+output MOSAIC_COSMOS_ENDPOINT string = resources.outputs.MOSAIC_COSMOS_ENDPOINT
+output MOSAIC_DATABASE_NAME string = resources.outputs.MOSAIC_DATABASE_NAME
+output MOSAIC_LIBRARIES_CONTAINER string = resources.outputs.MOSAIC_LIBRARIES_CONTAINER
+output MOSAIC_MEMORIES_CONTAINER string = resources.outputs.MOSAIC_MEMORIES_CONTAINER
+output MOSAIC_DOCUMENTS_CONTAINER string = resources.outputs.MOSAIC_DOCUMENTS_CONTAINER
+output MOSAIC_CONFIG_CONTAINER string = resources.outputs.MOSAIC_CONFIG_CONTAINER
+
+// Service Endpoints
+output AZURE_REDIS_ENDPOINT string = resources.outputs.AZURE_REDIS_ENDPOINT
 output AZURE_OPENAI_ENDPOINT string = resources.outputs.AZURE_OPENAI_ENDPOINT
 output AZURE_ML_WORKSPACE_NAME string = resources.outputs.AZURE_ML_WORKSPACE_NAME
 output AZURE_FUNCTIONS_ENDPOINT string = resources.outputs.AZURE_FUNCTIONS_ENDPOINT
+
+// OAuth 2.1 Configuration Outputs (FR-14)
+output AZURE_TENANT_ID string = resources.outputs.AZURE_TENANT_ID
+output MOSAIC_APP_URL string = resources.outputs.MOSAIC_APP_URL
+output OAUTH_SETUP_REQUIRED string = resources.outputs.OAUTH_SETUP_REQUIRED

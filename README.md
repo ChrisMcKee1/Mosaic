@@ -12,26 +12,28 @@ The Mosaic MCP Tool is a standardized, high-performance Model Context Protocol (
 
 ## Features
 
-- **🚀 MCP Server Implementation**: Full MCP protocol compliance with Server-Sent Events (SSE)
+- **🚀 MCP Server Implementation**: Full MCP protocol compliance with Streamable HTTP transport
+- **🔐 OAuth 2.1 Security**: Microsoft Entra ID authentication for production-ready security
 - **🧠 Semantic Kernel Integration**: Modular plugin-based architecture
-- **☁️ Azure Native**: Deployed on Azure with POC-optimized SKUs
-- **🔍 Hybrid Search**: Vector and keyword search with Azure AI Search
-- **🕸️ Graph Code Analysis**: Dependency analysis with Azure Cosmos DB Gremlin API
-- **🧠 Multi-Layered Memory**: Redis + Cosmos DB persistent agent memory
-- **📊 Semantic Reranking**: Cross-encoder model for context refinement
+- **☁️ Azure Native**: Deployed on Azure with simplified, cost-optimized architecture
+- **🔍 Unified Data Backend**: OmniRAG pattern with Azure Cosmos DB (serverless) for vector search, graph analysis, and memory
+- **📊 Semantic Reranking**: cross-encoder/ms-marco-MiniLM-L-12-v2 model on Azure ML Endpoint for context refinement
 - **📈 Mermaid Diagrams**: AI-powered architectural documentation
+- **⚡ FastMCP Framework**: Industry-standard MCP server implementation
 
 ## Architecture
 
 The Mosaic MCP Tool is built with:
 
-- **Core**: Python Semantic Kernel with FastAPI
+- **Core**: Python Semantic Kernel with FastMCP framework
 - **Hosting**: Azure Container Apps (Consumption Plan)
-- **Search**: Azure AI Search (Free tier)
-- **Graph DB**: Azure Cosmos DB (Gremlin API)
-- **Memory**: Redis (short-term) + Cosmos DB (long-term)
-- **ML**: Azure Machine Learning (cross-encoder reranking)
-- **Functions**: Azure Functions (memory consolidation)
+- **Unified Backend**: Azure Cosmos DB for NoSQL (serverless, vector search, embedded graph relationships, memory)
+- **Short-term Memory**: Azure Cache for Redis (Basic C0)
+- **AI Models**: Azure OpenAI Service (GPT-4o 2024-11-20, text-embedding-3-small)
+- **ML**: Azure Machine Learning (cross-encoder/ms-marco-MiniLM-L-12-v2)
+- **Functions**: Azure Functions (memory consolidation, consumption plan)
+- **Authentication**: Microsoft Entra ID (OAuth 2.1) + Managed Identity
+- **DevOps**: Azure Developer CLI (azd) with Bicep templates
 
 ## Quick Start
 
@@ -71,14 +73,14 @@ azd up
 
 ```
 src/mosaic/
-├── server/          # FastAPI MCP server
-│   ├── main.py      # FastAPI application with SSE
+├── server/          # FastMCP server implementation
+│   ├── main.py      # FastMCP application with Streamable HTTP
 │   ├── kernel.py    # Semantic Kernel management
-│   └── mcp_utils.py # Custom MCP protocol utilities
+│   └── auth.py      # OAuth 2.1 authentication utilities
 ├── plugins/         # Semantic Kernel plugins
-│   ├── retrieval.py # RetrievalPlugin (hybrid search, graph analysis)
-│   ├── refinement.py # RefinementPlugin (semantic reranking)
-│   ├── memory.py    # MemoryPlugin (multi-layered storage)
+│   ├── retrieval.py # RetrievalPlugin (unified Cosmos DB backend)
+│   ├── refinement.py # RefinementPlugin (cross-encoder reranking)
+│   ├── memory.py    # MemoryPlugin (OmniRAG pattern storage)
 │   └── diagram.py   # DiagramPlugin (Mermaid generation)
 ├── models/          # Data models and schemas
 ├── utils/           # Utility functions
@@ -90,7 +92,7 @@ src/mosaic/
 The tool exposes these MCP functions:
 
 - `mosaic.retrieval.hybrid_search(query: str) -> List[Document]`
-- `mosaic.retrieval.query_code_graph(gremlin_query: str) -> List[GraphNode]`
+- `mosaic.retrieval.query_code_graph(library_id: str, relationship_type: str) -> List[LibraryNode]`
 - `mosaic.refinement.rerank(query: str, documents: List[Document]) -> List[Document]`
 - `mosaic.memory.save(session_id: str, content: str, type: str)`
 - `mosaic.memory.retrieve(session_id: str, query: str, limit: int) -> List[MemoryEntry]`
@@ -128,6 +130,26 @@ pre-commit run --all-files
 ## Configuration
 
 See [CLAUDE.md](./CLAUDE.md) for comprehensive development guidelines and requirements.
+
+## 🚨 **IMPLEMENTATION STATUS**
+
+**CRITICAL NOTICE:** The Mosaic MCP Tool has a **critical implementation gap** that blocks AI-assisted development capabilities. While the system includes sophisticated querying, memory management, and context refinement, it **lacks the fundamental code ingestion pipeline** required to populate the knowledge graph with actual codebase data.
+
+### **Current Status**
+- ✅ **Infrastructure & Deployment** - Complete Azure architecture with `azd up`
+- ✅ **Query & Retrieval** - Hybrid search and graph traversal capabilities  
+- ✅ **Memory & Context** - Multi-layered storage with consolidation
+- ✅ **Refinement & Diagrams** - Semantic reranking and Mermaid generation
+- ❌ **Code Ingestion** - **MISSING** - Repository access, parsing, and graph construction
+- ❌ **Real-time Updates** - **MISSING** - File monitoring and incremental updates
+- ❌ **AI Integration** - **MISSING** - Generated code insertion and correlation
+
+### **Implementation Documents**
+- **[Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Comprehensive 12-week implementation plan
+- **[Code Ingestion Analysis](docs/CODE_INGESTION_ANALYSIS.md)** - Executive summary of the critical gap
+- **[Architecture Documentation](docs/architecture/README.md)** - System design and component details
+
+**Next Action:** Begin Phase 1 implementation with Context7 MCP tool research for technology validation.
 
 ## License
 

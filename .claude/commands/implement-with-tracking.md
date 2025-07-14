@@ -11,16 +11,40 @@ Use `/implement-with-tracking` when you need to:
 
 ## Chained Workflow Steps
 
-### 1. Pre-Implementation Planning
+### 1. Project State Assessment
 ```
-Use mcp__sequential-thinking__sequentialthinking to:
-- Analyze the implementation requirements
-- Break down into specific tasks
-- Identify potential challenges and solutions
-- Plan the implementation approach
+First, review existing progress and context:
+Use mcp__conport__get_recent_activity_summary to:
+- Check what work has been done recently
+- Identify any in-progress tasks
+
+Use mcp__conport__get_progress to:
+- Review current progress entries
+- Find any incomplete tasks
+- Determine where we left off
+
+Use mcp__conport__get_decisions to:
+- Review recent architectural decisions
+- Understand implementation choices made
+- Identify any patterns established
+
+Use mcp__conport__get_product_context and mcp__conport__get_active_context to:
+- Understand current project state
+- Review any context updates since last work
+- Identify current focus areas
 ```
 
-### 2. ConPort Progress Initialization
+### 2. Pre-Implementation Planning
+```
+Use mcp__sequential-thinking__sequentialthinking to:
+- Analyze the implementation requirements against current state
+- Determine if continuing existing work or starting new tasks
+- Break down into specific tasks (if new) or continue existing tasks
+- Identify potential challenges and solutions
+- Plan the implementation approach based on existing decisions
+```
+
+### 3. ConPort Progress Initialization/Continuation
 ```
 Use mcp__conport__log_progress for main task:
 - Status: "IN_PROGRESS"
