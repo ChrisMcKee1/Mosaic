@@ -120,7 +120,7 @@ Use mcp__conport__link_conport_items to connect:
 
 ### RetrievalPlugin (FR-5, FR-6, FR-7)
 - Implement hybrid_search using AzureAISearchMemoryStore
-- Create query_code_graph with gremlinpython
+- Create query_code_graph with Cosmos NoSQL for Azure
 - Add aggregate_candidates utility function
 
 ### RefinementPlugin (FR-8)  

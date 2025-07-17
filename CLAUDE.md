@@ -196,7 +196,7 @@ src/mosaic/
 MUST create:
 - `main.bicep` - Main template orchestrator
 - `container-apps.bicep` - Container Apps (Consumption Plan)
-- `cosmos-db.bicep` - Cosmos DB (Free tier, unified backend for vector search, NoSQL + Gremlin)
+- `cosmos-db.bicep` - Cosmos DB (Free tier, unified backend for vector search, NoSQL)
 - `redis.bicep` - Redis (Basic C0 tier)
 - `ml-workspace.bicep` - ML workspace + endpoint (cross-encoder/ms-marco-MiniLM-L-12-v2)
 - `functions.bicep` - Functions (Consumption Plan)

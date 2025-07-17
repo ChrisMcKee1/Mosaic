@@ -50,19 +50,24 @@ flowchart TD
         I["Cross-Encoder Model"]
         J["Microsoft Entra ID:
         OAuth 2.1 Authentication"]
+        K["Azure Container App Job:
+        Code Ingestion Service"]
     end
     
     A -- "MCP Request (Streamable HTTP + OAuth 2.1)" --> J
-    J -- "Authenticated" --> B
+    J -- "Authenticated Request" --> B
     B -- "1. Hybrid Search + Vector Search" --> D
     B -- "2. Graph Query" --> D
     B -- "3. Rerank" --> F
     B -- "4. Memory Ops (Short-Term)" --> E
     B -- "5. Memory Ops (Long-Term)" --> D
     B -- "6. LLM/Embedding Calls" --> H
+    B -- "7. Trigger Ingestion Job" --> K
     F -- "Hosts & Runs" --> I
     G -.-> D
     G -- "LLM Calls" --> H
+    K -- "Repository Parsing & Storage" --> D
+    K -- "Code Embedding" --> H
 ```
 
 ## 3.0 Technology Stack
@@ -71,7 +76,7 @@ flowchart TD
 |-----------|------------|--------------------------------|
 | Core Framework | Python Semantic Kernel | Aligns with FR-2; provides a robust plugin architecture for modularity and orchestration. |
 | LLM & Embedding Models | Azure OpenAI Service (GPT-4o 2024-11-20, text-embedding-3-small) | Provides enterprise-grade, secure, and scalable access to latest GPT and embedding models. |
-| Hosting | Azure Container Apps | Best-in-class for containerized microservices. Superior KEDA-based autoscaling is ideal for handling variable loads of persistent MCP/SSE connections (FR-1, FR-4). |
+| Hosting | Azure Container Apps | Best-in-class for containerized microservices. Superior KEDA-based autoscaling is ideal for handling variable loads of persistent MCP/Streamable HTTP connections (FR-1, FR-4). |
 | Communication | FastMCP Framework | Modern, high-performance MCP server framework that handles Streamable HTTP transport and protocol compliance (FR-3). |
 | **Authentication** | **Azure Managed Identity** | **Secure, credential-free authentication across all Azure services. Eliminates connection string management and follows 2025 security best practices.** |
 | Unified Data Backend | Azure Cosmos DB for NoSQL (with Vector Search) | Provides unified vector search, keyword search, graph operations, and memory storage in a single service, implementing the OmniRAG pattern (FR-5, FR-6, FR-10). |
@@ -82,6 +87,9 @@ flowchart TD
 | Semantic Reranking | Azure Machine Learning Endpoint | Hosts the cross-encoder/ms-marco-MiniLM-L-12-v2 model. Provides a secure, scalable, and fully managed endpoint for semantic reranking (FR-8). |
 | Developer Tooling | Azure Developer CLI (azd) with AVM | Primary development tool that streamlines provisioning and deployment workflows using Azure Verified Modules for consistency and best practices. |
 | MCP Authorization | Microsoft Entra ID (OAuth 2.1) | Implements MCP Authorization specification for secure authentication and authorization of client connections (FR-14). |
+| Code Ingestion | Azure Container App Job | Serverless container for on-demand code repository processing and knowledge graph population. Separates heavy ingestion tasks from real-time MCP server. |
+| Code Parsing | tree-sitter library | Multi-language code parsing for Abstract Syntax Tree (AST) generation and structural code understanding across programming languages. |
+| Repository Access | GitPython library | Git operations for repository cloning, branch management, and version control integration within the ingestion pipeline. |
 
 ## 4.0 Detailed Component Design
 
@@ -91,7 +99,7 @@ The server will be a Python application using the FastMCP framework, which handl
 
 #### 4.1.1 Hosting Platform: Azure Container Apps
 
-The Mosaic MCP Server will be deployed as a Docker container to Azure Container Apps (ACA). ACA is the superior choice for this workload because its KEDA-based, event-driven scaling is perfectly suited for managing the long-running, variable-load SSE connections inherent to the MCP protocol.
+The Mosaic MCP Server will be deployed as a Docker container to Azure Container Apps (ACA). ACA is the superior choice for this workload because its KEDA-based, event-driven scaling is perfectly suited for managing the long-running, variable-load Streamable HTTP connections inherent to the MCP protocol.
 
 #### 4.1.2 MCP Framework: FastMCP
 
@@ -210,7 +218,7 @@ chat_service = AzureChatCompletion(
 - **MCP Client Functions:** Manual trigger functions with streaming progress
 - **Dependency Analysis:** AST parsing and import tracking for changed files
 - **AI Agent Integration:** Prompt engineering for "modify code → update graph" workflow
-- **Streaming Support:** Server-Sent Events (SSE) for long-running operations
+- **Streaming Support:** Streamable HTTP for long-running operations
 - **Connection Management:** Extended HTTP connections with backpressure handling
 - **Error Recovery:** Recoverable partial failures without full restart
 
@@ -258,6 +266,118 @@ This plugin improves the precision of retrieved context.
 ### 4.5 DiagramPlugin (FR-12, FR-13)
 
 **GenerateMermaid (Semantic Function):** A Semantic Function with a prompt template processed by a GPT model on Azure OpenAI.
+
+### 4.6 Code Ingestion Service Architecture
+
+**Critical Implementation Gap:** The current architecture has robust querying capabilities but lacks the fundamental code ingestion pipeline to populate the knowledge graph from Git repositories.
+
+**Solution:** A dedicated, offline Code Ingestion Service implemented as an Azure Container App Job for on-demand processing.
+
+#### 4.6.1 Architecture Overview
+
+**Service Type:** Azure Container App Job (serverless container for heavy tasks)
+**Purpose:** Separate from real-time MCP server to maintain fast, responsive main application
+**Trigger:** On-demand execution (e.g., when adding new repository or major updates)
+
+#### 4.6.2 Ingestion Workflow
+
+**1. Repository Access:**
+- **Technology:** GitPython library for Git operations
+- **Process:** Clone specified repository to temporary container filesystem
+- **Security:** Use Azure Managed Identity for secure repository access where applicable
+
+**2. Code Parsing:**
+- **Technology:** tree-sitter library for multi-language code parsing
+- **Process:** Parse code into Abstract Syntax Tree (AST) for structural understanding
+- **Support:** Multiple programming languages (Python, JavaScript, TypeScript, Go, Java, C#, etc.)
+
+**3. Knowledge Extraction:**
+- **Functions:** Extract classes, methods, imports, dependencies
+- **Relationships:** Map code dependencies and call graphs
+- **Metadata:** Capture file paths, line numbers, documentation strings
+
+**4. Embedding & Storage:**
+- **Embedding:** Azure OpenAI text-embedding-3-small for vector representations
+- **Storage:** Azure Cosmos DB for NoSQL following OmniRAG pattern
+- **Structure:** Universal node system with flexible relationships
+
+#### 4.6.3 Integration with MCP Server
+
+**Job Triggering:**
+- **Manual:** MCP function to trigger ingestion job
+- **Automated:** Webhook-based triggers for repository updates
+- **Status:** Real-time progress reporting via Cosmos DB status documents
+
+**Data Flow:**
+1. **Ingestion Job:** Processes repository and populates Cosmos DB
+2. **MCP Server:** Queries populated knowledge graph for context retrieval
+3. **AI Assistant:** Receives structured context for code assistance
+
+#### 4.6.4 Technical Implementation
+
+**Container Configuration:**
+- **Base Image:** Python 3.11 slim with Git and tree-sitter
+- **Resources:** CPU-optimized for parsing-heavy workloads
+- **Storage:** Temporary filesystem for repository cloning
+- **Networking:** Access to Azure services via managed identity
+
+**Processing Pipeline:**
+```python
+# Pseudocode for ingestion pipeline
+def ingest_repository(repo_url: str, branch: str = "main"):
+    # 1. Clone repository
+    repo = git.Repo.clone_from(repo_url, "/tmp/repo")
+    
+    # 2. Parse code files
+    for file_path in discover_code_files(repo):
+        ast = parse_with_tree_sitter(file_path)
+        nodes = extract_code_entities(ast)
+        
+        # 3. Generate embeddings
+        embeddings = await openai_embed(nodes)
+        
+        # 4. Store in Cosmos DB
+        await store_nodes_cosmos(nodes, embeddings)
+    
+    # 5. Build relationship graph
+    await build_dependency_graph(repo)
+```
+
+**Error Handling:**
+- **Partial Failures:** Continue processing on individual file errors
+- **Rollback:** Atomic operations for graph consistency
+- **Recovery:** Resumable processing for large repositories
+
+### 4.7 Context Overlay Model for Real-Time Local Development
+
+**Design Pattern:** To handle a developer's local, uncommitted code changes efficiently, we implement a "Context Overlay" pattern that avoids constantly updating the main knowledge graph.
+
+**Problem:** Developers save files frequently, often in broken states. Updating the central knowledge graph with every save would be inefficient, costly, and pollute the graph with bad data.
+
+**Solution:** The Context Overlay model provides complete context without corrupting the central graph:
+
+1. **Stable Baseline:** The central knowledge graph in Cosmos DB only contains code from the stable main branch
+2. **Real-Time Layer:** Local, uncommitted changes are fetched just-in-time using chained MCP tool calls
+3. **AI Context Composition:** The AI assistant combines both data sources in the prompt to the LLM
+
+**Implementation Workflow:**
+
+When a developer asks for help, the AI assistant performs two chained MCP tool calls:
+
+1. **First Call:** `desktop-commander` MCP tool executes `git diff` on the developer's local machine to retrieve real-time, uncommitted changes
+2. **Second Call:** `mosaic` MCP tool queries Cosmos DB to get the stable, baseline version of the code
+
+**Benefits:**
+- **Clean Graph:** Central knowledge graph remains uncorrupted by transient, potentially broken code
+- **Complete Context:** AI gets both stable reference and current changes for accurate suggestions
+- **Cost Efficient:** No expensive real-time database writes for every file save
+- **Performance:** Avoids processing overhead of constant graph updates
+
+**Technical Details:**
+- Uses MCP protocol's tool chaining capabilities
+- Leverages existing `desktop-commander` tool for local file system access
+- Maintains separation between stable (remote) and dynamic (local) contexts
+- Enables sophisticated AI responses without architectural complexity
 
 ## 5.0 Data Models & Schemas
 
@@ -401,11 +521,13 @@ This plugin improves the precision of retrieved context.
 |-------------------|-------------|
 | `mosaic.retrieval.hybrid_search(query: str) -> List[Document]` | Performs parallel vector and keyword search. |
 | `mosaic.retrieval.query_code_graph(library_id: str, relationship_type: str) -> List[LibraryNode]` | Queries embedded graph relationships in NoSQL documents using OmniRAG pattern. |
-| **UNIVERSAL GRAPH INGESTION FUNCTIONS (CRITICAL IMPLEMENTATION GAP)** | |
-| `mosaic.ingestion.insert_node(node_type: str, name: str, path: str, content_summary: str, metadata: dict) -> NodeResult` | **[MISSING]** Universal node insertion for any content type. |
-| `mosaic.ingestion.create_relationship(source_id: str, target_id: str, relationship_type: str, metadata: dict) -> RelationshipResult` | **[MISSING]** Creates typed relationships between any nodes. |
-| `mosaic.ingestion.ingest_file_structure(root_path: str, filters: List[str]) -> StructureResult` | **[MISSING]** Ingests file/directory structure as graph nodes. |
-| `mosaic.ingestion.ingest_repository(repo_url: str, branch: str, filters: List[str]) -> IngestionResult` | **[MISSING]** Clones repository and ingests complete structure. |
+| **CODE INGESTION SERVICE FUNCTIONS** | |
+| `mosaic.ingestion.trigger_repository_ingestion(repo_url: str, branch: str, filters: List[str]) -> IngestionJobResult` | Triggers Azure Container App Job to ingest repository and populate knowledge graph. |
+| `mosaic.ingestion.get_ingestion_status(job_id: str) -> IngestionStatus` | Returns status and progress of running ingestion job. |
+| `mosaic.ingestion.insert_node(node_type: str, name: str, path: str, content_summary: str, metadata: dict) -> NodeResult` | **[POPULATED BY INGESTION JOB]** Universal node insertion for any content type. |
+| `mosaic.ingestion.create_relationship(source_id: str, target_id: str, relationship_type: str, metadata: dict) -> RelationshipResult` | **[POPULATED BY INGESTION JOB]** Creates typed relationships between any nodes. |
+| `mosaic.ingestion.ingest_file_structure(root_path: str, filters: List[str]) -> StructureResult` | **[POPULATED BY INGESTION JOB]** Ingests file/directory structure as graph nodes. |
+| `mosaic.ingestion.ingest_repository(repo_url: str, branch: str, filters: List[str]) -> IngestionResult` | **[POPULATED BY INGESTION JOB]** Clones repository and ingests complete structure. |
 | `mosaic.ingestion.parse_content_references(node_id: str, content: str) -> List[Reference]` | **[MISSING]** Extracts cross-references from any content type. |
 | `mosaic.ingestion.update_node_content(node_id: str, content_summary: str, metadata: dict) -> UpdateResult` | **[MISSING]** Updates existing node content and metadata. |
 | `mosaic.ingestion.query_nodes_by_type(node_type: str, filters: dict) -> List[Node]` | **[MISSING]** Queries nodes by type and optional filters. |
@@ -432,7 +554,14 @@ This plugin improves the precision of retrieved context.
 
 ### 6.1 Implementation Priority
 
-**CRITICAL:** The code ingestion functions represent the most important missing functionality. Without these, the system cannot populate the knowledge graph with actual codebase data, rendering the AI-assisted development vision incomplete.
+**CRITICAL:** The Code Ingestion Service represents the most important missing functionality. Without this service, the system cannot populate the knowledge graph with actual codebase data, rendering the AI-assisted development vision incomplete.
+
+**Implementation Order:**
+1. **Code Ingestion Service** (Azure Container App Job) - Highest Priority
+2. **Repository Triggering Functions** (MCP server integration)
+3. **Universal Graph Functions** (populated by ingestion service)
+4. **Real-time Updates** (webhook and manual triggers)
+5. **Local/Remote State Management** (context overlay support)
 
 ## 7.0 Deployment & Operations (AI Foundry & AZD)
 
@@ -459,6 +588,7 @@ For the initial Development and Proof of Concept phase, the following simplified
 | Service | Recommended POC SKU | Justification & Feature Validation |
 |---------|-------------------|-----------------------------------|
 | Azure Container Apps | Consumption Plan | Serverless, pay-per-use plan with a generous monthly free grant. Scales to zero, costing nothing when idle. Fully supports all required features. |
+| Azure Container App Jobs | Consumption Plan | Serverless container jobs for on-demand code ingestion processing. Pay-per-execution model with no idle costs. Optimal for batch processing workloads. |
 | Azure Cosmos DB for NoSQL | Free Tier Offer (Serverless) | Provides the first 1000 RU/s and 25 GB of storage free. This single account hosts vector search, NoSQL (long-term memory), and embedded graph relationships, implementing the unified OmniRAG pattern. |
 | Azure Cache for Redis | Basic (C0) Tier | The lowest-cost tier, designed for dev/test. Provides a 250MB cache, which is ample for short-term session memory during development. |
 | Azure Machine Learning | Pay-as-you-go | The workspace itself has no cost. The deployed endpoint will use a low-cost, CPU-based compute instance (e.g., Standard_DS2_v2), which will be manually started and stopped to control costs. |

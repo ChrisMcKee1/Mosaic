@@ -74,9 +74,9 @@ Mosaic will be implemented as a Semantic Kernel MCP Tool, exposing its capabilit
 
 *Problem Solved:* Enables responsive, real-time AI applications by preventing blocking I/O during context retrieval and ensures compliance with the latest MCP specification (2025-03-26).
 
-**FR-4: Azure Native Deployment:** The solution is deployed on Azure using Container Apps (Consumption Plan) with Azure Cosmos DB for NoSQL as the unified OmniRAG backend for vector search, graph data, and long-term memory, along with Azure Functions for memory consolidation.
+**FR-4: Azure Native Deployment:** The solution is deployed on Azure using Container Apps (Consumption Plan) with Azure Cosmos DB for NoSQL as the unified OmniRAG backend for vector search, graph data, and long-term memory, along with Azure Functions for memory consolidation. The unified backend eliminates the need for separate services like Azure AI Search.
 
-*Problem Solved:* Ensures the system is scalable, reliable, and performant enough for production workloads while reducing cost and management overhead through a unified data backend following Microsoft's OmniRAG pattern.
+*Problem Solved:* Ensures the system is scalable, reliable, and performant enough for production workloads while reducing cost and management overhead through a unified data backend following Microsoft's OmniRAG pattern, significantly simplifying the architecture.
 
 ### 5.2. Plugin: Multi-Pronged Retrieval (RetrievalPlugin)
 
@@ -110,7 +110,7 @@ This plugin will handle the first stage of the context funnel: gathering a broad
 - Prompt engineering integration: "When you modify code, update the graph"
 - MCP Streamable HTTP Mode support for long-running operations
 
-*Technical Requirements:* Support for Server-Sent Events (SSE) for progress streaming, connection management for extended HTTP operations, backpressure handling, and recoverable partial failures.
+*Technical Requirements:* Support for Streamable HTTP for progress streaming, connection management for extended HTTP operations, backpressure handling, and recoverable partial failures.
 
 **FR-6.5: AI Integration:** The plugin MUST provide mechanisms for AI agents to insert generated code into the graph, correlate new entities with existing ones, and analyze dependency impacts.
 

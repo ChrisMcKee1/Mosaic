@@ -1,75 +1,98 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash",
-      "Read",
-      "Write",
-      "Edit",
-      "MultiEdit",
-      "LS",
-      "Glob",
-      "Grep",
-      "Task",
-      "TodoWrite",
-      "WebFetch",
-      "WebSearch"
-    ],
-    "deny": []
-  },
-  "env": {
-    "AZURE_RESOURCE_GROUP": "rg-mosaic-dev",
-    "AZURE_LOCATION": "eastus2",
-    "AZURE_ENV_NAME": "mosaic-dev",
-    "AZURE_OPENAI_SERVICE_NAME": "mosaic-openai-mosaic-dev",
-    "AZURE_SEARCH_SERVICE_NAME": "mosaic-search-mosaic-dev",
-    "AZURE_COSMOS_DB_ACCOUNT_NAME": "mosaic-cosmos-mosaic-dev",
-    "AZURE_REDIS_CACHE_NAME": "mosaic-redis-mosaic-dev",
-    "AZURE_ML_WORKSPACE_NAME": "mosaic-ml-mosaic-dev",
-    "MOSAIC_ENVIRONMENT": "development"
-  },
-  "cleanupPeriodDays": 30,
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Code modification detected - ensuring compliance with Mosaic MCP Tool requirements'"
-          }
+    "permissions": {
+        "allow": [
+            "Bash",
+            "Read",
+            "Write",
+            "Edit",
+            "MultiEdit",
+            "LS",
+            "Glob",
+            "Grep",
+            "Task",
+            "TodoWrite",
+            "WebFetch",
+            "WebSearch"
+        ],
+        "deny": []
+    },
+    "env": {
+        "AZURE_RESOURCE_GROUP": "rg-mosaic-dev",
+        "AZURE_LOCATION": "eastus2",
+        "AZURE_ENV_NAME": "mosaic-dev",
+        "AZURE_OPENAI_SERVICE_NAME": "mosaic-openai-mosaic-dev",
+        "AZURE_COSMOS_DB_ACCOUNT_NAME": "mosaic-cosmos-mosaic-dev",
+        "AZURE_REDIS_CACHE_NAME": "mosaic-redis-mosaic-dev",
+        "AZURE_ML_WORKSPACE_NAME": "mosaic-ml-mosaic-dev",
+        "MOSAIC_ENVIRONMENT": "development"
+    },
+    "cleanupPeriodDays": 30,
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Write|Edit|MultiEdit",
+                "hooks": [
+                    {
+                        "type": "mcp",
+                        "server": "conport",
+                        "method": "get_active_context",
+                        "template": "[Pre-Write Hook]: Verifying active task before code modification. Current Conport context is focused on: {{. | json }}"
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Write|Edit|MultiEdit",
+                "hooks": [
+                    {
+                        "type": "mcp",
+                        "server": "desktop-commander",
+                        "method": "execute_command",
+                        "params": {
+                            "command": "ruff check {{.FilePath}} --fix; ruff format {{.FilePath}}"
+                        },
+                        "template": "[Post-Write Hook]: Automatically running linter and formatter on {{.FilePath}}..."
+                    }
+                ]
+            },
+            {
+                "matcher": {
+                    "server": "desktop-commander",
+                    "method": "execute_command",
+                    "params": {
+                        "command": "git commit.*"
+                    }
+                },
+                "hooks": [
+                    {
+                        "type": "mcp",
+                        "server": "desktop-commander",
+                        "method": "execute_command",
+                        "params": {
+                            "command": "git log -1 --pretty=format:'%H|%s'"
+                        },
+                        "template": "[Post-Commit Hook]: Commit detected. Capturing details with `git log` and logging to Conport...\n{{ let $commitDetails := . }}{{ $parts := split \"|\" $commitDetails }}{{ $hash := index $parts 0 }}{{ $message := index $parts 1 }}mcp__conport__log_custom_data --category='GitCommit' --key='{{$hash}}' --value='{{$message}}'{{end}}"
+                    }
+                ]
+            }
+        ],
+        "Stop": [
+            {
+                "matcher": "*",
+                "hooks": [
+                    {
+                        "type": "mcp",
+                        "server": "conport",
+                        "method": "log_progress",
+                        "params": {
+                            "status": "PAUSED",
+                            "description": "Task stopped. Summary of work: {{.FinalAnswer}}"
+                        },
+                        "template": "[Stop Hook]: Task complete. Automatically logging a summary to Conport to ensure no context is lost."
+                    }
+                ]
+            }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Bash execution - prioritizing azd and az CLI commands'"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Code modification completed - verify Semantic Kernel plugin patterns'"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Task completed - ensure all FR requirements are met'"
-          }
-        ]
-      }
-    ]
-  }
+    }
 }
