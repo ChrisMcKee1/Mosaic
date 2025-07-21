@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Mosaic MCP Tool - Project Memory & Development Guidelines
 
 ## Project Overview
@@ -226,17 +230,76 @@ MUST include in `.gitignore`:
 
 ## Development Commands
 
-### Required Commands (Azure Developer CLI Primary)
-- `azd up` - Complete simplified environment provisioning (unified Cosmos DB backend)
-- `azd deploy` - Application deployment with FastMCP
-- `az ml model deploy` - cross-encoder/ms-marco-MiniLM-L-12-v2 model deployment
-- `azd auth login` - OAuth 2.1 authentication setup
-- `gh repo create Mosaic --private` - Repository creation
+### Core Development Commands
 
-### Testing Commands
-- Run full test suite before any deployment
-- Validate MCP protocol compliance
-- Test all Azure service connections
+**Testing and Quality Assurance:**
+```bash
+# Run all tests
+pytest
+
+# Run tests by category
+pytest -m unit                    # Unit tests only
+pytest -m integration            # Integration tests only  
+pytest -m "not azure"           # Skip Azure-dependent tests
+pytest -m "not slow"            # Skip slow tests
+
+# Code quality checks
+black src/ tests/                # Code formatting
+isort src/ tests/                # Import sorting
+mypy src/                        # Type checking
+bandit -r src/                   # Security scanning
+pre-commit run --all-files       # Run all pre-commit hooks
+
+# Install pre-commit hooks
+pre-commit install
+```
+
+**Package Management:**
+```bash
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Install project in development mode
+pip install -e .
+
+# Install specific dependency groups
+pip install -e ".[dev]"          # Development dependencies
+pip install -e ".[test]"         # Testing dependencies
+pip install -e ".[docs]"         # Documentation dependencies
+```
+
+**Azure Deployment (Primary Workflow):**
+```bash
+# Initial setup
+az login
+azd auth login
+
+# Full environment provisioning and deployment
+azd up
+
+# Application deployment only
+azd deploy
+
+# Infrastructure management
+azd provision                    # Infrastructure only
+azd down                        # Tear down environment
+
+# Model deployment (semantic reranking)
+az ml model deploy              # Deploy cross-encoder/ms-marco-MiniLM-L-12-v2
+```
+
+**Local Development:**
+```bash
+# Run MCP server locally
+python -m mosaic.server.main
+
+# Run with specific environment
+ENVIRONMENT=development python -m mosaic.server.main
+
+# Start server with debug logging
+python -m mosaic.server.main --log-level debug
+```
 
 ## Success Criteria
 
@@ -258,11 +321,36 @@ This tool solves:
 - **Contextual Noise**: Semantic reranking and refinement
 - **Lack of Interoperability**: Standardized MCP protocol
 
+## Key Architecture Patterns
+
+**Plugin-Based Architecture:** All functionality MUST be implemented as Semantic Kernel Plugins. The system uses a plugin-based architecture where each major capability (retrieval, refinement, memory, diagrams) is implemented as a separate plugin that can be composed together.
+
+**OmniRAG Unified Backend:** The project uses Microsoft's OmniRAG pattern with Azure Cosmos DB as the unified backend for vector search, graph relationships (embedded as JSON arrays), and memory storage. This eliminates the need for separate vector databases or graph databases.
+
+**Multi-Layered Memory System:** 
+- **Short-term**: Azure Redis Cache for conversational state
+- **Long-term**: Azure Cosmos DB for persistent knowledge with LLM-powered consolidation
+- **Consolidation**: Azure Functions with timer trigger for background memory processing
+
+**FastMCP Protocol Implementation:** Uses FastMCP Python library for MCP protocol compliance with Streamable HTTP transport, enabling real-time context streaming to AI applications.
+
+**Cross-Encoder Semantic Reranking:** Deploys cross-encoder/ms-marco-MiniLM-L-12-v2 model on Azure ML Endpoint to address the "lost in the middle" problem in retrieval systems.
+
+## Current Implementation Status
+
+**CRITICAL IMPLEMENTATION GAP:** The system lacks the fundamental code ingestion pipeline required to populate the knowledge graph with actual codebase data. While query, memory, and refinement capabilities exist, the system cannot currently ingest and analyze codebases.
+
+**Completed:** Infrastructure, deployment pipeline, plugin architecture, memory system
+**Missing:** Code ingestion, real-time updates, AI integration capabilities
+
+See `docs/IMPLEMENTATION_ROADMAP.md` for detailed implementation plan and `docs/CODE_INGESTION_ANALYSIS.md` for gap analysis.
+
 ## Key Success Metrics
 
 - MCP protocol compliance (FR-1)
-- Semantic Kernel plugin architecture (FR-2)
+- Semantic Kernel plugin architecture (FR-2) 
 - Real-time SSE communication (FR-3)
 - Azure native deployment (FR-4)
-- All functional requirements (FR-5 through FR-13)
+- All functional requirements (FR-5 through FR-14)
 - Complete end-to-end workflow with `azd up`
+- 80% minimum test coverage requirement
