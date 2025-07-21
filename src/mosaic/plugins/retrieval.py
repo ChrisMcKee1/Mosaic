@@ -1,13 +1,17 @@
 """
-RetrievalPlugin for Mosaic MCP Tool
+RetrievalPlugin for Mosaic Query Server
 
 Implements FR-5 (Hybrid Search), FR-6 (Graph-Based Code Analysis), and FR-7 (Candidate Aggregation)
 using the OmniRAG pattern with unified Azure Cosmos DB backend.
 
+ARCHITECTURAL NOTE: This plugin has been refactored to focus ONLY on querying operations.
+Heavy ingestion operations have been moved to the separate Ingestion Service.
+
 This plugin provides:
-- Hybrid search combining vector and keyword search
-- Graph-based code dependency analysis using embedded JSON
-- Result aggregation and deduplication
+- Hybrid search combining vector and keyword search (QUERY ONLY)
+- Graph-based code dependency analysis using embedded JSON (QUERY ONLY)
+- Result aggregation and deduplication (QUERY ONLY)
+- Real-time, lightweight operations for MCP server responsiveness
 """
 
 import logging
@@ -28,13 +32,18 @@ logger = logging.getLogger(__name__)
 
 class RetrievalPlugin:
     """
-    Semantic Kernel plugin for retrieval operations using OmniRAG pattern.
+    Semantic Kernel plugin for QUERY-ONLY retrieval operations using OmniRAG pattern.
+
+    Architectural Separation: This plugin handles ONLY lightweight query operations.
+    Heavy ingestion operations are handled by the separate Ingestion Service.
 
     Implements unified retrieval from Azure Cosmos DB combining:
-    - Vector search for semantic similarity
-    - Keyword search for lexical matching
-    - Graph traversal for dependency analysis
-    - Result aggregation and deduplication
+    - Vector search for semantic similarity (QUERY ONLY)
+    - Keyword search for lexical matching (QUERY ONLY)
+    - Graph traversal for dependency analysis (QUERY ONLY)
+    - Result aggregation and deduplication (QUERY ONLY)
+
+    Performance: Optimized for real-time MCP response times.
     """
 
     def __init__(self, settings: MosaicSettings):

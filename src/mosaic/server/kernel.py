@@ -21,7 +21,6 @@ from ..plugins.retrieval import RetrievalPlugin
 from ..plugins.refinement import RefinementPlugin
 from ..plugins.memory import MemoryPlugin
 from ..plugins.diagram import DiagramPlugin
-from ..plugins.ingestion import IngestionPlugin
 
 
 logger = logging.getLogger(__name__)
@@ -109,15 +108,9 @@ class SemanticKernelManager:
             raise
 
     async def _register_mosaic_plugins(self) -> None:
-        """Register Mosaic-specific plugins implementing FR-5 through FR-13 plus Phase 1 Foundation."""
+        """Register Mosaic Query Server plugins implementing FR-5 through FR-13."""
         try:
-            # Ingestion Plugin (Phase 1 Foundation: Repository Access, AST Parsing)
-            ingestion_plugin = IngestionPlugin(self.settings)
-            await ingestion_plugin.initialize()
-            self.kernel.add_plugin(ingestion_plugin, plugin_name="ingestion")
-            self.plugins["ingestion"] = ingestion_plugin
-
-            # Retrieval Plugin (FR-5, FR-6, FR-7)
+            # Retrieval Plugin (FR-5, FR-6, FR-7) - QUERY ONLY
             retrieval_plugin = RetrievalPlugin(self.settings)
             await retrieval_plugin.initialize()
             self.kernel.add_plugin(retrieval_plugin, plugin_name="retrieval")
@@ -141,9 +134,7 @@ class SemanticKernelManager:
             self.kernel.add_plugin(diagram_plugin, plugin_name="diagram")
             self.plugins["diagram"] = diagram_plugin
 
-            logger.info(
-                "Mosaic plugins registered successfully (including Phase 1 Foundation)"
-            )
+            logger.info("Mosaic Query Server plugins registered successfully")
 
         except Exception as e:
             logger.error(f"Failed to register Mosaic plugins: {e}")

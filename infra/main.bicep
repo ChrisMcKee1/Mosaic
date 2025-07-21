@@ -45,6 +45,33 @@ module resources 'resources.bicep' = {
     mosaicExists: mosaicExists
   }
 }
+
+// Two-Service Architecture: Query Server + Ingestion Service
+module queryServer 'query-server.bicep' = {
+  scope: rg
+  name: 'query-server'
+  params: {
+    environmentName: environmentName
+    location: location
+    containerAppsEnvironmentId: resources.outputs.CONTAINER_APPS_ENVIRONMENT_ID
+    azureOpenAIEndpoint: resources.outputs.AZURE_OPENAI_ENDPOINT
+    cosmosDbEndpoint: resources.outputs.MOSAIC_COSMOS_ENDPOINT
+    redisEndpoint: resources.outputs.AZURE_REDIS_ENDPOINT
+    azureMLEndpointUrl: resources.outputs.AZURE_ML_ENDPOINT_URL
+  }
+}
+
+module ingestionService 'ingestion-service.bicep' = {
+  scope: rg
+  name: 'ingestion-service'
+  params: {
+    environmentName: environmentName
+    location: location
+    containerAppsEnvironmentId: resources.outputs.CONTAINER_APPS_ENVIRONMENT_ID
+    azureOpenAIEndpoint: resources.outputs.AZURE_OPENAI_ENDPOINT
+    cosmosDbEndpoint: resources.outputs.MOSAIC_COSMOS_ENDPOINT
+  }
+}
 // Core Infrastructure Outputs
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = resources.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT
 output AZURE_RESOURCE_MOSAIC_ID string = resources.outputs.AZURE_RESOURCE_MOSAIC_ID
@@ -67,5 +94,12 @@ output AZURE_FUNCTIONS_ENDPOINT string = resources.outputs.AZURE_FUNCTIONS_ENDPO
 
 // OAuth 2.1 Configuration Outputs (FR-14)
 output AZURE_TENANT_ID string = resources.outputs.AZURE_TENANT_ID
-output MOSAIC_APP_URL string = resources.outputs.MOSAIC_APP_URL
+output MOSAIC_APP_URL string = queryServer.outputs.queryServerUrl
 output OAUTH_SETUP_REQUIRED string = resources.outputs.OAUTH_SETUP_REQUIRED
+
+// Two-Service Architecture Outputs
+output QUERY_SERVER_URL string = queryServer.outputs.queryServerUrl
+output QUERY_SERVER_PRINCIPAL_ID string = queryServer.outputs.queryServerPrincipalId
+output INGESTION_JOB_NAME string = ingestionService.outputs.ingestionJobName
+output INGESTION_SCHEDULE_NAME string = ingestionService.outputs.ingestionScheduleName
+output INGESTION_JOB_PRINCIPAL_ID string = ingestionService.outputs.ingestionJobPrincipalId

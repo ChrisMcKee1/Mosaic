@@ -1,14 +1,16 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-# Mosaic MCP Tool - Simplified OmniRAG Architecture
+# Mosaic MCP Tool - Two-Service Architecture
+# Query Server: Real-time MCP requests (Container App)
+# Ingestion Service: Heavy repository processing (Container App Jobs)
 # Unified Azure Cosmos DB backend for vector search, graph analysis, and memory
 # FastMCP framework with OAuth 2.1 authentication and Streamable HTTP transport
 name: mosaic
 metadata:
     template: azd-init@1.17.2
 services:
-    mosaic:
-        project: .
+    query-server:
+        project: ./src/mosaic
         host: containerapp
         language: python
         env:
@@ -32,13 +34,32 @@ services:
           MCP_OAUTH_ENABLED: true
           MCP_OAUTH_PROVIDER: entra_id
           # Note: AZURE_OAUTH_CLIENT_ID must be set after App Registration creation
+    ingestion-service:
+        project: ./src/ingestion_service
+        host: containerjob
+        language: python
+        env:
+          # OmniRAG Pattern Configuration (Microsoft CosmosAIGraph-based)
+          MOSAIC_COSMOS_ENDPOINT: ${MOSAIC_COSMOS_ENDPOINT}
+          MOSAIC_DATABASE_NAME: ${MOSAIC_DATABASE_NAME}
+          MOSAIC_LIBRARIES_CONTAINER: ${MOSAIC_LIBRARIES_CONTAINER}
+          MOSAIC_MEMORIES_CONTAINER: ${MOSAIC_MEMORIES_CONTAINER}
+          MOSAIC_DOCUMENTS_CONTAINER: ${MOSAIC_DOCUMENTS_CONTAINER}
+          MOSAIC_CONFIG_CONTAINER: ${MOSAIC_CONFIG_CONTAINER}
+          # Additional Service Endpoints
+          AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+          # Managed Identity Configuration (no connection strings)
+          AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+          AZURE_USE_MANAGED_IDENTITY: ${AZURE_USE_MANAGED_IDENTITY}
     memory-consolidator:
         project: ./functions/memory-consolidator
         host: function
         language: python
 resources:
-    mosaic:
+    query-server:
         type: host.containerapp
-        port: 80
+        port: 8000
+    ingestion-service:
+        type: host.containerjob
     memory-consolidator:
         type: host.function

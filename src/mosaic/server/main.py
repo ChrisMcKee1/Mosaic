@@ -156,26 +156,8 @@ class MosaicMCPServer:
             memory_plugin = await self.kernel_manager.get_plugin("memory")
             return await memory_plugin.clear(session_id)
 
-        # Ingestion Plugin Tools (Phase 1 Foundation)
-        @self.app.tool()
-        async def ingest_repository(
-            repository_url: str, branch: str = "main"
-        ) -> Dict[str, Any]:
-            """
-            Ingest code repository using GitPython and populate knowledge graph.
-
-            Phase 1 Foundation implementation addressing critical code ingestion gap.
-            Uses validated GitPython + tree-sitter technologies for multi-language parsing.
-
-            Args:
-                repository_url: Git repository URL to ingest
-                branch: Git branch to checkout (default: main)
-
-            Returns:
-                Ingestion summary with statistics
-            """
-            ingestion_plugin = await self.kernel_manager.get_plugin("ingestion")
-            return await ingestion_plugin.ingest_repository(repository_url, branch)
+        # NOTE: Repository ingestion is handled by separate Ingestion Service
+        # (Azure Container App Job) - not part of real-time Query Server
 
         # Diagram Plugin Tools (FR-12, FR-13)
         @self.app.tool()
