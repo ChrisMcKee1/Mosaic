@@ -174,6 +174,97 @@ class MosaicMCPServer:
             diagram_plugin = await self.kernel_manager.get_plugin("diagram")
             return await diagram_plugin.generate(description)
 
+        # Graph Visualization Plugin Tools (Interactive Graphs)
+        @self.app.tool()
+        async def visualize_repository_structure(
+            repository_url: str,
+            include_functions: bool = True,
+            include_classes: bool = True,
+            color_by_language: bool = True,
+            size_by_complexity: bool = True
+        ) -> str:
+            """
+            Create interactive visualization of repository code structure and relationships.
+
+            Args:
+                repository_url: Git repository URL to visualize
+                include_functions: Include function nodes in visualization
+                include_classes: Include class nodes in visualization
+                color_by_language: Color nodes by programming language
+                size_by_complexity: Size nodes by code complexity/LOC
+
+            Returns:
+                HTML string containing interactive graph visualization
+            """
+            graph_plugin = await self.kernel_manager.get_plugin("graph_visualization")
+            return await graph_plugin.visualize_repository_structure(
+                repository_url, include_functions, include_classes, 
+                color_by_language, size_by_complexity
+            )
+
+        @self.app.tool()
+        async def visualize_code_dependencies(
+            repository_url: str,
+            dependency_types: Optional[List[str]] = None,
+            show_external_deps: bool = True,
+            layout_algorithm: str = "force"
+        ) -> str:
+            """
+            Create interactive visualization focusing on code dependencies and imports.
+
+            Args:
+                repository_url: Repository to analyze
+                dependency_types: Types of dependencies to include (imports, calls, inherits)
+                show_external_deps: Include external library dependencies
+                layout_algorithm: Graph layout algorithm to use
+
+            Returns:
+                HTML string with dependency graph visualization
+            """
+            graph_plugin = await self.kernel_manager.get_plugin("graph_visualization")
+            return await graph_plugin.visualize_code_dependencies(
+                repository_url, dependency_types, show_external_deps, layout_algorithm
+            )
+
+        @self.app.tool()
+        async def visualize_knowledge_graph(
+            repository_url: str,
+            include_semantic_similarity: bool = True,
+            cluster_by_functionality: bool = True,
+            max_nodes: int = 200
+        ) -> str:
+            """
+            Create comprehensive knowledge graph visualization with semantic relationships.
+
+            Args:
+                repository_url: Repository to visualize
+                include_semantic_similarity: Include semantic similarity edges
+                cluster_by_functionality: Group nodes by functional similarity
+                max_nodes: Maximum number of nodes to include
+
+            Returns:
+                HTML string with knowledge graph visualization
+            """
+            graph_plugin = await self.kernel_manager.get_plugin("graph_visualization")
+            return await graph_plugin.visualize_knowledge_graph(
+                repository_url, include_semantic_similarity, 
+                cluster_by_functionality, max_nodes
+            )
+
+        @self.app.tool()
+        async def get_repository_graph_stats(repository_url: str) -> str:
+            """
+            Get statistics about repository entities and relationships for graph visualization.
+
+            Args:
+                repository_url: Repository URL to analyze
+
+            Returns:
+                JSON string with repository statistics
+            """
+            graph_plugin = await self.kernel_manager.get_plugin("graph_visualization")
+            return await graph_plugin.get_repository_graph_stats(repository_url)
+
     def _register_resources(self) -> None:
         """Register MCP resources for stored diagrams and documentation."""
 
