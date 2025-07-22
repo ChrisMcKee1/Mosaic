@@ -101,14 +101,20 @@ az containerapp job start \
 
 ### Local Development
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Create virtual environment and install dependencies
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install GitPython pydantic pydantic-settings python-dotenv
 
 # Run Query Server locally (requires Azure credentials)
 python -m mosaic.server.main
 
-# Run Ingestion Service locally
-python -m ingestion_service.main --repository-url <url>
+# Run Local Development Ingestion Service (minimal dependencies)
+source venv/bin/activate
+python3 -m src.ingestion_service.local_main --repository-url https://github.com/user/repo --branch main --debug
+
+# Run Full Ingestion Service (requires complete Azure setup)
+python -m ingestion_service.main --repository-url <url> --branch main
 ```
 
 ## Data Models and Schemas
