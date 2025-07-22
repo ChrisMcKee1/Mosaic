@@ -147,7 +147,7 @@ See [CLAUDE.md](./CLAUDE.md) for comprehensive development guidelines and requir
 ### **Implementation Documents**
 - **[Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Comprehensive 12-week implementation plan
 - **[Code Ingestion Analysis](docs/CODE_INGESTION_ANALYSIS.md)** - Executive summary of the critical gap
-- **[Architecture Documentation](docs/architecture/README.md)** - System design and component details
+- **[Technical Design Document](docs/TDD_UNIFIED.md)** - Unified system design and architecture specification
 
 **Next Action:** Begin Phase 1 implementation with Context7 MCP tool research for technology validation.
 

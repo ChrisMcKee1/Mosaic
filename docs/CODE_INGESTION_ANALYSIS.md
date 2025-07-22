@@ -112,9 +112,9 @@ The Mosaic MCP Tool architecture analysis has revealed a **critical implementati
 
 ### **Files Updated**
 - **`docs/Mosaic_MCP_Tool_PRD.md`** - Expanded FR-6 requirements
-- **`docs/Mosaic_MCP_Tool_TDD.md`** - Added code ingestion pipeline details
+- **`docs/TDD_UNIFIED.md`** - Unified technical design document (single source of truth)
 - **`docs/IMPLEMENTATION_ROADMAP.md`** - Comprehensive implementation plan
-- **`docs/architecture/README.md`** - Added implementation status reference
+- **`docs/_archive/`** - Legacy documentation archived for reference
 
 ### **Key Changes**
 - **Code ingestion gap** prominently documented

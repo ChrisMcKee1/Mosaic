@@ -6,7 +6,7 @@ Performs a deep, comprehensive audit of the entire Mosaic project by comparing t
 
 ### 1. Load the "Planned State" (Documentation)
 - **Read the PRD:** Use `desktop-commander` to `read_file` on `docs/Mosaic_MCP_Tool_PRD.md`.
-- **Read the TDD:** Use `desktop-commander` to `read_file` on `docs/Mosaic_MCP_Tool_TDD.md`.
+- **Read the TDD:** Use `desktop-commander` to `read_file` on `docs/TDD_UNIFIED.md`.
 - **Read the Gap Analysis:** Use `desktop-commander` to `read_file` on `docs/CODE_INGESTION_ANALYSIS.md`.
 
 ### 2. Load the "Reality State" (Codebase)
