@@ -250,3 +250,19 @@ Thumbs.db
 /.venv-conport
 .azure
 /docs/_archive
+
+# Generated HTML files and visualizations
+*.html
+mosaic_*.html
+
+# Development and sample files
+create_*.py
+*_demo.py
+examples/
+
+# Test files in root (should be in tests/ directory)
+/test_*.py
+
+# Local database and vector data
+context.db
+conport_vector_data/

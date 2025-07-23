@@ -75,6 +75,29 @@ class MosaicSettings(BaseSettings):
         default="memory", description="Cosmos DB container name for memory storage"
     )
 
+    # Golden Node Container - NEW for AI Agent architecture
+    azure_cosmos_golden_nodes_container: str = Field(
+        default="golden_nodes",
+        description="Cosmos DB container name for Golden Node unified schema",
+    )
+
+    # Additional containers for complete plugin support
+    azure_cosmos_diagrams_container: str = Field(
+        default="diagrams", description="Cosmos DB container name for diagram storage"
+    )
+    azure_cosmos_code_entities_container: str = Field(
+        default="code_entities",
+        description="Cosmos DB container name for code entities",
+    )
+    azure_cosmos_code_relationships_container: str = Field(
+        default="code_relationships",
+        description="Cosmos DB container name for code relationships",
+    )
+    azure_cosmos_repositories_container: str = Field(
+        default="repositories",
+        description="Cosmos DB container name for repository metadata",
+    )
+
     # Azure Cache for Redis Configuration (managed identity)
     azure_redis_endpoint: Optional[str] = Field(
         default=None,
@@ -127,12 +150,20 @@ class MosaicSettings(BaseSettings):
     request_timeout: int = Field(default=30, description="Request timeout in seconds")
 
     def get_cosmos_config(self) -> dict:
-        """Get Azure Cosmos DB configuration dictionary."""
+        """Get Azure Cosmos DB configuration dictionary - UPDATED for Golden Node support."""
         return {
             "endpoint": self.azure_cosmos_endpoint,
             "database_name": self.azure_cosmos_database_name,
-            "container_name": self.azure_cosmos_container_name,
-            "memory_container": self.azure_cosmos_memory_container,
+            # Query Server containers
+            "container_name": self.azure_cosmos_container_name,  # knowledge
+            "memory_container": self.azure_cosmos_memory_container,  # memory
+            "diagrams_container": self.azure_cosmos_diagrams_container,  # diagrams
+            # GraphDataService containers
+            "code_entities_container": self.azure_cosmos_code_entities_container,
+            "code_relationships_container": self.azure_cosmos_code_relationships_container,
+            "repositories_container": self.azure_cosmos_repositories_container,
+            # Golden Node container
+            "golden_nodes_container": self.azure_cosmos_golden_nodes_container,
         }
 
     def get_redis_config(self) -> dict:

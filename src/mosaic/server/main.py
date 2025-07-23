@@ -181,7 +181,7 @@ class MosaicMCPServer:
             include_functions: bool = True,
             include_classes: bool = True,
             color_by_language: bool = True,
-            size_by_complexity: bool = True
+            size_by_complexity: bool = True,
         ) -> str:
             """
             Create interactive visualization of repository code structure and relationships.
@@ -198,8 +198,11 @@ class MosaicMCPServer:
             """
             graph_plugin = await self.kernel_manager.get_plugin("graph_visualization")
             return await graph_plugin.visualize_repository_structure(
-                repository_url, include_functions, include_classes, 
-                color_by_language, size_by_complexity
+                repository_url,
+                include_functions,
+                include_classes,
+                color_by_language,
+                size_by_complexity,
             )
 
         @self.app.tool()
@@ -207,7 +210,7 @@ class MosaicMCPServer:
             repository_url: str,
             dependency_types: Optional[List[str]] = None,
             show_external_deps: bool = True,
-            layout_algorithm: str = "force"
+            layout_algorithm: str = "force",
         ) -> str:
             """
             Create interactive visualization focusing on code dependencies and imports.
@@ -231,7 +234,7 @@ class MosaicMCPServer:
             repository_url: str,
             include_semantic_similarity: bool = True,
             cluster_by_functionality: bool = True,
-            max_nodes: int = 200
+            max_nodes: int = 200,
         ) -> str:
             """
             Create comprehensive knowledge graph visualization with semantic relationships.
@@ -247,8 +250,10 @@ class MosaicMCPServer:
             """
             graph_plugin = await self.kernel_manager.get_plugin("graph_visualization")
             return await graph_plugin.visualize_knowledge_graph(
-                repository_url, include_semantic_similarity, 
-                cluster_by_functionality, max_nodes
+                repository_url,
+                include_semantic_similarity,
+                cluster_by_functionality,
+                max_nodes,
             )
 
         @self.app.tool()
