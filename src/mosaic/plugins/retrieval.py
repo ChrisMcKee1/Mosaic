@@ -25,6 +25,7 @@ from semantic_kernel.connectors.ai.open_ai import AzureTextEmbedding
 
 from ..config.settings import MosaicSettings
 from ..models.base import Document, LibraryNode
+from .vector_search import VectorSearchPlugin
 
 
 logger = logging.getLogger(__name__)
@@ -53,6 +54,8 @@ class RetrievalPlugin:
         self.database = None
         self.knowledge_container = None
         self.embedding_service: Optional[AzureTextEmbedding] = None
+        # Integrated VectorSearchPlugin for hierarchical vector operations
+        self.vector_search_plugin: Optional[VectorSearchPlugin] = None
 
     async def initialize(self) -> None:
         """Initialize Azure services and connections."""
@@ -62,6 +65,9 @@ class RetrievalPlugin:
 
             # Initialize embedding service
             await self._initialize_embedding_service()
+
+            # Initialize integrated VectorSearchPlugin
+            await self._initialize_vector_search_plugin()
 
             logger.info("RetrievalPlugin initialized successfully")
 
@@ -92,6 +98,11 @@ class RetrievalPlugin:
             endpoint=self.settings.azure_openai_endpoint,
             service_id="retrieval_embedding",
         )
+
+    async def _initialize_vector_search_plugin(self) -> None:
+        """Initialize integrated VectorSearchPlugin for hierarchical operations."""
+        self.vector_search_plugin = VectorSearchPlugin(self.settings)
+        await self.vector_search_plugin.initialize()
 
     @sk_function(
         description="Perform hybrid search using vector and keyword search",
@@ -339,3 +350,111 @@ class RetrievalPlugin:
         # Cosmos client cleanup is handled automatically
         # Embedding service cleanup is handled automatically
         logger.info("RetrievalPlugin cleanup completed")
+
+    # === HIERARCHICAL VECTOR SEARCH FUNCTIONS ===
+    # These functions expose VectorSearchPlugin capabilities through RetrievalPlugin
+
+    @sk_function(
+        description="Perform hierarchical vector search within code entity relationships",
+        name="hierarchical_vector_search",
+    )
+    @sk_function_context_parameter(
+        name="query", description="Search query string", type_="str"
+    )
+    @sk_function_context_parameter(
+        name="parent_id",
+        description="Parent entity UUID to limit search scope (optional)",
+        type_="str",
+    )
+    @sk_function_context_parameter(
+        name="entity_type",
+        description="Filter by specific entity type (optional)",
+        type_="str",
+    )
+    async def hierarchical_vector_search(
+        self,
+        query: str,
+        parent_id: Optional[str] = None,
+        entity_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Perform vector search with hierarchical filtering using the integrated VectorSearchPlugin.
+
+        This exposes the hierarchical vector search capabilities for Semantic Kernel integration.
+        """
+        if not self.vector_search_plugin:
+            raise RuntimeError("VectorSearchPlugin not initialized")
+
+        return await self.vector_search_plugin.hierarchical_vector_search(
+            query=query, parent_id=parent_id, entity_type=entity_type
+        )
+
+    @sk_function(
+        description="Get all child entities of a specific code entity",
+        name="get_entity_children",
+    )
+    @sk_function_context_parameter(
+        name="entity_id", description="UUID of the parent entity", type_="str"
+    )
+    @sk_function_context_parameter(
+        name="max_depth",
+        description="Maximum depth to traverse (optional)",
+        type_="int",
+    )
+    async def get_entity_children(
+        self, entity_id: str, max_depth: Optional[int] = 1
+    ) -> List[Dict[str, Any]]:
+        """
+        Get all child entities of a specific code entity using hierarchical relationships.
+
+        Exposes VectorSearchPlugin get_children functionality for Semantic Kernel.
+        """
+        if not self.vector_search_plugin:
+            raise RuntimeError("VectorSearchPlugin not initialized")
+
+        return await self.vector_search_plugin.get_children(entity_id, max_depth)
+
+    @sk_function(
+        description="Get all parent entities of a specific code entity",
+        name="get_entity_parents",
+    )
+    @sk_function_context_parameter(
+        name="entity_id", description="UUID of the child entity", type_="str"
+    )
+    @sk_function_context_parameter(
+        name="max_depth",
+        description="Maximum depth to traverse up (optional)",
+        type_="int",
+    )
+    async def get_entity_parents(
+        self, entity_id: str, max_depth: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Get all parent entities of a specific code entity using materialized paths.
+
+        Exposes VectorSearchPlugin get_parents functionality for Semantic Kernel.
+        """
+        if not self.vector_search_plugin:
+            raise RuntimeError("VectorSearchPlugin not initialized")
+
+        return await self.vector_search_plugin.get_parents(entity_id, max_depth)
+
+    @sk_function(
+        description="Get sibling entities at the same hierarchy level",
+        name="get_entity_siblings",
+    )
+    @sk_function_context_parameter(
+        name="entity_id",
+        description="UUID of the entity to find siblings for",
+        type_="str",
+    )
+    async def get_entity_siblings(self, entity_id: str) -> List[Dict[str, Any]]:
+        """
+        Get all sibling entities at the same hierarchy level.
+
+        Exposes VectorSearchPlugin get_siblings functionality for Semantic Kernel.
+        """
+        if not self.vector_search_plugin:
+            raise RuntimeError("VectorSearchPlugin not initialized")
+
+        return await self.vector_search_plugin.get_siblings(entity_id)

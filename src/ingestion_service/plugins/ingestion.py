@@ -2142,7 +2142,7 @@ Guidelines:
                     "ai_tags": cached_result["tags"],
                     "has_ai_analyst": True,
                     "ai_analyst_timestamp": datetime.utcnow().isoformat(),
-                    "ai_model_used": "gpt-4o-mini",
+                    "ai_model_used": "gpt-4.1-mini",
                     "analysis_confidence": cached_result.get("confidence", 0.85),
                     "cache_hit": True,
                 }
@@ -2169,7 +2169,7 @@ Guidelines:
                     "ai_tags": analysis["tags"],
                     "has_ai_analyst": True,
                     "ai_analyst_timestamp": datetime.utcnow().isoformat(),
-                    "ai_model_used": "gpt-4o-mini",
+                    "ai_model_used": "gpt-4.1-mini",
                     "analysis_confidence": 0.85,
                     "cache_hit": False,
                 }

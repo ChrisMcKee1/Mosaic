@@ -46,8 +46,8 @@ class TestKnowledgeBasePopulation:
         """Create mock settings for testing."""
         settings = MagicMock(spec=MosaicSettings)
         settings.azure_openai_endpoint = "https://test.openai.azure.com/"
-        settings.azure_openai_text_embedding_deployment_name = "text-embedding-ada-002"
-        settings.azure_openai_chat_deployment_name = "gpt-4"
+        settings.azure_openai_text_embedding_deployment_name = "text-embedding-3-small"
+        settings.azure_openai_chat_deployment_name = "gpt-4.1"
         settings.get_cosmos_config.return_value = {
             "endpoint": "https://test.cosmos.azure.com:443/",
             "database_name": "mosaic",

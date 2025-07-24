@@ -3,7 +3,9 @@
 Comprehensive Azure deployment workflow using all MCP tools for safe, tracked, and validated deployments.
 
 ## Usage
+
 Use `/azure-deploy` when you need to:
+
 - Deploy Mosaic MCP Tool to Azure
 - Update Azure infrastructure
 - Validate deployment configuration
@@ -12,6 +14,7 @@ Use `/azure-deploy` when you need to:
 ## Chained Workflow Steps
 
 ### 1. Pre-Deployment Planning
+
 ```
 Use mcp__sequential-thinking__sequentialthinking to:
 - Review deployment requirements
@@ -21,6 +24,7 @@ Use mcp__sequential-thinking__sequentialthinking to:
 ```
 
 ### 2. ConPort Deployment Preparation
+
 ```
 Use mcp__conport__get_progress to check implementation status
 Use mcp__conport__get_decisions to review Azure architecture decisions
@@ -31,7 +35,9 @@ Use mcp__conport__log_progress for deployment tracking:
 ```
 
 ### 3. Azure Documentation Research
+
 ```
+Use `microsoft_docs_search` Performs semantic search against Microsoft official technical documentation for Azure.
 Use mcp__context7__resolve-library-id to find Azure services docs
 Use mcp__context7__get-library-docs for:
 - Azure Container Apps deployment
@@ -46,6 +52,7 @@ Use WebSearch to validate:
 ```
 
 ### 4. Desktop Commander Pre-Deployment Checks
+
 ```
 Use mcp__desktop-commander tools for validation:
 - read_file: check all configuration files
@@ -56,6 +63,7 @@ Use mcp__desktop-commander tools for validation:
 ```
 
 ### 5. Azure CLI Deployment
+
 ```
 Use mcp__desktop-commander__execute_command for:
 - az login (authenticate)
@@ -66,6 +74,7 @@ Use mcp__desktop-commander__execute_command for:
 ```
 
 ### 6. Deployment Validation
+
 ```
 Use mcp__sequential-thinking__sequentialthinking to:
 - Analyze deployment output
@@ -75,6 +84,7 @@ Use mcp__sequential-thinking__sequentialthinking to:
 ```
 
 ### 7. ConPort Deployment Tracking
+
 ```
 Use mcp__conport__log_decision for deployment choices:
 - Summary: deployment configuration used
@@ -92,6 +102,7 @@ Use mcp__conport__update_progress:
 ```
 
 ### 8. Post-Deployment Validation
+
 ```
 Use mcp__desktop-commander__execute_command for testing:
 - curl health check endpoints
@@ -104,6 +115,7 @@ Use WebSearch to verify:
 ```
 
 ### 9. Documentation and Linking
+
 ```
 Use mcp__conport__link_conport_items to connect:
 - Deployment to functional requirements
@@ -121,6 +133,7 @@ Use mcp__conport__log_system_pattern for deployment pattern:
 "Deploy the Mosaic MCP Tool to Azure using azd, ensuring all services are properly configured and the MCP server is accessible with full progress tracking."
 
 ## Expected Outputs
+
 - Successfully deployed Azure infrastructure
 - Running MCP server with validated endpoints
 - Complete deployment documentation in conport

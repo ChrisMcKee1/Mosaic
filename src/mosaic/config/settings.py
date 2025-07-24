@@ -44,17 +44,22 @@ class MosaicSettings(BaseSettings):
         alias="AZURE_OPENAI_ENDPOINT",
     )
     azure_openai_api_version: str = Field(
-        default="2024-02-01",
+        default="2025-01-01-preview",
         description="Azure OpenAI API version",
         alias="AZURE_OPENAI_API_VERSION",
     )
     azure_openai_chat_deployment_name: str = Field(
-        default="gpt-4",
-        description="Azure OpenAI chat deployment name",
+        default="gpt-4.1",
+        description="Azure OpenAI chat deployment name (main model for complex reasoning)",
         alias="AZURE_OPENAI_CHAT_DEPLOYMENT_NAME",
     )
+    azure_openai_chat_deployment_name_mini: str = Field(
+        default="gpt-4.1-mini",
+        description="Azure OpenAI mini deployment name (for simple plugin tasks)",
+        alias="AZURE_OPENAI_CHAT_DEPLOYMENT_NAME_MINI",
+    )
     azure_openai_text_embedding_deployment_name: str = Field(
-        default="text-embedding-ada-002",
+        default="text-embedding-3-small",
         description="Azure OpenAI embedding deployment name",
         alias="AZURE_OPENAI_TEXT_EMBEDDING_DEPLOYMENT_NAME",
     )

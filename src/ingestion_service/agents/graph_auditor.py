@@ -79,8 +79,12 @@ class GraphAuditorAgent(MosaicAgent):
 
     async def _register_plugins(self) -> None:
         """Register GraphAuditor-specific Semantic Kernel plugins."""
-        # TODO: Register plugins for quality assessment, anomaly detection
-        self.logger.info("GraphAuditor agent plugins registered")
+        # GraphAuditor uses LLM for AI-powered anomaly detection
+        # The base agent already provides chat_with_llm capability
+        # Additional plugins could be added for specialized quality assessment
+        self.logger.info(
+            "GraphAuditor agent plugins registered with AI anomaly detection capability"
+        )
 
     async def process_golden_node(
         self, golden_node: GoldenNode, context: AgentExecutionContext
@@ -162,6 +166,9 @@ class GraphAuditorAgent(MosaicAgent):
 
         # Perform various validation checks
         validation_results.extend(await self._validate_data_integrity(golden_node))
+        validation_results.extend(
+            await self._validate_hierarchical_structure(golden_node)
+        )
         validation_results.extend(await self._validate_relationships(golden_node))
         validation_results.extend(await self._validate_ai_enrichment(golden_node))
         validation_results.extend(await self._validate_schema_compliance(golden_node))
@@ -242,6 +249,140 @@ class GraphAuditorAgent(MosaicAgent):
 
         return results
 
+    async def _validate_hierarchical_structure(
+        self, golden_node: GoldenNode
+    ) -> List[ValidationResult]:
+        """Validate hierarchical structure integrity."""
+        results = []
+
+        # Check for hierarchical fields consistency
+        code_entity = golden_node.code_entity
+
+        # Validate parent_id format if present
+        if hasattr(code_entity, "parent_id") and code_entity.parent_id:
+            try:
+                from uuid import UUID
+
+                UUID(code_entity.parent_id)
+                results.append(
+                    ValidationResult(
+                        check_name="parent_id_format",
+                        passed=True,
+                        severity="info",
+                        message="Parent ID is properly formatted as UUID",
+                    )
+                )
+            except (ValueError, TypeError, AttributeError):
+                results.append(
+                    ValidationResult(
+                        check_name="parent_id_format",
+                        passed=False,
+                        severity="error",
+                        message="Parent ID is not a valid UUID format",
+                        suggestions=["Ensure parent_id is properly formatted as UUID"],
+                    )
+                )
+
+        # Validate hierarchy level consistency
+        if hasattr(code_entity, "hierarchy_level"):
+            hierarchy_level = code_entity.hierarchy_level
+            hierarchy_path = getattr(code_entity, "hierarchy_path", [])
+
+            # Root nodes should have level 0 and empty path
+            if not code_entity.parent_id:
+                if hierarchy_level != 0:
+                    results.append(
+                        ValidationResult(
+                            check_name="root_hierarchy_level",
+                            passed=False,
+                            severity="error",
+                            message=f"Root entity has non-zero hierarchy level: {hierarchy_level}",
+                            suggestions=["Set hierarchy_level to 0 for root entities"],
+                        )
+                    )
+
+                if hierarchy_path:
+                    results.append(
+                        ValidationResult(
+                            check_name="root_hierarchy_path",
+                            passed=False,
+                            severity="error",
+                            message="Root entity has non-empty hierarchy path",
+                            suggestions=[
+                                "Set hierarchy_path to empty list for root entities"
+                            ],
+                        )
+                    )
+
+            # Non-root nodes should have level > 0 and appropriate path length
+            else:
+                if hierarchy_level <= 0:
+                    results.append(
+                        ValidationResult(
+                            check_name="child_hierarchy_level",
+                            passed=False,
+                            severity="error",
+                            message=f"Child entity has invalid hierarchy level: {hierarchy_level}",
+                            suggestions=["Set hierarchy_level > 0 for child entities"],
+                        )
+                    )
+
+                expected_path_length = hierarchy_level
+                if len(hierarchy_path) != expected_path_length:
+                    results.append(
+                        ValidationResult(
+                            check_name="hierarchy_path_consistency",
+                            passed=False,
+                            severity="warning",
+                            message=f"Hierarchy path length ({len(hierarchy_path)}) doesn't match level ({hierarchy_level})",
+                            suggestions=[
+                                "Ensure hierarchy_path length equals hierarchy_level"
+                            ],
+                        )
+                    )
+
+        # Check for computed properties
+        if hasattr(code_entity, "is_root_node"):
+            is_root_computed = not code_entity.parent_id
+            if code_entity.is_root_node != is_root_computed:
+                results.append(
+                    ValidationResult(
+                        check_name="is_root_node_consistency",
+                        passed=False,
+                        severity="warning",
+                        message="is_root_node property doesn't match parent_id state",
+                        suggestions=["Recalculate computed hierarchical properties"],
+                    )
+                )
+
+        # Validate relationship between parent_entity (legacy) and parent_id (new)
+        if hasattr(code_entity, "parent_entity") and code_entity.parent_entity:
+            if hasattr(code_entity, "parent_id") and not code_entity.parent_id:
+                results.append(
+                    ValidationResult(
+                        check_name="parent_fields_consistency",
+                        passed=False,
+                        severity="warning",
+                        message="Legacy parent_entity field is set but parent_id is not",
+                        suggestions=[
+                            "Migrate from parent_entity to parent_id for hierarchical structure"
+                        ],
+                    )
+                )
+
+        # Add success result if no issues found
+        if not any(not r.passed for r in results):
+            results.append(
+                ValidationResult(
+                    check_name="hierarchical_structure",
+                    passed=True,
+                    severity="info",
+                    message="All hierarchical structure validations passed",
+                )
+            )
+
+        return results
+
     async def _validate_relationships(
         self, golden_node: GoldenNode
     ) -> List[ValidationResult]:
@@ -273,6 +414,48 @@ class GraphAuditorAgent(MosaicAgent):
                         severity="error",
                         message="Entity has relationship with itself",
                         suggestions=["Remove self-referential relationships"],
+                    )
+                )
+
+            # Validate hierarchical relationship types
+            if (
+                hasattr(golden_node.code_entity, "parent_id")
+                and golden_node.code_entity.parent_id
+            ):
+                if (
+                    relationship.relationship_type in ["contains", "parent_of"]
+                    and relationship.target_entity_id
+                    == golden_node.code_entity.parent_id
+                ):
+                    results.append(
+                        ValidationResult(
+                            check_name="hierarchical_relationship_direction",
+                            passed=False,
+                            severity="warning",
+                            message="Hierarchical relationship has incorrect direction",
+                            suggestions=[
+                                "Use 'contained_by' or 'child_of' for upward relationships"
+                            ],
+                        )
+                    )
+
+        # Check for UUID format in relationship entity IDs
+        for relationship in golden_node.relationships:
+            try:
+                from uuid import UUID
+
+                UUID(relationship.source_entity_id)
+                UUID(relationship.target_entity_id)
+            except (ValueError, TypeError):
+                results.append(
+                    ValidationResult(
+                        check_name="relationship_uuid_format",
+                        passed=False,
+                        severity="error",
+                        message="Relationship contains non-UUID entity IDs",
+                        suggestions=[
+                            "Ensure all entity IDs in relationships are valid UUIDs"
+                        ],
                     )
                 )
 
@@ -371,52 +554,103 @@ class GraphAuditorAgent(MosaicAgent):
     async def _detect_anomalies(
         self, golden_node: GoldenNode, context: AgentExecutionContext
     ) -> List[ValidationResult]:
-        """Use AI to detect potential anomalies."""
+        """Use AI to detect potential anomalies in hierarchical structure and code quality."""
         results = []
 
         try:
-            # TODO: Implement AI-powered anomaly detection
-            # This would use LLM to identify unusual patterns or potential issues
-            #
-            # anomaly_prompt = f"""
-            # Analyze this code entity for potential anomalies or quality issues:
-            #
-            # Entity: {golden_node.code_entity.name}
-            # Type: {golden_node.code_entity.entity_type.value}
-            # Language: {golden_node.code_entity.language.value}
-            # Content Length: {len(golden_node.code_entity.content)} characters
-            #
-            # Look for:
-            # - Unusual naming patterns
-            # - Potential code smells
-            # - Inconsistent formatting
-            # - Missing documentation
-            # - Overly complex structure
-            #
-            # Provide specific, actionable feedback.
-            # """
+            # Build comprehensive analysis prompt for hierarchical and code anomalies
+            code_entity = golden_node.code_entity
+            hierarchical_info = ""
 
-            # This would use the chat_with_llm method for analysis
-            # anomaly_analysis = await self.chat_with_llm(anomaly_prompt, context)
+            if hasattr(code_entity, "parent_id"):
+                hierarchical_info = f"""
+Hierarchical Structure:
+- Parent ID: {code_entity.parent_id or "None (root entity)"}
+- Hierarchy Level: {getattr(code_entity, "hierarchy_level", "Not set")}
+- Hierarchy Path Length: {len(getattr(code_entity, "hierarchy_path", []))}
+- Is Root Node: {getattr(code_entity, "is_root_node", "Not computed")}
+- Legacy Parent Entity: {code_entity.parent_entity or "None"}
+"""
 
-            # For now, add a placeholder success result
-            results.append(
-                ValidationResult(
-                    check_name="anomaly_detection",
-                    passed=True,
-                    severity="info",
-                    message="No anomalies detected in code entity",
+            anomaly_prompt = f"""
+Analyze this code entity for potential anomalies, quality issues, and hierarchical inconsistencies:
+
+Entity Information:
+- Name: {code_entity.name}
+- Type: {code_entity.entity_type.value}
+- Language: {code_entity.language.value}
+- Content Length: {len(code_entity.content)} characters
+- Scope: {getattr(code_entity, "scope", "Not specified")}
+- Is Exported: {getattr(code_entity, "is_exported", "Not specified")}
+
+{hierarchical_info}
+
+Code Content Sample:
+{code_entity.content[:500]}{"..." if len(code_entity.content) > 500 else ""}
+
+Relationships Count: {len(golden_node.relationships)}
+AI Enrichment Present: {golden_node.ai_enrichment is not None}
+
+Look for:
+1. Hierarchical Issues:
+   - Inconsistent parent-child relationships
+   - Incorrect hierarchy levels or paths
+   - Missing or invalid parent references
+   
+2. Code Quality Issues:
+   - Unusual naming patterns
+   - Potential code smells
+   - Inconsistent formatting
+   - Missing documentation
+   - Overly complex structure
+   
+3. Data Integrity Issues:
+   - Mismatched entity types and content
+   - Invalid scope or export declarations
+   - Incomplete entity information
+
+Respond with: PASS if no significant issues found, or ANOMALY: [specific issue description] if problems detected.
+Provide actionable suggestions for any anomalies found.
+"""
+
+            # Use the chat_with_llm method for AI-powered analysis
+            anomaly_analysis = await self.chat_with_llm(anomaly_prompt, context)
+
+            if anomaly_analysis and "ANOMALY:" in anomaly_analysis.upper():
+                # Extract anomaly description
+                anomaly_desc = anomaly_analysis.split("ANOMALY:")[-1].strip()
+
+                results.append(
+                    ValidationResult(
+                        check_name="ai_anomaly_detection",
+                        passed=False,
+                        severity="warning",
+                        message=f"AI detected potential anomaly: {anomaly_desc[:200]}...",
+                        suggestions=[
+                            "Review the detected anomaly and consider code refactoring",
+                            "Validate hierarchical structure consistency",
+                            "Check for code quality improvements",
+                        ],
+                    )
                 )
-            )
+            else:
+                results.append(
+                    ValidationResult(
+                        check_name="ai_anomaly_detection",
+                        passed=True,
+                        severity="info",
+                        message="AI analysis found no significant anomalies",
+                    )
+                )
 
         except Exception as e:
-            self.logger.error(f"Anomaly detection failed: {e}")
+            self.logger.error(f"AI anomaly detection failed: {e}")
             results.append(
                 ValidationResult(
-                    check_name="anomaly_detection",
+                    check_name="ai_anomaly_detection",
                     passed=False,
                     severity="error",
-                    message=f"Anomaly detection failed: {e}",
+                    message=f"AI anomaly detection failed: {e}",
                     suggestions=["Check AI service connectivity and retry"],
                 )
             )
@@ -507,6 +741,29 @@ class GraphAuditorAgent(MosaicAgent):
         warning_count = sum(1 for r in validation_results if r.severity == "warning")
         if warning_count > 3:
             recommendations.append("Review and address multiple warning conditions")
+
+        # Add hierarchical-specific recommendations
+        hierarchical_issues = [
+            r
+            for r in validation_results
+            if any(
+                keyword in r.check_name
+                for keyword in ["hierarchy", "parent_id", "hierarchical"]
+            )
+        ]
+        if hierarchical_issues:
+            recommendations.append(
+                "Review hierarchical structure consistency and UUID-based relationships"
+            )
+
+        # Add AI-specific recommendations
+        ai_issues = [
+            r for r in validation_results if "ai_" in r.check_name and not r.passed
+        ]
+        if ai_issues:
+            recommendations.append(
+                "Consider re-running AI analysis agents to improve data quality"
+            )
 
         return (
             recommendations + unique_suggestions[:5]

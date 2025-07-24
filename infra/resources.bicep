@@ -166,15 +166,15 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' = 
   }
 }
 
-// GPT-4o Deployment (Latest GA model)
-resource gpt4oDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+// GPT-4.1 Deployment (Latest GA model)
+resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: aiServices
-  name: 'gpt-4o'
+  name: 'gpt-4.1'
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-4o'
-      version: '2024-11-20'
+      name: 'gpt-4.1'
+      version: '2025-01-01-preview'
     }
   }
   sku: {
@@ -183,16 +183,16 @@ resource gpt4oDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-
   }
 }
 
-// GPT-4o-mini Deployment (Fast, cost-effective model)
-resource gpt4oMiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+// GPT-4.1-mini Deployment (Fast, cost-effective model)
+resource gpt41MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: aiServices
-  name: 'gpt-4o-mini'
-  dependsOn: [gpt4oDeployment]
+  name: 'gpt-4.1-mini'
+  dependsOn: [gpt41Deployment]
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-4o-mini'
-      version: '2024-07-18'
+      name: 'gpt-4.1-mini'
+      version: '2025-01-01-preview'
     }
   }
   sku: {
@@ -205,7 +205,7 @@ resource gpt4oMiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
 resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: aiServices
   name: 'text-embedding-3-small'
-  dependsOn: [gpt4oMiniDeployment]
+  dependsOn: [gpt41MiniDeployment]
   properties: {
     model: {
       format: 'OpenAI'

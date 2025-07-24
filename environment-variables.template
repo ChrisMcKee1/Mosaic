@@ -41,8 +41,9 @@ AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devsto
 # =============================================================================
 # These require a real Azure OpenAI service - no local emulator available
 AZURE_OPENAI_ENDPOINT=https://your-openai-resource.openai.azure.com/
-AZURE_OPENAI_API_VERSION=2024-02-15-preview
-AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o
+AZURE_OPENAI_API_VERSION=2025-01-01-preview
+AZURE_OPENAI_CHAT_DEPLOYMENT_NAME=gpt-4.1
+AZURE_OPENAI_CHAT_DEPLOYMENT_NAME_MINI=gpt-4.1-mini
 AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-small
 
 # =============================================================================

@@ -54,9 +54,14 @@ class LocalDevelopmentConfig(BaseSettings):
     # Azure OpenAI (still requires cloud service)
     openai_endpoint: Optional[str] = Field(default=None, env="AZURE_OPENAI_ENDPOINT")
     openai_api_version: str = Field(
-        default="2024-02-15-preview", env="AZURE_OPENAI_API_VERSION"
+        default="2025-01-01-preview", env="AZURE_OPENAI_API_VERSION"
     )
-    openai_deployment: str = Field(default="gpt-4o", env="AZURE_OPENAI_DEPLOYMENT_NAME")
+    openai_chat_deployment: str = Field(
+        default="gpt-4.1", env="AZURE_OPENAI_CHAT_DEPLOYMENT_NAME"
+    )
+    openai_chat_deployment_mini: str = Field(
+        default="gpt-4.1-mini", env="AZURE_OPENAI_CHAT_DEPLOYMENT_NAME_MINI"
+    )
     openai_embedding_deployment: str = Field(
         default="text-embedding-3-small", env="AZURE_OPENAI_EMBEDDING_DEPLOYMENT"
     )

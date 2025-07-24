@@ -15,6 +15,7 @@ of Golden Node models with comprehensive relationship data.
 import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
+from uuid import uuid4
 
 from .base_agent import MosaicAgent, AgentConfig, AgentExecutionContext, AgentError
 from ..models.golden_node import (
@@ -52,9 +53,18 @@ class GraphArchitectAgent(MosaicAgent):
 
     async def _register_plugins(self) -> None:
         """Register GraphArchitect-specific Semantic Kernel plugins."""
-        # TODO: Register plugins for relationship analysis
-        # Could include similarity detection, dependency analysis plugins
-        self.logger.info("GraphArchitect agent plugins registered")
+        # Import and register the AI-powered code parser plugin for relationship analysis
+        from ..plugins.ai_code_parser import AICodeParserPlugin
+
+        # Initialize AI Code Parser Plugin for relationship analysis
+        self.ai_code_parser = AICodeParserPlugin()
+
+        # Register the plugin with the kernel
+        self.kernel.add_plugin(self.ai_code_parser, "ai_code_parser")
+
+        self.logger.info(
+            "GraphArchitect agent with AI-powered relationship analysis plugins registered"
+        )
 
     async def process_golden_node(
         self, golden_node: GoldenNode, context: AgentExecutionContext
@@ -138,35 +148,157 @@ class GraphArchitectAgent(MosaicAgent):
         context: AgentExecutionContext,
     ) -> List[EntityRelationship]:
         """
-        Build relationships between the current entity and related entities.
+        Build relationships using AI-powered relationship analysis.
         """
         self.logger.debug(
-            f"Building relationships for entity: {golden_node.code_entity.name}"
+            f"Building AI-powered relationships for entity: {golden_node.code_entity.name}"
         )
 
         relationships = []
 
         try:
-            # TODO: Implement comprehensive relationship building
-            # This would analyze import statements, function calls, inheritance, etc.
-
-            # Analyze direct code relationships
-            direct_relationships = await self._analyze_direct_relationships(
-                golden_node, related_entities, context
+            # Convert related entities to CodeEntityStructured format for AI analysis
+            entities_structured = self._convert_to_structured_entities(
+                golden_node, related_entities
             )
-            relationships.extend(direct_relationships)
 
-            # Analyze semantic similarities using AI
-            semantic_relationships = await self._analyze_semantic_relationships(
-                golden_node, related_entities, context
+            # Get source code context from repository
+            source_code = repository_context.get(
+                "source_code", golden_node.code_entity.content
             )
-            relationships.extend(semantic_relationships)
 
+            # Use AI-powered relationship analysis
+            ai_relationships = await self.ai_code_parser.analyze_code_relationships(
+                entities=entities_structured,
+                file_content=source_code,
+                cross_file_context=repository_context,
+            )
+
+            # Convert AI relationships to EntityRelationship objects
+            for ai_rel in ai_relationships:
+                entity_relationship = EntityRelationship(
+                    source_entity_id=golden_node.id,
+                    target_entity_id=self._find_entity_id(
+                        ai_rel.target_entity, related_entities
+                    ),
+                    relationship_type=ai_rel.relationship_type,
+                    strength=ai_rel.strength,
+                    description=ai_rel.description,
+                    metadata={
+                        "analysis_method": "ai_powered",
+                        "source_entity_name": ai_rel.source_entity,
+                        "target_entity_name": ai_rel.target_entity,
+                    },
+                )
+                relationships.append(entity_relationship)
+
+            self.logger.info(
+                f"AI identified {len(relationships)} relationships for {golden_node.code_entity.name}"
+            )
             return relationships
 
         except Exception as e:
-            self.logger.error(f"Relationship building failed: {e}")
-            return []
+            self.logger.error(f"AI relationship building failed: {e}")
+            # Fallback to basic relationship detection
+            return await self._fallback_basic_relationships(
+                golden_node, related_entities, context
+            )
+
+    def _convert_to_structured_entities(
+        self, golden_node: GoldenNode, related_entities: List[Dict[str, Any]]
+    ) -> List:
+        """Convert GoldenNode and related entities to CodeEntityStructured format for AI analysis."""
+        from ..plugins.ai_code_parser import CodeEntityStructured
+
+        entities_structured = []
+
+        # Add the current entity
+        current_entity = CodeEntityStructured(
+            name=golden_node.code_entity.name,
+            entity_type=golden_node.code_entity.entity_type.value.lower(),
+            parent_name=golden_node.code_entity.parent_entity,
+            content=golden_node.code_entity.content or "",
+            signature=golden_node.code_entity.signature,
+            scope=golden_node.code_entity.scope or "public",
+            is_exported=golden_node.code_entity.is_exported or False,
+            line_start=1,  # Default values
+            line_end=10,
+            imports=golden_node.code_entity.imports or [],
+            calls=golden_node.code_entity.calls or [],
+            description=f"Entity: {golden_node.code_entity.name}",
+        )
+        entities_structured.append(current_entity)
+
+        # Add related entities
+        for entity_data in related_entities:
+            if isinstance(entity_data, dict) and "name" in entity_data:
+                structured_entity = CodeEntityStructured(
+                    name=entity_data.get("name", "unknown"),
+                    entity_type=entity_data.get("entity_type", "function"),
+                    parent_name=entity_data.get("parent_name"),
+                    content=entity_data.get("content", ""),
+                    signature=entity_data.get("signature"),
+                    scope=entity_data.get("scope", "public"),
+                    is_exported=entity_data.get("is_exported", False),
+                    line_start=entity_data.get("line_start", 1),
+                    line_end=entity_data.get("line_end", 10),
+                    imports=entity_data.get("imports", []),
+                    calls=entity_data.get("calls", []),
+                    description=f"Related entity: {entity_data.get('name', 'unknown')}",
+                )
+                entities_structured.append(structured_entity)
+
+        return entities_structured
+
+    def _find_entity_id(
+        self, entity_name: str, related_entities: List[Dict[str, Any]]
+    ) -> Optional[str]:
+        """Find entity ID by name in related entities."""
+        for entity_data in related_entities:
+            if isinstance(entity_data, dict) and entity_data.get("name") == entity_name:
+                return entity_data.get("id", str(uuid4()))
+        return str(uuid4())  # Generate new UUID if not found
+
+    async def _fallback_basic_relationships(
+        self,
+        golden_node: GoldenNode,
+        related_entities: List[Dict[str, Any]],
+        context: AgentExecutionContext,
+    ) -> List[EntityRelationship]:
+        """Fallback to basic relationship detection if AI analysis fails."""
+        self.logger.warning(
+            f"Using fallback basic relationship detection for {golden_node.code_entity.name}"
+        )
+
+        relationships = []
+
+        # Basic parent-child relationship
+        if golden_node.code_entity.parent_entity:
+            parent_rel = EntityRelationship(
+                source_entity_id=golden_node.id,
+                target_entity_id=self._find_entity_id(
+                    golden_node.code_entity.parent_entity, related_entities
+                ),
+                relationship_type="contained_by",
+                strength=1.0,
+                description=f"{golden_node.code_entity.name} is contained by {golden_node.code_entity.parent_entity}",
+                metadata={"analysis_method": "basic_fallback"},
+            )
+            relationships.append(parent_rel)
+
+        # Basic import relationships
+        for import_name in golden_node.code_entity.imports or []:
+            import_rel = EntityRelationship(
+                source_entity_id=golden_node.id,
+                target_entity_id=self._find_entity_id(import_name, related_entities),
+                relationship_type="imports",
+                strength=0.8,
+                description=f"{golden_node.code_entity.name} imports {import_name}",
+                metadata={"analysis_method": "basic_fallback"},
+            )
+            relationships.append(import_rel)
+
+        return relationships
 
     async def _analyze_direct_relationships(
         self,

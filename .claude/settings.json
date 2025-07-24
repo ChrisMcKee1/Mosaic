@@ -28,56 +28,6 @@
     },
     "cleanupPeriodDays": 30,
     "hooks": {
-        "PreToolUse": [
-            {
-                "matcher": "Write|Edit|MultiEdit",
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "echo '[Pre-Write Hook]: Verifying active context before code modification. Use get_active_context to check current focus.'"
-                    }
-                ]
-            },
-            {
-                "matcher": "Task",
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "echo '[Pre-Task Hook]: Starting new task. Consider using get_recent_activity_summary to understand current project state.'"
-                    }
-                ]
-            }
-        ],
-        "PostToolUse": [
-            {
-                "matcher": "Write|Edit|MultiEdit",
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "echo '[Post-Write Hook]: Code modification complete. Running auto-formatting and suggesting ConPort updates...' && jq -r '.tool_input.file_path // .tool_input.path // empty' | while read file_path; do if [[ -n \"$file_path\" ]]; then echo \"Modified: $file_path\"; if [[ \"$file_path\" == *.py ]]; then echo \"Auto-formatting Python...\" && ruff check \"$file_path\" --fix 2>/dev/null && ruff format \"$file_path\" 2>/dev/null || echo \"Ruff not available\"; elif [[ \"$file_path\" == *.cs ]]; then echo \"Auto-formatting C#...\" && dotnet format \"$file_path\" 2>/dev/null || echo \"dotnet format not available\"; fi; echo \"Consider using update_active_context to log this change in ConPort.\"; fi; done"
-                    }
-                ]
-            },
-            {
-                "matcher": "Bash",
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "jq -r '.tool_input.command // empty' | while read cmd; do if echo \"$cmd\" | grep -q 'git commit'; then echo '[Post-Commit Hook]: Git commit detected!'; git log -1 --pretty=format:'Commit: %H - %s' 2>/dev/null || echo 'Git log unavailable'; echo 'RECOMMENDED: Use log_decision tool to document this architectural decision in ConPort.'; echo 'EXAMPLE: log_decision with summary=\"[Brief description]\" and implementation_details=\"[What was changed]\"'; fi; if echo \"$cmd\" | grep -q 'az \\|azure\\|terraform\\|bicep'; then echo '[Azure Command Detected]: Consider logging this deployment/configuration decision in ConPort.'; fi; done"
-                    }
-                ]
-            }
-        ],
-        "Stop": [
-            {
-                "matcher": "",
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "echo '[Stop Hook]: Task session complete!' && echo '📊 RECOMMENDED ConPort ACTIONS:' && echo '1. Use log_progress to track task completion status' && echo '2. Use update_active_context to update current focus' && echo '3. Use log_decision for any architectural choices made' && echo '4. Use get_recent_activity_summary to review session impact' && echo 'ConPort helps maintain project knowledge for your Azure AI architecture work!'"
-                    }
-                ]
-            }
-        ]
+        
     }
 }

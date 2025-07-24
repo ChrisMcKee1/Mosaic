@@ -18,6 +18,7 @@ from semantic_kernel.core_plugins import TimePlugin, TextPlugin
 
 from ..config.settings import MosaicSettings
 from ..plugins.retrieval import RetrievalPlugin
+from ..plugins.vector_search import VectorSearchPlugin
 from ..plugins.refinement import RefinementPlugin
 from ..plugins.memory import MemoryPlugin
 from ..plugins.diagram import DiagramPlugin
@@ -110,7 +111,13 @@ class SemanticKernelManager:
     async def _register_mosaic_plugins(self) -> None:
         """Register Mosaic Query Server plugins implementing FR-5 through FR-13."""
         try:
-            # Retrieval Plugin (FR-5, FR-6, FR-7) - QUERY ONLY
+            # Vector Search Plugin - Native Azure Cosmos DB vector search with hierarchical relationships
+            vector_search_plugin = VectorSearchPlugin(self.settings)
+            await vector_search_plugin.initialize()
+            self.kernel.add_plugin(vector_search_plugin, plugin_name="vector_search")
+            self.plugins["vector_search"] = vector_search_plugin
+
+            # Retrieval Plugin (FR-5, FR-6, FR-7) - QUERY ONLY with integrated VectorSearchPlugin
             retrieval_plugin = RetrievalPlugin(self.settings)
             await retrieval_plugin.initialize()
             self.kernel.add_plugin(retrieval_plugin, plugin_name="retrieval")
@@ -135,6 +142,9 @@ class SemanticKernelManager:
             self.plugins["diagram"] = diagram_plugin
 
             logger.info("Mosaic Query Server plugins registered successfully")
+            logger.info(
+                "VectorSearchPlugin integrated with hierarchical relationships support"
+            )
 
         except Exception as e:
             logger.error(f"Failed to register Mosaic plugins: {e}")

@@ -281,3 +281,5 @@ conport_vector_data/
 mosaic_env/pyvenv.cfg
 /mosaic_env/etc/jupyter
 /mosaic_env/share/jupyter
+/debug_image
+CLAUDE.local.md

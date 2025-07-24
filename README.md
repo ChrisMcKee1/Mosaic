@@ -29,7 +29,7 @@ The Mosaic MCP Tool is built with:
 - **Hosting**: Azure Container Apps (Consumption Plan)
 - **Unified Backend**: Azure Cosmos DB for NoSQL (serverless, vector search, embedded graph relationships, memory)
 - **Short-term Memory**: Azure Cache for Redis (Basic C0)
-- **AI Models**: Azure OpenAI Service (GPT-4o 2024-11-20, text-embedding-3-small)
+- **AI Models**: Azure OpenAI Service (GPT-4.1 2025-01-01-preview, text-embedding-3-small)
 - **ML**: Azure Machine Learning (cross-encoder/ms-marco-MiniLM-L-12-v2)
 - **Functions**: Azure Functions (memory consolidation, consumption plan)
 - **Authentication**: Microsoft Entra ID (OAuth 2.1) + Managed Identity

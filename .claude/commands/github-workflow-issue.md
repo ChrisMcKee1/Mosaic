@@ -3,14 +3,17 @@
 Comprehensive GitHub issue management workflow for bugs, features, and enhancements.
 
 ## Usage
+
 `/github-issue-workflow <issue title>`
 
 ## Arguments
+
 - `$ARGUMENTS`: The GitHub issue title (required)
 
 ## Chained Workflow Steps
 
 ### 1. Issue Analysis with Sequential Thinking
+
 ```
 Use mcp__sequential-thinking__sequentialthinking to:
 - Analyze the issue type (bug, feature, enhancement)
@@ -20,6 +23,7 @@ Use mcp__sequential-thinking__sequentialthinking to:
 ```
 
 ### 2. ConPort Context Research
+
 ```
 Use mcp__conport__search_decisions_fts to find related decisions
 Use mcp__conport__search_custom_data_value_fts to find relevant context
@@ -28,6 +32,7 @@ Use mcp__conport__get_linked_items to understand dependencies
 ```
 
 ### 3. GitHub CLI Issue Creation
+
 ```
 Use mcp__desktop-commander__execute_command for:
 - gh issue create --title "$ARGUMENTS" --body "$(cat <<'EOF'
@@ -56,6 +61,7 @@ EOF
 ```
 
 ### 4. Issue Documentation and Tracking
+
 ```
 Use mcp__conport__log_progress for issue tracking:
 - Status: "TODO"
@@ -69,7 +75,9 @@ Use mcp__conport__log_custom_data for issue details:
 ```
 
 ### 5. Research and Validation
+
 ```
+Use `microsoft_docs_search` Performs semantic search against Microsoft official technical documentation.
 Use mcp__context7__resolve-library-id for relevant documentation
 Use mcp__context7__get-library-docs for technical requirements
 Use WebSearch to validate:
@@ -79,6 +87,7 @@ Use WebSearch to validate:
 ```
 
 ### 6. Implementation Planning
+
 ```
 Use mcp__sequential-thinking__sequentialthinking to:
 - Break down issue into implementation tasks
@@ -88,6 +97,7 @@ Use mcp__sequential-thinking__sequentialthinking to:
 ```
 
 ### 7. Enhanced Issue Body Generation
+
 ```
 Auto-generate comprehensive issue description including:
 - Problem statement with context
@@ -98,6 +108,7 @@ Auto-generate comprehensive issue description including:
 ```
 
 ### 8. Issue Linking and Prioritization
+
 ```
 Use mcp__conport__link_conport_items to connect:
 - Issue to functional requirements
@@ -113,77 +124,98 @@ Use mcp__desktop-commander__execute_command for:
 ## Issue Templates by Type
 
 ### Bug Report Template
+
 ```markdown
 ## Bug Description
+
 Clear description of what's wrong
 
 ## Expected Behavior
+
 What should happen
 
 ## Actual Behavior
+
 What actually happens
 
 ## Steps to Reproduce
+
 1. Step one
 2. Step two
 3. Bug occurs
 
 ## Environment
+
 - Python version:
 - Azure services:
 - Dependencies:
 
 ## ConPort Context
+
 - Related decisions: [links]
 - System patterns: [links]
 ```
 
 ### Feature Request Template
+
 ```markdown
 ## Feature Description
+
 Clear description of the new feature
 
 ## Functional Requirement
+
 - Maps to: FR-X
 - Purpose: [why this feature is needed]
 
 ## Acceptance Criteria
+
 - [ ] Specific testable criteria
 - [ ] Performance requirements
 - [ ] Integration requirements
 
 ## Implementation Considerations
+
 [Technical notes from ConPort research]
 
 ## ConPort Context
+
 - Related decisions: [links]
 - Research findings: [links]
 ```
 
 ### Enhancement Template
+
 ```markdown
 ## Enhancement Description
+
 What needs to be improved
 
 ## Current State
+
 How it works now
 
 ## Desired State
+
 How it should work
 
 ## Benefit
+
 Why this improvement matters
 
 ## Implementation Notes
+
 [Technical considerations from ConPort]
 ```
 
 ## Example Usage
+
 ```
 /github-issue-workflow "Implement semantic reranking with cross-encoder model for FR-8"
 ```
 
 ## Expected Outputs
+
 - Well-documented GitHub issue with comprehensive context
 - Issue linked to ConPort project knowledge
 - Implementation planning completed

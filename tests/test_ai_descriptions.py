@@ -24,7 +24,7 @@ class TestAIPoweredEntityDescriptions:
         """Create mock settings for testing."""
         settings = Mock()
         settings.azure_openai_endpoint = "https://test.openai.azure.com/"
-        settings.azure_openai_chat_deployment_name = "gpt-4o-mini"
+        settings.azure_openai_chat_deployment_name = "gpt-4.1-mini"
         settings.azure_openai_api_key = "test-key"
         return settings
 
@@ -370,7 +370,7 @@ class TestAIPoweredEntityDescriptions:
         assert fibonacci_entity["has_ai_analysis"] is True
         assert "ai_description" in fibonacci_entity
         assert "ai_analysis_timestamp" in fibonacci_entity
-        assert fibonacci_entity["ai_model_used"] == "gpt-4o-mini"
+        assert fibonacci_entity["ai_model_used"] == "gpt-4.1-mini"
 
     @pytest.mark.asyncio
     async def test_error_handling_graceful_degradation(

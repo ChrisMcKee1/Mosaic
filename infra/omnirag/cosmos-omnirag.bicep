@@ -43,12 +43,12 @@ module cosmosAccount 'br/public:avm/res/document-db/database-account:0.8.1' = {
       {
         name: 'mosaic' // ✅ FIXED: Changed from 'mosaic-omnirag' to match application
         containers: [
-          // Golden Node Container - NEW for AI Agent architecture
+          // Golden Node Container - Enhanced with hierarchical relationships and vector search
           {
             name: 'golden_nodes'
-            paths: ['/nodeType']
+            paths: ['/partition_key'] // Changed from nodeType to partition_key for better partitioning
             kind: 'Hash'
-            // Optimized for Golden Node unified schema
+            // Optimized for Golden Node hierarchical schema with vector search
             indexingPolicy: {
               indexingMode: 'consistent'  
               automatic: true
@@ -56,6 +56,7 @@ module cosmosAccount 'br/public:avm/res/document-db/database-account:0.8.1' = {
                 {
                   path: '/*'
                 }
+                // Core entity paths
                 {
                   path: '/code_entity/entity_type/?'
                 }
@@ -63,25 +64,96 @@ module cosmosAccount 'br/public:avm/res/document-db/database-account:0.8.1' = {
                   path: '/code_entity/language/?'
                 }
                 {
+                  path: '/code_entity/name/?'
+                }
+                // Hierarchical relationship paths for efficient queries
+                {
+                  path: '/code_entity/parent_id/?'
+                }
+                {
+                  path: '/code_entity/hierarchy_level/?'
+                }
+                {
+                  path: '/code_entity/hierarchy_path/*'
+                }
+                // File and git context paths
+                {
                   path: '/file_context/file_path/?'
                 }
                 {
                   path: '/git_context/repository_url/?'
                 }
                 {
+                  path: '/git_context/branch_name/?'
+                }
+                // Relationship and metadata paths
+                {
                   path: '/relationships/*/relationship_type/?'
+                }
+                {
+                  path: '/relationships/*/source_entity_id/?'
+                }
+                {
+                  path: '/relationships/*/target_entity_id/?'
                 }
                 {
                   path: '/tags/*'
                 }
+                {
+                  path: '/document_type/?'
+                }
+                {
+                  path: '/processing_metadata/processing_stage/?'
+                }
               ]
-              // Exclude embeddings from indexing for performance
+              // Exclude embeddings from indexing for optimal insertion performance
               excludedPaths: [
                 {
                   path: '/embedding/*'
                 }
                 {
                   path: '/ai_enrichment/embedding/*'
+                }
+              ]
+              // Composite indexes for hierarchical queries
+              compositeIndexes: [
+                // Hierarchical traversal optimization
+                {
+                  path: '/code_entity/parent_id ASC,/code_entity/hierarchy_level ASC'
+                }
+                {
+                  path: '/code_entity/hierarchy_level ASC,/code_entity/entity_type ASC'
+                }
+                // Repository and file-based queries
+                {
+                  path: '/partition_key ASC,/code_entity/entity_type ASC'
+                }
+                {
+                  path: '/git_context/repository_url ASC,/file_context/file_path ASC'
+                }
+                // Processing and relationship queries
+                {
+                  path: '/processing_metadata/processing_stage ASC,/processing_metadata/created_at ASC'
+                }
+              ]
+            }
+            // Vector indexing policy for native VectorDistance queries
+            vectorEmbeddingPolicy: {
+              vectorEmbeddings: [
+                {
+                  path: '/embedding'
+                  dataType: 'float32'
+                  distanceFunction: 'cosine'
+                  dimensions: 1536
+                }
+              ]
+            }
+            // Vector index configuration following Microsoft best practices
+            vectorIndexingPolicy: {
+              vectorIndexes: [
+                {
+                  path: '/embedding'
+                  type: 'quantizedFlat' // Optimal for 1536-dimension Azure OpenAI embeddings
                 }
               ]
             }
