@@ -21,7 +21,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from mosaic.config.settings import MosaicSettings
-from .plugins.ingestion import IngestionPlugin
+from .orchestrator import MosaicMagenticOrchestrator
 
 # Configure logging for the ingestion service
 logging.basicConfig(
@@ -36,66 +36,82 @@ class IngestionService:
     """
     Main Ingestion Service class for Azure Container App Job deployment.
 
-    Handles:
-    - Repository cloning and analysis
-    - Multi-language AST parsing
-    - Knowledge graph population
-    - Batch processing capabilities
+    Uses Microsoft Semantic Kernel Magentic orchestration to coordinate
+    specialized AI agents for comprehensive repository ingestion:
+    - GitSleuth: Repository cloning and analysis
+    - CodeParser: Multi-language AST parsing and entity extraction
+    - GraphArchitect: Relationship mapping and graph construction
+    - DocuWriter: AI-powered enrichment and documentation
+    - GraphAuditor: Quality assurance and validation
     """
 
     def __init__(self, settings: Optional[MosaicSettings] = None):
-        """Initialize the Ingestion Service."""
+        """Initialize the Ingestion Service with Magentic orchestration."""
         self.settings = settings or MosaicSettings()
-        self.ingestion_plugin: Optional[IngestionPlugin] = None
+        self.orchestrator: Optional[MosaicMagenticOrchestrator] = None
 
     async def initialize(self) -> None:
-        """Initialize the ingestion plugin and Azure services."""
+        """Initialize the Magentic orchestration and Azure services."""
         try:
-            self.ingestion_plugin = IngestionPlugin(self.settings)
-            await self.ingestion_plugin.initialize()
-            logger.info("Ingestion Service initialized successfully")
+            logger.info(
+                "🚀 Initializing Magentic orchestration for AI agent coordination..."
+            )
+            self.orchestrator = MosaicMagenticOrchestrator(self.settings)
+            logger.info("✅ Ingestion Service initialized with Magentic orchestration")
         except Exception as e:
-            logger.error(f"Failed to initialize Ingestion Service: {e}")
+            logger.error(
+                f"❌ Failed to initialize Ingestion Service with Magentic orchestration: {e}"
+            )
             raise
 
     async def ingest_repository(
         self, repository_url: str, branch: str = "main"
     ) -> dict:
         """
-        Ingest a single repository.
+        Ingest a repository using Magentic AI agent orchestration.
+
+        The StandardMagenticManager will coordinate specialized agents to:
+        1. Clone and analyze the repository structure
+        2. Parse code and extract Golden Node entities
+        3. Map relationships and build knowledge graph
+        4. Enrich entities with AI-powered insights
+        5. Validate and prepare for Cosmos DB storage
 
         Args:
             repository_url: Git repository URL
             branch: Git branch to process
 
         Returns:
-            Ingestion summary with statistics
+            Comprehensive ingestion results with Golden Node entities
         """
         try:
-            logger.info(f"Starting ingestion for: {repository_url} (branch: {branch})")
+            logger.info(
+                f"🚀 Starting Magentic AI agent ingestion for: {repository_url} (branch: {branch})"
+            )
 
-            if not self.ingestion_plugin:
-                raise RuntimeError("Ingestion plugin not initialized")
+            if not self.orchestrator:
+                raise RuntimeError("Magentic orchestrator not initialized")
 
-            result = await self.ingestion_plugin.ingest_repository(
+            # Execute the full AI agent orchestration
+            result = await self.orchestrator.orchestrate_repository_ingestion(
                 repository_url, branch
             )
 
-            logger.info(f"Ingestion completed successfully: {result}")
+            logger.info(f"✅ Magentic orchestration completed successfully: {result}")
             return result
 
         except Exception as e:
-            logger.error(f"Repository ingestion failed: {e}")
+            logger.error(f"❌ Magentic AI agent ingestion failed: {e}")
             raise
 
     async def cleanup(self) -> None:
-        """Cleanup resources."""
+        """Cleanup Magentic orchestration resources."""
         try:
-            if self.ingestion_plugin:
-                await self.ingestion_plugin.cleanup()
-            logger.info("Ingestion Service cleanup completed")
+            if self.orchestrator:
+                await self.orchestrator.cleanup()
+            logger.info("✅ Ingestion Service cleanup completed")
         except Exception as e:
-            logger.error(f"Error during cleanup: {e}")
+            logger.error(f"❌ Error during cleanup: {e}")
 
 
 async def main() -> None:
@@ -126,13 +142,22 @@ async def main() -> None:
         result = await service.ingest_repository(args.repository_url, args.branch)
 
         # Log final result
-        logger.info("=== INGESTION SUMMARY ===")
-        logger.info(f"Repository: {result['repository_url']}")
-        logger.info(f"Branch: {result['branch']}")
-        logger.info(f"Entities extracted: {result['entities_extracted']}")
-        logger.info(f"Relationships found: {result['relationships_found']}")
-        logger.info(f"Status: {result['status']}")
-        logger.info("=== END SUMMARY ===")
+        logger.info("🎯 === MAGENTIC ORCHESTRATION SUMMARY ===")
+        logger.info(f"🔗 Repository: {result['repository_url']}")
+        logger.info(f"🌿 Branch: {result['branch']}")
+        logger.info(
+            f"⚡ Framework: {result.get('framework', 'microsoft_semantic_kernel')}"
+        )
+        logger.info(f"🤖 Mode: {result.get('mode', 'magentic_orchestration')}")
+        logger.info(f"🎯 Agents executed: {result.get('agents_executed', 0)}")
+        logger.info(
+            f"⏱️  Processing time: {result.get('processing_time_seconds', 0):.2f}s"
+        )
+        logger.info(f"✅ Status: {result['status']}")
+        logger.info(
+            f"📝 Result preview: {result.get('orchestration_result', 'N/A')[:200]}..."
+        )
+        logger.info("🎯 === END MAGENTIC ORCHESTRATION SUMMARY ===")
 
     except KeyboardInterrupt:
         logger.info("Received shutdown signal")

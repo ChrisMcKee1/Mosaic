@@ -74,9 +74,9 @@ Mosaic will be implemented as a Semantic Kernel MCP Tool, exposing its capabilit
 
 *Problem Solved:* Enables responsive, real-time AI applications by preventing blocking I/O during context retrieval and ensures compliance with the latest MCP specification (2025-03-26).
 
-**FR-4: Azure Native Deployment:** The solution is deployed on Azure using Container Apps (Consumption Plan) with Azure Cosmos DB for NoSQL as the unified OmniRAG backend for vector search, graph data, and long-term memory, along with Azure Functions for memory consolidation. The unified backend eliminates the need for separate services like Azure AI Search.
+**FR-4: Azure Native Deployment:** The solution is deployed on Azure using Container Apps (Consumption Plan) with Azure Cosmos DB for NoSQL as the unified OmniRAG backend for vector search, graph data, and long-term memory, along with Azure Functions for memory consolidation.
 
-*Problem Solved:* Ensures the system is scalable, reliable, and performant enough for production workloads while reducing cost and management overhead through a unified data backend following Microsoft's OmniRAG pattern, significantly simplifying the architecture.
+*Problem Solved:* Ensures the system is scalable, reliable, and performant enough for production workloads while reducing cost and management overhead through a unified data backend following Microsoft's OmniRAG pattern.
 
 ### 5.2. Plugin: Multi-Pronged Retrieval (RetrievalPlugin)
 
@@ -86,75 +86,9 @@ This plugin will handle the first stage of the context funnel: gathering a broad
 
 *Problem Solved:* Addresses "Context is More Than a Prompt" by moving beyond single-method retrieval to capture both semantic (intent-based) and lexical (keyword-based) relevance within a unified data platform.
 
-**FR-6: Universal Graph Ingestion System:** Provide comprehensive, content-agnostic graph ingestion capabilities that can handle any type of structured content, not just code, with the following sub-requirements:
+**FR-6: Graph-Based Code Analysis (GraphCode tool):** Provide a function to ingest a codebase, parse it into a dependency graph, and expose query functions.
 
-**FR-6.1: Universal Node Insertion:** The plugin MUST provide a universal node insertion system that can accept any content type (code, documentation, configuration, file structures) and create appropriate graph nodes with flexible metadata and relationship systems.
-
-**FR-6.2: Content-Agnostic Structure Ingestion:** The plugin MUST support ingestion of file systems, directory structures, and hierarchical content organization regardless of content type (code files, markdown documents, configuration files, etc.).
-
-**FR-6.3: Universal Relationship Management:** The plugin MUST provide a flexible relationship system that can connect any node types through typed relationships (contains, imports, references, documents, links_to, depends_on, uses, implements).
-
-**FR-6.4: Real-time Updates:** The plugin MUST support incremental graph updates through two distinct usage patterns:
-
-**Pattern A: Repository-Based Auto-Monitoring**
-- GitHub App integration with webhook subscriptions for push/PR events
-- Automated branch monitoring (main, dev, + subscribed branches)
-- Self-healing branch cleanup (auto-removal of deleted branches)
-- Background processing queue to avoid blocking MCP responses
-- Server-side automation requiring no direct MCP client interaction
-
-**Pattern B: Local/Manual Agent-Driven Updates**
-- MCP client-callable update functions with streaming progress
-- AI agent responsibility for triggering graph updates
-- Dependency analysis for changed files (AST parsing + import tracking)
-- Prompt engineering integration: "When you modify code, update the graph"
-- MCP Streamable HTTP Mode support for long-running operations
-
-*Technical Requirements:* Support for Streamable HTTP for progress streaming, connection management for extended HTTP operations, backpressure handling, and recoverable partial failures.
-
-**FR-6.5: AI Integration:** The plugin MUST provide mechanisms for AI agents to insert generated code into the graph, correlate new entities with existing ones, and analyze dependency impacts.
-
-**FR-6.6: Query Functions:** The plugin MUST expose query functions to traverse the constructed dependency graph and retrieve code context for AI-assisted development.
-
-**FR-6.7: Local/Remote State Management:** The plugin MUST support simultaneous local and remote code entity tracking to support realistic developer workflows where remote repositories serve as reference while local changes evolve the graph.
-
-**Technical Requirements:**
-- **Shared Graph:** Local and remote entities coexist in the same graph structure
-- **Source Type Tracking:** Optional `source_type` field ("local" | "remote" | "unknown")
-- **State Transitions:** Automatic local→remote conversion upon successful commits
-- **Conflict Resolution:** Handle cases where remote code exists but entity is marked local
-- **Repository Context:** Track repo_url, branch, commit_hash, and modification timestamps
-- **Workflow Support:** Enable developers to pull remote reference while making local changes
-
-**Required MCP Functions:**
-
-**Universal Graph Functions:**
-- `mosaic.ingestion.insert_node` - Universal node insertion for any content type
-- `mosaic.ingestion.create_relationship` - Create typed relationships between any nodes
-- `mosaic.ingestion.ingest_file_structure` - Ingest file/directory structure as graph nodes
-- `mosaic.ingestion.ingest_repository` - Clone repository and ingest complete structure
-- `mosaic.ingestion.parse_content_references` - Extract cross-references from any content
-- `mosaic.ingestion.update_node_content` - Update existing node content and metadata
-- `mosaic.ingestion.query_nodes_by_type` - Query nodes by type and filters
-- `mosaic.ingestion.traverse_relationships` - Traverse graph relationships
-
-**Real-time Updates:**
-- `mosaic.ingestion.subscribe_repository_branch` - Branch subscription setup
-- `mosaic.ingestion.update_graph_manual` - Manual updates with streaming
-- `mosaic.ingestion.get_update_progress` - Stream-compatible status
-
-**Local/Remote State Management:**
-- `mosaic.ingestion.transition_local_to_remote` - State transition management
-- `mosaic.ingestion.create_local_variant` - Local development support
-- `mosaic.ingestion.resolve_state_conflicts` - Conflict resolution
-- `mosaic.ingestion.query_by_source_type` - Source-specific querying
-
-**Optional Specialized Processors:**
-- `mosaic.ingestion.process_code_file` - Extract code entities from programming files
-- `mosaic.ingestion.process_markdown_file` - Extract links from markdown documents
-- `mosaic.ingestion.process_config_file` - Extract configuration dependencies
-
-*Problem Solved:* Directly mitigates "Dependency Blindness" by providing the AI with a structural understanding of the codebase, allowing it to foresee the impact of changes. Enables true AI-assisted development by maintaining a live, queryable representation of the codebase.
+*Problem Solved:* Directly mitigates "Dependency Blindness" by providing the AI with a structural understanding of the codebase, allowing it to foresee the impact of changes.
 
 **FR-7: Candidate Aggregation:** The plugin MUST include a function to aggregate and de-duplicate results from the different retrieval methods into a single candidate pool.
 
@@ -204,15 +138,5 @@ This plugin facilitates shared understanding using Mermaid diagrams.
 
 - **Multi-Agent Collaboration:** While the MCP architecture enables this, v1.0 will focus on single-agent/single-user context. Explicit features for memory sharing and conflict resolution between multiple agents are out of scope.
 
+
 - **UI/Frontend:** This is a backend tool. No user interface will be developed as part of this PRD.
-
-## 7. Critical Implementation Note
-
-**Code Ingestion Gap:** The current system architecture includes robust querying capabilities but lacks the fundamental code ingestion pipeline (FR-6.1 through FR-6.5). This represents a critical dependency that must be implemented before the system can fulfill its vision of AI-assisted development. The implementation should be prioritized in the following order:
-
-1. **Repository Access & Parsing** (FR-6.1, FR-6.2)
-2. **Graph Construction** (FR-6.3)  
-3. **Real-time Updates** (FR-6.4)
-4. **AI Integration** (FR-6.5)
-
-**Research Requirement:** All implementation must be validated against 2025's most current best practices using the Context7 MCP tool, web search, and fetch capabilities to ensure cutting-edge technology adoption.
