@@ -203,12 +203,24 @@ conport_backup/
 .cursorignore
 .cursorrules
 
-# Environment variables
+# Environment variables and configuration files
 .env
 .env.local
 .env.development
 .env.test
 .env.production
+
+# Hierarchical configuration files (NEVER COMMIT ACTUAL VALUES)
+.env.shared
+.env.*.local
+.env.mosaic.local
+.env.ingestion_service.local
+.env.mosaic-ui.local
+
+# Azure specific secrets
+.azure/
+*.azureProfile
+.azd/
 
 # Temporary files
 *.tmp
@@ -266,3 +278,4 @@ examples/
 # Local database and vector data
 context.db
 conport_vector_data/
+mosaic_env/pyvenv.cfg
