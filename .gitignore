@@ -279,3 +279,5 @@ examples/
 context.db
 conport_vector_data/
 mosaic_env/pyvenv.cfg
+/mosaic_env/etc/jupyter
+/mosaic_env/share/jupyter
