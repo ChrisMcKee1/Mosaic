@@ -56,40 +56,62 @@ For commands needing multiple parameters, you can structure them as:
 ### Advanced Memory MCP Operations
 
 #### Multi-Entity Creation Patterns
+
 ```typescript
 // Create coordinated entities for complex workflows
 await create_entities([
   {
     name: "FR-5-hybrid-search",
     entityType: "task",
-    observations: ["Implement hybrid vector+graph search", "Priority: HIGH", "Status: IN_PROGRESS"]
+    observations: [
+      "Implement hybrid vector+graph search",
+      "Priority: HIGH",
+      "Status: IN_PROGRESS",
+    ],
   },
   {
     name: "hybrid-search-research",
     entityType: "research",
-    observations: ["Azure Cognitive Search patterns", "Elasticsearch alternatives", "Performance benchmarks"]
-  }
+    observations: [
+      "Azure Cognitive Search patterns",
+      "Elasticsearch alternatives",
+      "Performance benchmarks",
+    ],
+  },
 ]);
 
 await create_relations([
-  { from: "FR-5-hybrid-search", to: "hybrid-search-research", relationType: "validates" }
+  {
+    from: "FR-5-hybrid-search",
+    to: "hybrid-search-research",
+    relationType: "validates",
+  },
 ]);
 ```
 
 #### Session-Aware Context Management
+
 ```typescript
 // Track development session context
 await create_entities([
   {
     name: "session-2025-01-15",
     entityType: "session",
-    observations: ["Focus: Authentication implementation", "Team: chrismckee", "Started: 09:00"]
-  }
+    observations: [
+      "Focus: Authentication implementation",
+      "Team: chrismckee",
+      "Started: 09:00",
+    ],
+  },
 ]);
 
 // Link session to active work
 await create_relations([
-  { from: "session-2025-01-15", to: "FR-8-auth-system", relationType: "focuses_on" }
+  {
+    from: "session-2025-01-15",
+    to: "FR-8-auth-system",
+    relationType: "focuses_on",
+  },
 ]);
 ```
 
@@ -104,6 +126,7 @@ await create_relations([
 **Chains**: Sequential Thinking → Context7/Microsoft Docs → Web Search → Analysis → Memory MCP Entity Creation
 
 **Memory MCP Operations**:
+
 - Creates research entities with findings
 - Creates decision entities with recommendations
 - Links research to related tasks and patterns
@@ -116,6 +139,7 @@ await create_relations([
 **Chains**: Memory MCP Graph Read → Analysis → Technology Updates → Strategic Planning
 
 **Memory MCP Operations**:
+
 - Reads complete knowledge graph
 - Searches for recent milestones and decisions
 - Creates status summary entities
@@ -130,6 +154,7 @@ await create_relations([
 **Chains**: Planning → Memory MCP Context → Implementation → Documentation → Relationship Mapping
 
 **Memory MCP Operations**:
+
 - Creates implementation task entities
 - Links to research and decision entities
 - Tracks progress through observations
@@ -142,6 +167,7 @@ await create_relations([
 **Chains**: Research → Planning → Implementation → Integration → Memory MCP Documentation
 
 **Memory MCP Operations**:
+
 - Creates plugin entities with specifications
 - Links to Semantic Kernel patterns
 - Tracks integration dependencies
@@ -156,6 +182,7 @@ await create_relations([
 **Chains**: Pre-commit Checks → Validation → Commit → Memory MCP Updates
 
 **Memory MCP Operations**:
+
 - Creates commit entities with metadata
 - Links commits to implemented features
 - Updates task progress observations
@@ -168,6 +195,7 @@ await create_relations([
 **Chains**: Planning → Testing → PR Creation → Documentation → Memory MCP Linking
 
 **Memory MCP Operations**:
+
 - Creates PR entities with context
 - Links to completed tasks and features
 - Documents review requirements
@@ -180,6 +208,7 @@ await create_relations([
 **Chains**: Planning → Branch Creation → Documentation → Memory MCP Environment Setup
 
 **Memory MCP Operations**:
+
 - Creates branch entities with purpose
 - Links to feature requirements
 - Tracks workflow dependencies
@@ -192,6 +221,7 @@ await create_relations([
 **Chains**: Analysis → Context Research → Issue Creation → Planning → Memory MCP Linking
 
 **Memory MCP Operations**:
+
 - Creates issue entities with symptoms
 - Links to related decisions and patterns
 - Searches for similar historical issues
@@ -206,6 +236,7 @@ await create_relations([
 **Chains**: Analysis → Investigation → Research → Solution → Memory MCP Documentation
 
 **Memory MCP Operations**:
+
 - Creates problem entities with symptoms
 - Searches for related debugging patterns
 - Documents solution approaches
@@ -218,6 +249,7 @@ await create_relations([
 **Chains**: Planning → Validation → Deployment → Testing → Memory MCP Documentation
 
 **Memory MCP Operations**:
+
 - Creates deployment entities with details
 - Links to tested features and patterns
 - Tracks deployment dependencies

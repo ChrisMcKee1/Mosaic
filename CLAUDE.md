@@ -11,30 +11,35 @@ The Mosaic MCP Tool is a standardized, high-performance Model Context Protocol (
 **ARCHITECTURAL UPDATE (2025-01-21)**: The system has been separated into two distinct services to solve performance and scaling issues:
 
 ### Service 1: Query Server (Real-time MCP)
+
 - **Location**: `src/mosaic-mcp/` old name just `mosaic`
 - **Purpose**: Real-time MCP request handling with FastMCP framework
 - **Resources**: 0.25 CPU, 0.5Gi memory (lightweight, always-on)
 - **Components**: RetrievalPlugin, RefinementPlugin, MemoryPlugin, DiagramPlugin
 
 ### Service 2: Mosaic Ingestion Service (Heavy Processing)
+
 - **Location**: `src/mosaic-ingestion/`
 - **Purpose**: Repository ingestion and knowledge graph population
 - **Resources**: 2.0 CPU, 4Gi memory (on-demand processing)
 - **Components**: GitPython, tree-sitter AST parsing, entity extraction
 
 ### Shared Backend
+
 - **OmniRAG Pattern**: Unified Azure Cosmos DB for vector search, graph relationships, and memory storage
 - **Authentication**: Microsoft Entra ID OAuth 2.1 for production security
 
 ## Technology Stack (Mandatory)
 
 ### Core Framework
+
 - **Python Semantic Kernel**: ALL functionality MUST be implemented as Semantic Kernel plugins
 - **FastMCP**: Python library for MCP protocol compliance with Streamable HTTP transport
 - **Azure OpenAI Service**: Exclusively for LLM and embedding models
 - **Azure Container Apps**: Consumption Plan hosting
 
 ### Data Backend (OmniRAG Pattern)
+
 - **Azure Cosmos DB for NoSQL**: Unified backend for vector search, graph, and memory
 - **Azure Cache for Redis**: Short-term memory (Basic C0 tier)
 - **Azure Machine Learning**: cross-encoder/ms-marco-MiniLM-L-12-v2 for semantic reranking
@@ -61,6 +66,7 @@ az containerapp job start --name mosaic-ingestion-job-dev --resource-group rg-de
 ## Development Commands
 
 ### Deployment
+
 ```bash
 # Complete two-service deployment
 azd up
@@ -74,6 +80,7 @@ az login && azd auth login
 ```
 
 ### Code Quality
+
 ```bash
 # Format and lint (REQUIRED before commits)
 ruff check . --fix
@@ -91,6 +98,7 @@ git commit -m "descriptive message"
 ```
 
 ### Manual Repository Ingestion
+
 ```bash
 # Trigger ingestion job manually
 az containerapp job start \
@@ -100,6 +108,7 @@ az containerapp job start \
 ```
 
 ### Local Development
+
 ```bash
 # Create virtual environment and install dependencies
 python3 -m venv venv
@@ -120,6 +129,7 @@ python -m mosaic_ingestion.main --repository-url <url> --branch main
 ## Data Models and Schemas
 
 ### Cosmos DB Memory Schema (EXACT FORMAT)
+
 ```json
 {
   "id": "unique_memory_id",
@@ -138,6 +148,7 @@ python -m mosaic_ingestion.main --repository-url <url> --branch main
 ```
 
 ### Code Entity Schema (Ingestion Service)
+
 ```json
 {
   "id": "entity_md5_hash",
@@ -153,6 +164,7 @@ python -m mosaic_ingestion.main --repository-url <url> --branch main
 ```
 
 ### Graph Relationships (OmniRAG Pattern)
+
 ```json
 {
   "id": "pypi_flask",
@@ -168,7 +180,9 @@ python -m mosaic_ingestion.main --repository-url <url> --branch main
 ## Architecture Implementation Requirements
 
 ### Functional Requirements Compliance (FR-1 through FR-15)
+
 All code must comply with these functional requirements:
+
 - **FR-1**: MCP Server Implementation with Streamable HTTP
 - **FR-2**: Semantic Kernel Integration (ALL functionality as plugins)
 - **FR-3**: Streamable HTTP Communication (prevent blocking I/O)
@@ -186,11 +200,13 @@ All code must comply with these functional requirements:
 - **FR-15**: Repository Ingestion (11 languages with tree-sitter)
 
 ### Authentication and Security
+
 - **Microsoft Entra ID**: OAuth 2.1 authentication for MCP endpoints
 - **Managed Identity**: All Azure service connections use DefaultAzureCredential
 - **No Secrets**: No connection strings or API keys in code
 
 ### Environment Variables (Required)
+
 ```bash
 AZURE_OPENAI_ENDPOINT         # Azure OpenAI service endpoint
 AZURE_COSMOS_DB_ENDPOINT      # Cosmos DB endpoint (unified backend)
@@ -203,6 +219,7 @@ AZURE_CLIENT_ID               # OAuth 2.1 client ID
 ## Code Standards (Mandatory)
 
 ### Python Development
+
 - **Type Hints**: Required everywhere
 - **Async/Await**: All I/O operations must be async
 - **Error Handling**: Comprehensive try-catch blocks
@@ -210,6 +227,7 @@ AZURE_CLIENT_ID               # OAuth 2.1 client ID
 - **Testing**: Unit tests for all plugins and MCP compliance
 
 ### Plugin Architecture
+
 - **Semantic Kernel Plugins**: All functionality as SK plugins
 - **Modular Design**: Each plugin focuses on specific FR requirements
 - **OmniRAG Integration**: Use unified Cosmos DB backend (not separate services)
@@ -218,11 +236,13 @@ AZURE_CLIENT_ID               # OAuth 2.1 client ID
 ## Repository Ingestion Capabilities
 
 The ingestion service supports **11 programming languages** with tree-sitter AST parsing:
+
 - Python, JavaScript, TypeScript, Java, Go, Rust
 - C, C++, C# (including Razor/Blazor)
 - HTML, CSS (including preprocessors)
 
 ### Language-Specific Features
+
 - **AST Parsing**: Complete syntax tree analysis for entity extraction
 - **Entity Types**: Functions, classes, modules, imports, HTML elements, CSS rules
 - **Relationship Modeling**: Cross-file dependencies and import analysis
@@ -231,12 +251,14 @@ The ingestion service supports **11 programming languages** with tree-sitter AST
 ## Performance and Scalability
 
 ### Query Server Optimization
+
 - **Response Time**: <100ms for hybrid search operations
 - **Throughput**: 100+ concurrent MCP requests
 - **Memory Efficiency**: Plugin caching and connection pooling
 - **Auto-scaling**: 1-3 replicas based on load
 
 ### Ingestion Service Optimization
+
 - **Repository Processing**: Large repositories (1GB+) supported
 - **Parallel Processing**: Concurrent entity extraction
 - **Batch Operations**: Efficient Cosmos DB population
@@ -245,18 +267,21 @@ The ingestion service supports **11 programming languages** with tree-sitter AST
 ## Important File Locations
 
 ### Core Implementation
+
 - `src/mosaic-mcp/server/main.py`: FastMCP server entry point
 - `src/mosaic-mcp/plugins/`: Query Server plugins (retrieval, refinement, memory, diagram)
 - `src/mosaic-ingestion/main.py`: Mosaic Ingestion service entry point
 - `src/mosaic-ingestion/plugins/ingestion.py`: Repository processing logic
 
 ### Infrastructure and Deployment
+
 - `infra/main.bicep`: Main infrastructure orchestration
 - `infra/query-server.bicep`: Query Server Container App
 - `infra/ingestion-service.bicep`: Ingestion Service Container Job
 - `azure.yaml`: Azure Developer CLI configuration
 
 ### Documentation
+
 - `docs/TDD_UNIFIED.md`: Complete technical design document
 - `ARCHITECTURE_LOG.md`: Architectural decision log
 - `.cursorrules`: Development guidelines and requirements
@@ -264,6 +289,7 @@ The ingestion service supports **11 programming languages** with tree-sitter AST
 ## Success Criteria
 
 The system is ready for production when:
+
 1. All FR-1 through FR-15 requirements are implemented
 2. Both services deploy successfully with `azd up`
 3. MCP protocol compliance validated with Streamable HTTP
@@ -275,6 +301,7 @@ The system is ready for production when:
 ## Current Status (2025-01-21)
 
 ### ✅ Completed (Production Ready)
+
 - Two-service architectural separation
 - Query Server with FastMCP and all plugins
 - Ingestion Service with 11-language AST parsing
@@ -283,6 +310,7 @@ The system is ready for production when:
 - Unified TDD documentation
 
 ### 🔄 Remaining (Low Priority)
+
 - Integration testing between services
 - Performance benchmarking under load
 - Production deployment validation

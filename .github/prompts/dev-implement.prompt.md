@@ -59,6 +59,7 @@ create_relations --relations=[{
 ### 5. Continuous Progress Updates
 
 - Update progress as each step completes:
+
 ```
 add_observations --observations=[{
     "entityName": "${task_id}",
@@ -67,6 +68,7 @@ add_observations --observations=[{
 ```
 
 - Log reusable code patterns:
+
 ```
 create_entities --entities=[{
     "name": "pattern_${pattern_name}",
@@ -79,6 +81,7 @@ create_entities --entities=[{
 
 - **Validate Against Checklist**: Review implemented code against acceptance criteria
 - **Mark Complete**: Update task status:
+
 ```
 add_observations --observations=[{
     "entityName": "${task_id}",

@@ -3,6 +3,7 @@
 Prepares the development session by syncing the repo and identifying the highest-priority tasks from Memory MCP knowledge graph. Creates a new development session entity and formally starts the selected task with comprehensive relationship tracking.
 
 ## Usage
+
 `/planning-start-day`
 
 ## Chained Workflow
@@ -15,21 +16,22 @@ Use Memory MCP to create today's development session:
 // Create today's session entity
 await create_entities([
   {
-    name: `session-${new Date().toISOString().split('T')[0]}`,
+    name: `session-${new Date().toISOString().split("T")[0]}`,
     entityType: "session",
     observations: [
       `Started: ${new Date().toLocaleTimeString()}`,
-      `Developer: ${process.env.USER || 'developer'}`,
-      "Status: ACTIVE"
-    ]
-  }
+      `Developer: ${process.env.USER || "developer"}`,
+      "Status: ACTIVE",
+    ],
+  },
 ]);
 ```
 
 ### 2. Sync Local Environment
 
 Use `run_in_terminal` to run:
-- `git checkout main` 
+
+- `git checkout main`
 - `git pull`
 
 ### 3. Query Memory MCP for High-Priority Tasks
@@ -59,6 +61,7 @@ await search_nodes("relates_to:" + task_name);
 ### 5. Present Prioritized Tasks to User
 
 Based on the Memory MCP knowledge graph analysis, present tasks with:
+
 - Task priority and status
 - Related decisions and research
 - Dependency relationships
@@ -78,18 +81,18 @@ await add_observations([
     contents: [
       "Status: IN_PROGRESS",
       `Started: ${new Date().toISOString()}`,
-      `Session: session-${new Date().toISOString().split('T')[0]}`
-    ]
-  }
+      `Session: session-${new Date().toISOString().split("T")[0]}`,
+    ],
+  },
 ]);
 
 // Create relationship between session and active task
 await create_relations([
   {
-    from: `session-${new Date().toISOString().split('T')[0]}`,
+    from: `session-${new Date().toISOString().split("T")[0]}`,
     to: task_id,
-    relationType: "focuses_on"
-  }
+    relationType: "focuses_on",
+  },
 ]);
 
 // Search for and link related entities
@@ -100,6 +103,7 @@ await search_nodes(`relates_to:${task_id}`);
 ### 7. Establish Development Context
 
 Create comprehensive context by linking the active task to:
+
 - Related architectural decisions
 - Relevant code patterns
 - Previous research findings
@@ -114,15 +118,19 @@ await create_entities([
     observations: [
       "Development context for active task",
       "Includes related decisions and patterns",
-      "Auto-updated during development"
-    ]
-  }
+      "Auto-updated during development",
+    ],
+  },
 ]);
 
 // Link context to task and session
 await create_relations([
   { from: `context-${task_id}`, to: task_id, relationType: "supports" },
-  { from: `session-${new Date().toISOString().split('T')[0]}`, to: `context-${task_id}`, relationType: "uses" }
+  {
+    from: `session-${new Date().toISOString().split("T")[0]}`,
+    to: `context-${task_id}`,
+    relationType: "uses",
+  },
 ]);
 ```
 

@@ -3,9 +3,11 @@
 Performs comprehensive research and analysis, producing a structured "Implementation Proposal" that is stored as interconnected entities in Memory MCP knowledge graph. Creates research, decision, and pattern entities with rich relationship mapping.
 
 ## Usage
+
 `/research-and-validate <topic>`
 
 ## Arguments
+
 - `$ARGUMENTS`: The research topic to investigate
 
 ## Chained Workflow
@@ -22,20 +24,22 @@ await create_entities([
       `Research topic: ${$ARGUMENTS}`,
       `Started: ${new Date().toISOString()}`,
       "Status: IN_PROGRESS",
-      "Type: technology_validation"
-    ]
-  }
+      "Type: technology_validation",
+    ],
+  },
 ]);
 
 // Link to current development session
-const activeSession = await search_nodes("entityType:session AND Status:ACTIVE");
+const activeSession = await search_nodes(
+  "entityType:session AND Status:ACTIVE"
+);
 if (activeSession.length > 0) {
   await create_relations([
     {
       from: `research-${topic_slug}-${Date.now()}`,
       to: activeSession[0].name,
-      relationType: "part_of"
-    }
+      relationType: "part_of",
+    },
   ]);
 }
 ```
@@ -48,11 +52,11 @@ Query Memory MCP for related research and decisions:
 
 ```typescript
 // Search for related research and decisions
-await search_nodes(`entityType:research AND (${topic_keywords.join(' OR ')})`);
-await search_nodes(`entityType:decision AND (${topic_keywords.join(' OR ')})`);
+await search_nodes(`entityType:research AND (${topic_keywords.join(" OR ")})`);
+await search_nodes(`entityType:decision AND (${topic_keywords.join(" OR ")})`);
 
 // Find related patterns and implementations
-await search_nodes(`entityType:pattern AND (${topic_keywords.join(' OR ')})`);
+await search_nodes(`entityType:pattern AND (${topic_keywords.join(" OR ")})`);
 ```
 
 ### 3. Multi-Tool Information Gathering
@@ -60,6 +64,7 @@ await search_nodes(`entityType:pattern AND (${topic_keywords.join(' OR ')})`);
 **Primary Documentation:** Use `mcp_context72_get-library-docs` for core technology docs.
 
 **Community Context:** Use `fetch_webpage` for real-world usage:
+
 - Stack Overflow discussions
 - Reddit community insights
 - GitHub issue analysis
@@ -76,9 +81,9 @@ await add_observations([
       `Documentation analysis: ${doc_findings}`,
       `Community insights: ${community_findings}`,
       `Best practices identified: ${best_practices}`,
-      `Potential issues: ${potential_issues}`
-    ]
-  }
+      `Potential issues: ${potential_issues}`,
+    ],
+  },
 ]);
 ```
 
@@ -99,9 +104,9 @@ await create_entities([
       `Technology choice rationale: ${rationale}`,
       `Implementation priority: ${priority}`,
       `Risk assessment: ${risk_assessment}`,
-      `Success criteria: ${success_criteria}`
-    ]
-  }
+      `Success criteria: ${success_criteria}`,
+    ],
+  },
 ]);
 
 // Link decision to research
@@ -109,8 +114,8 @@ await create_relations([
   {
     from: `decision-${topic_slug}-approach`,
     to: `research-${topic_slug}-${Date.now()}`,
-    relationType: "based_on"
-  }
+    relationType: "based_on",
+  },
 ]);
 ```
 
@@ -130,15 +135,23 @@ await create_entities([
       `Acceptance criteria: ${acceptance_criteria}`,
       `Priority: ${recommended_priority}`,
       "Status: PLANNED",
-      `Created from research: ${new Date().toISOString()}`
-    ]
-  }
+      `Created from research: ${new Date().toISOString()}`,
+    ],
+  },
 ]);
 
 // Create comprehensive relationship network
 await create_relations([
-  { from: `task-${topic_slug}-implementation`, to: `decision-${topic_slug}-approach`, relationType: "guided_by" },
-  { from: `task-${topic_slug}-implementation`, to: `research-${topic_slug}-${Date.now()}`, relationType: "validated_by" }
+  {
+    from: `task-${topic_slug}-implementation`,
+    to: `decision-${topic_slug}-approach`,
+    relationType: "guided_by",
+  },
+  {
+    from: `task-${topic_slug}-implementation`,
+    to: `research-${topic_slug}-${Date.now()}`,
+    relationType: "validated_by",
+  },
 ]);
 ```
 
@@ -156,15 +169,23 @@ await create_entities([
       `Pattern description: ${pattern_description}`,
       `Use cases: ${use_cases}`,
       `Implementation notes: ${implementation_notes}`,
-      `Best practices: ${best_practices}`
-    ]
-  }
+      `Best practices: ${best_practices}`,
+    ],
+  },
 ]);
 
 // Link patterns to research and decisions
 await create_relations([
-  { from: `pattern-${pattern_name}`, to: `research-${topic_slug}-${Date.now()}`, relationType: "discovered_in" },
-  { from: `pattern-${pattern_name}`, to: `decision-${topic_slug}-approach`, relationType: "supports" }
+  {
+    from: `pattern-${pattern_name}`,
+    to: `research-${topic_slug}-${Date.now()}`,
+    relationType: "discovered_in",
+  },
+  {
+    from: `pattern-${pattern_name}`,
+    to: `decision-${topic_slug}-approach`,
+    relationType: "supports",
+  },
 ]);
 ```
 
@@ -178,8 +199,16 @@ await search_nodes("entityType:task AND Status:COMPLETED");
 
 // Create relationships to related project areas
 await create_relations([
-  { from: `research-${topic_slug}-${Date.now()}`, to: "project-architecture", relationType: "informs" },
-  { from: `decision-${topic_slug}-approach`, to: "technology-stack", relationType: "influences" }
+  {
+    from: `research-${topic_slug}-${Date.now()}`,
+    to: "project-architecture",
+    relationType: "informs",
+  },
+  {
+    from: `decision-${topic_slug}-approach`,
+    to: "technology-stack",
+    relationType: "influences",
+  },
 ]);
 ```
 
@@ -197,9 +226,9 @@ await add_observations([
       `Completion time: ${new Date().toISOString()}`,
       `Decision created: decision-${topic_slug}-approach`,
       `Task template created: task-${topic_slug}-implementation`,
-      `Patterns documented: ${pattern_count}`
-    ]
-  }
+      `Patterns documented: ${pattern_count}`,
+    ],
+  },
 ]);
 
 // Update team knowledge base
@@ -210,9 +239,9 @@ await add_observations([
       `Research completed: ${$ARGUMENTS}`,
       `Key insight: ${key_insight}`,
       `Technology recommendation: ${technology_choice}`,
-      `Implementation approach: ${approach_summary}`
-    ]
-  }
+      `Implementation approach: ${approach_summary}`,
+    ],
+  },
 ]);
 ```
 
@@ -228,8 +257,9 @@ Present the complete Implementation Proposal to the user with:
 
 **Final Output:**
 "Research complete and stored in Memory MCP knowledge graph. Created entities:
+
 - Research: `research-${topic_slug}-${Date.now()}`
-- Decision: `decision-${topic_slug}-approach`  
+- Decision: `decision-${topic_slug}-approach`
 - Task Template: `task-${topic_slug}-implementation`
 
 Use `/dev-implement task-${topic_slug}-implementation` to begin implementation based on this research."

@@ -82,16 +82,16 @@ Select specialized chat modes for focused assistance:
 
 This setup provides equivalent functionality to your Claude commands with Memory MCP replacing ConPort:
 
-| Claude Command                       | VS Code Equivalent                       | Memory MCP Integration                    |
-| ------------------------------------ | ---------------------------------------- | ----------------------------------------- |
-| `/planning-start-day`                | `/planning-start-day` prompt             | `search_nodes` for tasks, `add_observations` for progress |
+| Claude Command                       | VS Code Equivalent                       | Memory MCP Integration                                          |
+| ------------------------------------ | ---------------------------------------- | --------------------------------------------------------------- |
+| `/planning-start-day`                | `/planning-start-day` prompt             | `search_nodes` for tasks, `add_observations` for progress       |
 | `/research-and-validate <topic>`     | `/planning-research-and-validate` prompt | `create_entities` for decisions, `create_relations` for linking |
-| `/implement-with-tracking <task_id>` | `/dev-implement` prompt                  | `open_nodes` for task context, `add_observations` for progress |
-| `/semantic-kernel-workflow <plugin>` | `/dev-sk-plugin-implement` prompt        | Task and pattern entities with relations |
-| `/git-commit-workflow <message>`     | `/git-workflow-commit` prompt            | `create_entities` for commit tracking |
-| `/debug-and-solve <problem>`         | `/debug-debug-and-solve` prompt          | Decision and solution entities |
-| `/azure-deploy <description>`        | `/ops-azure-deploy` prompt               | Deployment and configuration entities |
-| `/project-status`                    | `/planning-project-status` prompt        | `read_graph` for comprehensive analysis |
+| `/implement-with-tracking <task_id>` | `/dev-implement` prompt                  | `open_nodes` for task context, `add_observations` for progress  |
+| `/semantic-kernel-workflow <plugin>` | `/dev-sk-plugin-implement` prompt        | Task and pattern entities with relations                        |
+| `/git-commit-workflow <message>`     | `/git-workflow-commit` prompt            | `create_entities` for commit tracking                           |
+| `/debug-and-solve <problem>`         | `/debug-debug-and-solve` prompt          | Decision and solution entities                                  |
+| `/azure-deploy <description>`        | `/ops-azure-deploy` prompt               | Deployment and configuration entities                           |
+| `/project-status`                    | `/planning-project-status` prompt        | `read_graph` for comprehensive analysis                         |
 
 ## VS Code Settings
 

@@ -13,7 +13,7 @@ param containerAppsEnvironmentId string
 @description('Azure OpenAI endpoint')
 param azureOpenAIEndpoint string
 
-@description('Azure Cosmos DB endpoint')  
+@description('Azure Cosmos DB endpoint')
 param cosmosDbEndpoint string
 
 @description('Azure Redis endpoint')
@@ -75,7 +75,7 @@ resource queryServer 'Microsoft.App/containerApps@2023-05-01' = {
         }
       ]
       scale: {
-        minReplicas: 1  // Always-on for real-time queries
+        minReplicas: 1 // Always-on for real-time queries
         maxReplicas: 3
         rules: [
           {

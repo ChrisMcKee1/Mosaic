@@ -3,9 +3,11 @@
 Creates well-structured development tasks in Memory MCP knowledge graph with comprehensive context, relationships, and acceptance criteria. Converts research findings and decisions into actionable work items.
 
 ## Usage
+
 `/planning-create-task <task description or research reference>`
 
 ## Arguments
+
 - `$ARGUMENTS`: Task description or reference to research/decision entity
 
 ## Chained Workflow
@@ -22,20 +24,21 @@ if (isEntityReference($ARGUMENTS)) {
 } else {
   // Search for related entities by keywords
   const keywords = extractKeywords($ARGUMENTS);
-  await search_nodes(`entityType:research AND (${keywords.join(' OR ')})`);
-  await search_nodes(`entityType:decision AND (${keywords.join(' OR ')})`);
+  await search_nodes(`entityType:research AND (${keywords.join(" OR ")})`);
+  await search_nodes(`entityType:decision AND (${keywords.join(" OR ")})`);
 }
 
 // Find related patterns and existing tasks
-await search_nodes(`entityType:pattern AND (${keywords.join(' OR ')})`);
-await search_nodes(`entityType:task AND (${keywords.join(' OR ')})`);
+await search_nodes(`entityType:pattern AND (${keywords.join(" OR ")})`);
+await search_nodes(`entityType:task AND (${keywords.join(" OR ")})`);
 ```
 
 ### 2. Analyze Task Requirements
 
 Use `sequential-thinking` to analyze:
+
 - Task scope and objectives
-- Technical requirements and constraints  
+- Technical requirements and constraints
 - Dependencies on other tasks or decisions
 - Acceptance criteria and success metrics
 - Priority and effort estimation
@@ -71,9 +74,9 @@ await create_entities([
       `Created: ${new Date().toISOString()}`,
       "Status: TODO",
       `Type: ${task_type}`, // feature, bug, research, infrastructure
-      `Category: ${task_category}` // frontend, backend, devops, etc.
-    ]
-  }
+      `Category: ${task_category}`, // frontend, backend, devops, etc.
+    ],
+  },
 ]);
 ```
 
@@ -88,8 +91,8 @@ if (sourceEntity) {
     {
       from: taskId,
       to: sourceEntity.name,
-      relationType: "based_on"
-    }
+      relationType: "based_on",
+    },
   ]);
 }
 
@@ -99,8 +102,8 @@ for (const pattern of relatedPatterns) {
     {
       from: taskId,
       to: pattern.name,
-      relationType: "uses"
-    }
+      relationType: "uses",
+    },
   ]);
 }
 ```
@@ -114,8 +117,8 @@ for (const dependency of identifiedDependencies) {
     {
       from: taskId,
       to: dependency.name,
-      relationType: "depends_on"
-    }
+      relationType: "depends_on",
+    },
   ]);
 }
 
@@ -124,8 +127,8 @@ await create_relations([
   {
     from: taskId,
     to: "current-milestone",
-    relationType: "contributes_to"
-  }
+    relationType: "contributes_to",
+  },
 ]);
 ```
 
@@ -137,10 +140,10 @@ await create_relations([
 // If task is large, create sub-tasks
 if (isComplexTask(task_scope)) {
   const subtasks = breakDownTask(task_scope);
-  
+
   for (const [index, subtask] of subtasks.entries()) {
     const subtaskId = `${taskId}-${index + 1}`;
-    
+
     await create_entities([
       {
         name: subtaskId,
@@ -152,18 +155,18 @@ if (isComplexTask(task_scope)) {
           `Priority: ${subtask.priority}`,
           "Status: TODO",
           `Parent task: ${taskId}`,
-          `Sequence: ${index + 1}`
-        ]
-      }
+          `Sequence: ${index + 1}`,
+        ],
+      },
     ]);
-    
+
     // Link subtask to parent
     await create_relations([
       {
         from: subtaskId,
         to: taskId,
-        relationType: "subtask_of"
-      }
+        relationType: "subtask_of",
+      },
     ]);
   }
 }
@@ -184,9 +187,9 @@ await create_entities([
       `Recommended tools: ${recommended_tools}`,
       `Implementation steps: ${implementation_steps}`,
       `Testing strategy: ${testing_strategy}`,
-      `Risk considerations: ${risk_considerations}`
-    ]
-  }
+      `Risk considerations: ${risk_considerations}`,
+    ],
+  },
 ]);
 
 // Link guide to task
@@ -194,8 +197,8 @@ await create_relations([
   {
     from: `guide-${taskId}`,
     to: taskId,
-    relationType: "guides"
-  }
+    relationType: "guides",
+  },
 ]);
 ```
 
@@ -214,9 +217,9 @@ await create_entities([
       `Quality gates: ${quality_gates}`,
       `Performance criteria: ${performance_criteria}`,
       `Review requirements: ${review_requirements}`,
-      `Documentation requirements: ${doc_requirements}`
-    ]
-  }
+      `Documentation requirements: ${doc_requirements}`,
+    ],
+  },
 ]);
 
 // Link success criteria to task
@@ -224,8 +227,8 @@ await create_relations([
   {
     from: `success-criteria-${taskId}`,
     to: taskId,
-    relationType: "defines_success_for"
-  }
+    relationType: "defines_success_for",
+  },
 ]);
 ```
 
@@ -235,14 +238,16 @@ await create_relations([
 
 ```typescript
 // Link to current development session
-const activeSession = await search_nodes("entityType:session AND Status:ACTIVE");
+const activeSession = await search_nodes(
+  "entityType:session AND Status:ACTIVE"
+);
 if (activeSession.length > 0) {
   await create_relations([
     {
       from: taskId,
       to: activeSession[0].name,
-      relationType: "created_in"
-    }
+      relationType: "created_in",
+    },
   ]);
 }
 
@@ -252,8 +257,8 @@ if (assignedTeamMember) {
     {
       from: taskId,
       to: assignedTeamMember,
-      relationType: "assigned_to"
-    }
+      relationType: "assigned_to",
+    },
   ]);
 }
 ```
@@ -275,9 +280,9 @@ await add_observations([
       `Priority: ${priority_level}`,
       `Added: ${new Date().toISOString()}`,
       `Dependencies: ${dependency_count}`,
-      `Estimated effort: ${effort_estimate}`
-    ]
-  }
+      `Estimated effort: ${effort_estimate}`,
+    ],
+  },
 ]);
 
 // Create priority relationship
@@ -285,8 +290,8 @@ await create_relations([
   {
     from: taskId,
     to: "project-backlog",
-    relationType: "prioritized_in"
-  }
+    relationType: "prioritized_in",
+  },
 ]);
 ```
 
@@ -303,9 +308,9 @@ await add_observations([
       `Task created: ${new Date().toISOString()}`,
       `Total tasks: ${total_task_count}`,
       `Backlog size: ${backlog_size}`,
-      `Planning velocity: ${planning_velocity}`
-    ]
-  }
+      `Planning velocity: ${planning_velocity}`,
+    ],
+  },
 ]);
 
 // Create planning pattern
@@ -317,14 +322,18 @@ await create_entities([
       `Planning approach for ${task_category} tasks`,
       `Requirements gathering: ${requirements_approach}`,
       `Estimation method: ${estimation_method}`,
-      `Success criteria template: ${criteria_template}`
-    ]
-  }
+      `Success criteria template: ${criteria_template}`,
+    ],
+  },
 ]);
 
 // Link planning pattern
 await create_relations([
-  { from: `planning-pattern-${task_category}`, to: taskId, relationType: "applied_to" }
+  {
+    from: `planning-pattern-${task_category}`,
+    to: taskId,
+    relationType: "applied_to",
+  },
 ]);
 ```
 
@@ -341,22 +350,28 @@ Present comprehensive task summary to user:
 **Estimated Effort:** ${effort_estimate}
 
 ### Description
+
 ${detailed_description}
 
 ### Acceptance Criteria
+
 ${acceptance_criteria}
 
 ### Dependencies
+
 ${dependency_list}
 
 ### Implementation Guide
+
 ${implementation_approach}
 
 ### Next Steps
+
 Use `/dev-implement ${taskId}` to begin implementation
 Use `/planning-start-day` to prioritize in daily planning
 
 ### Memory MCP Entities Created
+
 - Task: `${taskId}`
 - Implementation Guide: `guide-${taskId}`
 - Success Criteria: `success-criteria-${taskId}`

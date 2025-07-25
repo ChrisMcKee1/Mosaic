@@ -3,6 +3,7 @@
 Executes a specific development task using Memory MCP knowledge graph. This comprehensive workflow begins by fetching the task's full context from Memory MCP, proceeds through mandatory research and validation, guides implementation against acceptance criteria, and concludes with detailed knowledge graph updates and relationship mapping.
 
 ## Usage
+
 `/dev-implement <task_id> <brief description of what you're doing>`
 
 Example: `/dev-implement FR-6-1 Implement the GitPython cloning logic`
@@ -34,8 +35,9 @@ await search_nodes(`entityType:pattern OR entityType:research`);
 **Primary Documentation Research (Context7):** Use **`mcp_context72_get-library-docs`** tool to retrieve official documentation and API references.
 
 **Community Validation (WebSearch):** Use **`fetch_webpage`** tool for real-world context:
+
 - "`<topic>` vs `<alternative>` reddit"
-- "`<topic>` common issues stack overflow" 
+- "`<topic>` common issues stack overflow"
 - "`<topic>` tutorial 2025"
 
 **Memory MCP Research Storage:**
@@ -50,9 +52,9 @@ await create_entities([
       "Technology validation findings",
       "Best practices discovered",
       "Community insights gathered",
-      `Research date: ${new Date().toISOString()}`
-    ]
-  }
+      `Research date: ${new Date().toISOString()}`,
+    ],
+  },
 ]);
 
 // Link research to task
@@ -60,8 +62,8 @@ await create_relations([
   {
     from: `research-${task_id}-${Date.now()}`,
     to: task_id,
-    relationType: "validates"
-  }
+    relationType: "validates",
+  },
 ]);
 ```
 
@@ -77,15 +79,19 @@ await create_entities([
       "Implementation approach decision",
       "Based on comprehensive research",
       "Includes technology choices and rationale",
-      `Decision date: ${new Date().toISOString()}`
-    ]
-  }
+      `Decision date: ${new Date().toISOString()}`,
+    ],
+  },
 ]);
 
 // Link decision to task and research
 await create_relations([
   { from: `decision-${task_id}-approach`, to: task_id, relationType: "guides" },
-  { from: `decision-${task_id}-approach`, to: `research-${task_id}-${Date.now()}`, relationType: "based_on" }
+  {
+    from: `decision-${task_id}-approach`,
+    to: `research-${task_id}-${Date.now()}`,
+    relationType: "based_on",
+  },
 ]);
 ```
 
@@ -97,7 +103,9 @@ await create_relations([
 
 ```typescript
 // Search for architectural decisions and patterns
-await search_nodes("entityType:decision AND (architecture OR constraint OR pattern)");
+await search_nodes(
+  "entityType:decision AND (architecture OR constraint OR pattern)"
+);
 
 // Get related system patterns
 await search_nodes(`entityType:pattern AND relates_to:${task_id}`);
@@ -119,9 +127,9 @@ await add_observations([
     contents: [
       `Implementation step completed: ${step_description}`,
       `Progress: ${percentage}%`,
-      `Timestamp: ${new Date().toISOString()}`
-    ]
-  }
+      `Timestamp: ${new Date().toISOString()}`,
+    ],
+  },
 ]);
 
 // Create pattern entities for reusable code
@@ -132,14 +140,18 @@ await create_entities([
     observations: [
       "Reusable implementation pattern",
       "Code structure and approach",
-      "Usage guidelines and examples"
-    ]
-  }
+      "Usage guidelines and examples",
+    ],
+  },
 ]);
 
 // Link patterns to implementation
 await create_relations([
-  { from: `pattern-${pattern_name}`, to: task_id, relationType: "implemented_in" }
+  {
+    from: `pattern-${pattern_name}`,
+    to: task_id,
+    relationType: "implemented_in",
+  },
 ]);
 ```
 
@@ -158,9 +170,9 @@ await add_observations([
       "Status: COMPLETED",
       `Completion date: ${new Date().toISOString()}`,
       "All acceptance criteria met",
-      "Implementation validated and tested"
-    ]
-  }
+      "Implementation validated and tested",
+    ],
+  },
 ]);
 
 // Create final implementation summary
@@ -172,15 +184,19 @@ await create_entities([
       "Final implementation approach used",
       "Key decisions and trade-offs made",
       "Lessons learned and improvements",
-      "Testing and validation completed"
-    ]
-  }
+      "Testing and validation completed",
+    ],
+  },
 ]);
 
 // Link everything together
 await create_relations([
-  { from: `implementation-${task_id}-summary`, to: task_id, relationType: "summarizes" },
-  { from: task_id, to: "current-milestone", relationType: "contributes_to" }
+  {
+    from: `implementation-${task_id}-summary`,
+    to: task_id,
+    relationType: "summarizes",
+  },
+  { from: task_id, to: "current-milestone", relationType: "contributes_to" },
 ]);
 ```
 
@@ -194,7 +210,7 @@ await search_nodes("entityType:feature OR entityType:milestone");
 
 // Create relationships to project goals
 await create_relations([
-  { from: task_id, to: "project-goals", relationType: "advances" }
+  { from: task_id, to: "project-goals", relationType: "advances" },
 ]);
 
 // Update team knowledge base
@@ -204,9 +220,9 @@ await add_observations([
     contents: [
       `Implementation pattern: ${pattern_description}`,
       `Technology insight: ${technology_learning}`,
-      `Best practice: ${best_practice_discovered}`
-    ]
-  }
+      `Best practice: ${best_practice_discovered}`,
+    ],
+  },
 ]);
 ```
 

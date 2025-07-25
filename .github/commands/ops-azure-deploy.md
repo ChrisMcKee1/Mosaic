@@ -3,9 +3,11 @@
 Safe Azure deployment with comprehensive Memory MCP validation, infrastructure tracking, and deployment knowledge graph management. Ensures deployment readiness while building institutional deployment intelligence.
 
 ## Usage
+
 `/azure-deploy <deployment description>`
 
 ## Arguments
+
 - `$ARGUMENTS`: Description of what is being deployed
 
 ## Chained Workflow
@@ -24,20 +26,22 @@ await create_entities([
       "Status: PLANNING",
       "Type: azure_deployment",
       `Environment: ${target_environment}`,
-      `Deployment strategy: ${deployment_strategy}`
-    ]
-  }
+      `Deployment strategy: ${deployment_strategy}`,
+    ],
+  },
 ]);
 
 // Link to current development session
-const activeSession = await search_nodes("entityType:session AND Status:ACTIVE");
+const activeSession = await search_nodes(
+  "entityType:session AND Status:ACTIVE"
+);
 if (activeSession.length > 0) {
   await create_relations([
     {
       from: `deployment-${deployment_slug}-${Date.now()}`,
       to: activeSession[0].name,
-      relationType: "initiated_in"
-    }
+      relationType: "initiated_in",
+    },
   ]);
 }
 ```
@@ -48,21 +52,30 @@ if (activeSession.length > 0) {
 
 ```typescript
 // Find completed features ready for deployment
-const readyFeatures = await search_nodes("entityType:feature AND Status:COMPLETED");
+const readyFeatures = await search_nodes(
+  "entityType:feature AND Status:COMPLETED"
+);
 
 // Search for infrastructure decisions and patterns
-const infrastructureDecisions = await search_nodes("entityType:decision AND (infrastructure OR azure OR deployment)");
+const infrastructureDecisions = await search_nodes(
+  "entityType:decision AND (infrastructure OR azure OR deployment)"
+);
 
 // Get related deployment patterns
-const deploymentPatterns = await search_nodes("entityType:pattern AND (deployment OR infrastructure)");
+const deploymentPatterns = await search_nodes(
+  "entityType:pattern AND (deployment OR infrastructure)"
+);
 
 // Find blocking issues
-const blockingIssues = await search_nodes("entityType:issue AND (Status:BLOCKING OR priority:CRITICAL)");
+const blockingIssues = await search_nodes(
+  "entityType:issue AND (Status:BLOCKING OR priority:CRITICAL)"
+);
 ```
 
 ### 3. Pre-Deployment Validation
 
 Use `sequential-thinking` to analyze deployment readiness:
+
 - Feature completeness and testing status
 - Infrastructure requirements and availability
 - Security and compliance validation
@@ -81,9 +94,9 @@ await create_entities([
       `Security validation status: ${security_status}`,
       `Testing coverage: ${testing_coverage}`,
       `Rollback strategy: ${rollback_strategy}`,
-      `Risk assessment: ${risk_level}`
-    ]
-  }
+      `Risk assessment: ${risk_level}`,
+    ],
+  },
 ]);
 
 // Link assessment to deployment
@@ -91,8 +104,8 @@ await create_relations([
   {
     from: `readiness-assessment-${deployment_slug}`,
     to: `deployment-${deployment_slug}-${Date.now()}`,
-    relationType: "validates"
-  }
+    relationType: "validates",
+  },
 ]);
 ```
 
@@ -127,9 +140,9 @@ await add_observations([
       `Resource group status: ${resource_group_status}`,
       `Container Apps environment: ${container_env_status}`,
       `Database connectivity: ${database_status}`,
-      `Infrastructure health: ${overall_infrastructure_health}`
-    ]
-  }
+      `Infrastructure health: ${overall_infrastructure_health}`,
+    ],
+  },
 ]);
 ```
 
@@ -162,9 +175,9 @@ await create_entities([
       `Code coverage: ${code_coverage}`,
       `Security scan results: ${security_scan_results}`,
       `Build validation: ${build_status}`,
-      `Performance benchmarks: ${performance_results}`
-    ]
-  }
+      `Performance benchmarks: ${performance_results}`,
+    ],
+  },
 ]);
 
 // Link testing to deployment
@@ -172,8 +185,8 @@ await create_relations([
   {
     from: `testing-results-${deployment_slug}`,
     to: `deployment-${deployment_slug}-${Date.now()}`,
-    relationType: "validates"
-  }
+    relationType: "validates",
+  },
 ]);
 ```
 
@@ -183,10 +196,14 @@ await create_relations([
 
 ```typescript
 // Search for environment configuration decisions
-const configDecisions = await search_nodes("entityType:decision AND (configuration OR environment)");
+const configDecisions = await search_nodes(
+  "entityType:decision AND (configuration OR environment)"
+);
 
 // Get Azure service configuration patterns
-const azurePatterns = await search_nodes("entityType:pattern AND (azure OR configuration)");
+const azurePatterns = await search_nodes(
+  "entityType:pattern AND (azure OR configuration)"
+);
 ```
 
 Use `run_in_terminal` to validate environment variables and configuration:
@@ -230,9 +247,9 @@ await add_observations([
       "Status: DEPLOYING",
       `Deployment started: ${new Date().toISOString()}`,
       `Azure environment: ${azure_environment}`,
-      `Deployment method: Azure Developer CLI`
-    ]
-  }
+      `Deployment method: Azure Developer CLI`,
+    ],
+  },
 ]);
 ```
 
@@ -264,9 +281,9 @@ await create_entities([
       `Health check results: ${health_check_results}`,
       `API functionality: ${api_functionality}`,
       `Performance validation: ${performance_validation}`,
-      `Monitoring setup: ${monitoring_status}`
-    ]
-  }
+      `Monitoring setup: ${monitoring_status}`,
+    ],
+  },
 ]);
 ```
 
@@ -283,9 +300,9 @@ await add_observations([
       `Completion time: ${new Date().toISOString()}`,
       `Deployment URL: ${deployment_url}`,
       `Total deployment time: ${deployment_duration}`,
-      "Validation: PASSED"
-    ]
-  }
+      "Validation: PASSED",
+    ],
+  },
 ]);
 
 // Create deployment success pattern
@@ -298,9 +315,9 @@ await create_entities([
       `Key success factors: ${success_factors}`,
       `Validation strategy: ${validation_strategy}`,
       `Monitoring setup: ${monitoring_approach}`,
-      `Rollback procedures: ${rollback_procedures}`
-    ]
-  }
+      `Rollback procedures: ${rollback_procedures}`,
+    ],
+  },
 ]);
 ```
 
@@ -315,8 +332,8 @@ for (const feature of deployedFeatures) {
     {
       from: `deployment-${deployment_slug}-${Date.now()}`,
       to: feature.name,
-      relationType: "deploys"
-    }
+      relationType: "deploys",
+    },
   ]);
 }
 
@@ -328,9 +345,9 @@ await add_observations([
       `Deployment completed: ${new Date().toISOString()}`,
       `Services deployed: ${deployed_services_count}`,
       `Infrastructure pattern: ${infrastructure_pattern}`,
-      `Deployment strategy: ${deployment_strategy_used}`
-    ]
-  }
+      `Deployment strategy: ${deployment_strategy_used}`,
+    ],
+  },
 ]);
 
 // Create deployment metrics
@@ -341,9 +358,9 @@ await add_observations([
       `Deployment frequency: ${deployment_frequency}`,
       `Success rate: ${deployment_success_rate}`,
       `Average deployment time: ${avg_deployment_time}`,
-      `Infrastructure reliability: ${infrastructure_reliability}`
-    ]
-  }
+      `Infrastructure reliability: ${infrastructure_reliability}`,
+    ],
+  },
 ]);
 ```
 
@@ -361,9 +378,9 @@ await create_entities([
       `Health monitoring endpoints: ${health_endpoints}`,
       `Performance metrics tracked: ${performance_metrics}`,
       `Alert configurations: ${alert_configs}`,
-      `Incident response procedures: ${incident_response}`
-    ]
-  }
+      `Incident response procedures: ${incident_response}`,
+    ],
+  },
 ]);
 
 // Link monitoring to deployment
@@ -371,8 +388,8 @@ await create_relations([
   {
     from: `monitoring-${deployment_slug}`,
     to: `deployment-${deployment_slug}-${Date.now()}`,
-    relationType: "monitors"
-  }
+    relationType: "monitors",
+  },
 ]);
 ```
 

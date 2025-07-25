@@ -3,6 +3,7 @@
 Provides comprehensive project overview and strategic planning using Memory MCP knowledge graph analysis. Generates insights from development velocity, task completion patterns, team collaboration metrics, and technical debt tracking.
 
 ## Usage
+
 `/project-status`
 
 ## Chained Workflow
@@ -23,13 +24,19 @@ const graphAnalysis = analyzeGraphStructure(projectGraph);
 
 ```typescript
 // Get active tasks and their progress
-const activeTasks = await search_nodes("entityType:task AND (Status:IN_PROGRESS OR Status:TODO)");
+const activeTasks = await search_nodes(
+  "entityType:task AND (Status:IN_PROGRESS OR Status:TODO)"
+);
 
-// Get recent milestones and achievements  
-const recentMilestones = await search_nodes("entityType:milestone AND Status:COMPLETED");
+// Get recent milestones and achievements
+const recentMilestones = await search_nodes(
+  "entityType:milestone AND Status:COMPLETED"
+);
 
 // Get current development sessions
-const activeSessions = await search_nodes("entityType:session AND Status:ACTIVE");
+const activeSessions = await search_nodes(
+  "entityType:session AND Status:ACTIVE"
+);
 
 // Get recent decisions and their impact
 const recentDecisions = await search_nodes("entityType:decision");
@@ -40,16 +47,23 @@ const recentDecisions = await search_nodes("entityType:decision");
 ```typescript
 // Search for patterns and technical debt
 const codePatterns = await search_nodes("entityType:pattern AND type:code");
-const technicalDebt = await search_nodes("entityType:issue AND type:technical_debt");
+const technicalDebt = await search_nodes(
+  "entityType:issue AND type:technical_debt"
+);
 
 // Get deployment and infrastructure status
-const deploymentStatus = await search_nodes("entityType:milestone AND type:deployment");
-const infrastructureDecisions = await search_nodes("entityType:decision AND (infrastructure OR deployment)");
+const deploymentStatus = await search_nodes(
+  "entityType:milestone AND type:deployment"
+);
+const infrastructureDecisions = await search_nodes(
+  "entityType:decision AND (infrastructure OR deployment)"
+);
 ```
 
 ### 3. Analyze Development Velocity and Trends
 
 Use `sequential-thinking` to analyze:
+
 - Task completion rates and patterns
 - Development velocity trends
 - Blocking issues and dependencies
@@ -69,9 +83,9 @@ await create_entities([
       `Average task completion time: ${avg_completion_time}`,
       `Current velocity: ${velocity_metric}`,
       `Blocking issues: ${blocking_issues_count}`,
-      `Team collaboration score: ${collaboration_score}`
-    ]
-  }
+      `Team collaboration score: ${collaboration_score}`,
+    ],
+  },
 ]);
 ```
 
@@ -81,10 +95,14 @@ await create_entities([
 
 ```typescript
 // Get technology choices and their outcomes
-const techDecisions = await search_nodes("entityType:decision AND (technology OR architecture OR framework)");
+const techDecisions = await search_nodes(
+  "entityType:decision AND (technology OR architecture OR framework)"
+);
 
 // Get implementation patterns and their effectiveness
-const implementationPatterns = await search_nodes("entityType:pattern AND (implementation OR architecture)");
+const implementationPatterns = await search_nodes(
+  "entityType:pattern AND (implementation OR architecture)"
+);
 
 // Search for research validation and outcomes
 const researchFindings = await search_nodes("entityType:research");
@@ -102,9 +120,9 @@ await create_entities([
       `Architecture decision effectiveness: ${arch_effectiveness}`,
       `Technical debt level: ${tech_debt_level}`,
       `Innovation opportunities: ${innovation_opportunities}`,
-      `Risk factors: ${risk_factors}`
-    ]
-  }
+      `Risk factors: ${risk_factors}`,
+    ],
+  },
 ]);
 ```
 
@@ -115,11 +133,17 @@ await create_entities([
 ```typescript
 // Get team interaction patterns from sessions and PRs
 const teamSessions = await search_nodes("entityType:session");
-const prPatterns = await search_nodes("entityType:milestone AND type:pull_request");
+const prPatterns = await search_nodes(
+  "entityType:milestone AND type:pull_request"
+);
 
 // Analyze debugging and problem-solving patterns
-const problemSolving = await search_nodes("entityType:issue AND Status:RESOLVED");
-const debuggingPatterns = await search_nodes("entityType:pattern AND type:debugging");
+const problemSolving = await search_nodes(
+  "entityType:issue AND Status:RESOLVED"
+);
+const debuggingPatterns = await search_nodes(
+  "entityType:pattern AND type:debugging"
+);
 ```
 
 **Generate Team Effectiveness Analysis:**
@@ -134,9 +158,9 @@ await create_entities([
       `Knowledge sharing patterns: ${knowledge_sharing}`,
       `Problem resolution efficiency: ${problem_resolution}`,
       `Code review quality: ${review_quality}`,
-      `Learning and adaptation rate: ${learning_rate}`
-    ]
-  }
+      `Learning and adaptation rate: ${learning_rate}`,
+    ],
+  },
 ]);
 ```
 
@@ -146,13 +170,17 @@ await create_entities([
 
 ```typescript
 // Get current milestone and its task relationships
-const currentMilestone = await search_nodes("entityType:milestone AND Status:ACTIVE");
+const currentMilestone = await search_nodes(
+  "entityType:milestone AND Status:ACTIVE"
+);
 
 // Get tasks contributing to current milestone
 const milestoneTaskIds = [];
 for (const milestone of currentMilestone) {
-  const milestoneTasks = await search_nodes(`relates_to:${milestone.name} OR contributes_to:${milestone.name}`);
-  milestoneTaskIds.push(...milestoneTasks.map(t => t.name));
+  const milestoneTasks = await search_nodes(
+    `relates_to:${milestone.name} OR contributes_to:${milestone.name}`
+  );
+  milestoneTaskIds.push(...milestoneTasks.map((t) => t.name));
 }
 
 // Analyze milestone completion progress
@@ -165,7 +193,9 @@ const milestoneProgress = calculateMilestoneProgress(milestoneTaskIds);
 
 ```typescript
 // Search for blocking issues and dependencies
-const blockingIssues = await search_nodes("entityType:issue AND Status:BLOCKING");
+const blockingIssues = await search_nodes(
+  "entityType:issue AND Status:BLOCKING"
+);
 const dependencyRisks = await search_nodes("entityType:task AND depends_on");
 
 // Create risk assessment
@@ -178,9 +208,9 @@ await create_entities([
       `Dependency bottlenecks: ${dependency_bottlenecks}`,
       `Technical risks: ${technical_risks}`,
       `Timeline risks: ${timeline_risks}`,
-      `Mitigation strategies: ${mitigation_strategies}`
-    ]
-  }
+      `Mitigation strategies: ${mitigation_strategies}`,
+    ],
+  },
 ]);
 ```
 
@@ -196,9 +226,9 @@ await create_entities([
       `Innovation potential: ${innovation_potential}`,
       `Automation possibilities: ${automation_possibilities}`,
       `Knowledge leverage: ${knowledge_leverage}`,
-      `Technology upgrades: ${technology_upgrades}`
-    ]
-  }
+      `Technology upgrades: ${technology_upgrades}`,
+    ],
+  },
 ]);
 ```
 
@@ -216,9 +246,9 @@ await create_entities([
       `Resource allocation recommendations: ${resource_allocation}`,
       `Technical investment priorities: ${tech_investment}`,
       `Process improvement suggestions: ${process_improvements}`,
-      `Timeline adjustments: ${timeline_adjustments}`
-    ]
-  }
+      `Timeline adjustments: ${timeline_adjustments}`,
+    ],
+  },
 ]);
 ```
 
@@ -229,7 +259,7 @@ await create_entities([
 ```typescript
 await create_entities([
   {
-    name: `project-status-${new Date().toISOString().split('T')[0]}`,
+    name: `project-status-${new Date().toISOString().split("T")[0]}`,
     entityType: "milestone",
     observations: [
       `Overall project health: ${project_health_score}`,
@@ -238,14 +268,18 @@ await create_entities([
       `Team effectiveness: ${team_effectiveness_score}`,
       `Technical debt level: ${tech_debt_score}`,
       `Risk level: ${risk_level}`,
-      "Type: status_report"
-    ]
-  }
+      "Type: status_report",
+    ],
+  },
 ]);
 
 // Link status to all major project entities
 await create_relations([
-  { from: `project-status-${new Date().toISOString().split('T')[0]}`, to: "project-goals", relationType: "assesses" }
+  {
+    from: `project-status-${new Date().toISOString().split("T")[0]}`,
+    to: "project-goals",
+    relationType: "assesses",
+  },
 ]);
 ```
 
@@ -254,35 +288,41 @@ await create_relations([
 Generate and present detailed status report including:
 
 #### Executive Summary
+
 - Overall project health score
 - Key achievements and milestones
 - Critical path status
 - Resource utilization
 
 #### Development Metrics
+
 - Task completion velocity
 - Code quality trends
 - Technical debt analysis
 - Team collaboration effectiveness
 
 #### Technical Assessment
+
 - Architecture decision outcomes
 - Technology stack maturity
 - Infrastructure stability
 - Security and compliance status
 
 #### Strategic Recommendations
+
 - Priority adjustments
 - Resource reallocation needs
 - Technology investment priorities
 - Process optimization opportunities
 
 #### Risk and Opportunity Analysis
+
 - Current risk factors and mitigation
 - Growth and innovation opportunities
 - Timeline and scope considerations
 
 #### Next Steps
+
 - Immediate action items
 - Short-term priorities (next sprint)
 - Medium-term strategic initiatives
@@ -299,9 +339,9 @@ await add_observations([
       `Status review completed: ${new Date().toISOString()}`,
       `Next review scheduled: ${next_review_date}`,
       `Project phase: ${current_project_phase}`,
-      `Milestone progress: ${milestone_progress}`
-    ]
-  }
+      `Milestone progress: ${milestone_progress}`,
+    ],
+  },
 ]);
 
 // Create trend analysis for future reference
@@ -313,9 +353,9 @@ await create_entities([
       `Development trends identified: ${development_trends}`,
       `Team performance patterns: ${team_patterns}`,
       `Technology adoption patterns: ${tech_adoption}`,
-      `Risk evolution patterns: ${risk_patterns}`
-    ]
-  }
+      `Risk evolution patterns: ${risk_patterns}`,
+    ],
+  },
 ]);
 ```
 
