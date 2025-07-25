@@ -45,7 +45,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from mosaic.config.settings import MosaicSettings
+from mosaic_mcp.config.settings import MosaicSettings
 from ..models.golden_node import (
     GoldenNode,
     AgentTask,

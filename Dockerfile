@@ -42,7 +42,7 @@ COPY pyproject.toml ./
 RUN pip install -e .
 
 # Change ownership to non-root user
-RUN chown -R mosaic:mosaic /app
+RUN chown -R mosaic:mosaic-mcp /app
 USER mosaic
 
 # Expose MCP server port
@@ -53,4 +53,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
 # Start the MCP server
-CMD ["python", "-m", "src.mosaic.server.main"]
+CMD ["python", "-m", "src.mosaic_mcp.server.main"]

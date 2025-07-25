@@ -11,7 +11,7 @@ The Mosaic MCP Tool is a standardized, high-performance Model Context Protocol (
 **ARCHITECTURAL UPDATE (2025-01-21)**: The system has been separated into two distinct services to solve performance and scaling issues:
 
 ### Service 1: Query Server (Real-time MCP)
-- **Location**: `src/mosaic/`
+- **Location**: `src/mosaic-mcp/` old name just `mosaic`
 - **Purpose**: Real-time MCP request handling with FastMCP framework
 - **Resources**: 0.25 CPU, 0.5Gi memory (lightweight, always-on)
 - **Components**: RetrievalPlugin, RefinementPlugin, MemoryPlugin, DiagramPlugin
@@ -107,7 +107,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install GitPython pydantic pydantic-settings python-dotenv
 
 # Run Query Server locally (requires Azure credentials)
-python -m mosaic.server.main
+python -m mosaic_mcp.server.main
 
 # Run Local Development Ingestion Service (minimal dependencies)
 source venv/bin/activate
@@ -245,8 +245,8 @@ The ingestion service supports **11 programming languages** with tree-sitter AST
 ## Important File Locations
 
 ### Core Implementation
-- `src/mosaic/server/main.py`: FastMCP server entry point
-- `src/mosaic/plugins/`: Query Server plugins (retrieval, refinement, memory, diagram)
+- `src/mosaic-mcp/server/main.py`: FastMCP server entry point
+- `src/mosaic-mcp/plugins/`: Query Server plugins (retrieval, refinement, memory, diagram)
 - `src/mosaic-ingestion/main.py`: Mosaic Ingestion service entry point
 - `src/mosaic-ingestion/plugins/ingestion.py`: Repository processing logic
 

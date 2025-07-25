@@ -18,9 +18,9 @@ sys.path.append(str(Path(__file__).parent / "src"))
 
 # Import Mosaic components for real database integration
 try:
-    from mosaic.config.settings import MosaicSettings
-    from mosaic.plugins.graph_data_service import GraphDataService
-    from mosaic.plugins.retrieval import RetrievalPlugin
+    from mosaic_mcp.config.settings import MosaicSettings
+    from mosaic_mcp.plugins.graph_data_service import GraphDataService
+    from mosaic_mcp.plugins.retrieval import RetrievalPlugin
 
     MOSAIC_AVAILABLE = True
 except ImportError as e:
@@ -100,7 +100,7 @@ def load_mosaic_data():
             "lines": 285,
             "complexity": 8,
             "description": "FastMCP server entry point with tool registrations",
-            "file_path": "src/mosaic/server/main.py",
+            "file_path": "src/mosaic-mcp/server/main.py",
         },
         {
             "id": "server_auth",
@@ -109,7 +109,7 @@ def load_mosaic_data():
             "lines": 147,
             "complexity": 6,
             "description": "Microsoft Entra ID OAuth 2.1 authentication",
-            "file_path": "src/mosaic/server/auth.py",
+            "file_path": "src/mosaic-mcp/server/auth.py",
         },
         {
             "id": "server_kernel",
@@ -118,7 +118,7 @@ def load_mosaic_data():
             "lines": 139,
             "complexity": 7,
             "description": "Semantic Kernel configuration and plugin registration",
-            "file_path": "src/mosaic/server/kernel.py",
+            "file_path": "src/mosaic-mcp/server/kernel.py",
         },
         {
             "id": "retrieval_plugin",
@@ -127,7 +127,7 @@ def load_mosaic_data():
             "lines": 279,
             "complexity": 15,
             "description": "Hybrid search and code graph query functionality",
-            "file_path": "src/mosaic/plugins/retrieval.py",
+            "file_path": "src/mosaic-mcp/plugins/retrieval.py",
         },
         {
             "id": "graph_visualization_plugin",
@@ -136,7 +136,7 @@ def load_mosaic_data():
             "lines": 296,
             "complexity": 12,
             "description": "Interactive graph visualization using Neo4j-viz",
-            "file_path": "src/mosaic/plugins/graph_visualization.py",
+            "file_path": "src/mosaic-mcp/plugins/graph_visualization.py",
         },
         {
             "id": "memory_plugin",
@@ -145,7 +145,7 @@ def load_mosaic_data():
             "lines": 461,
             "complexity": 18,
             "description": "Multi-layered memory storage with consolidation",
-            "file_path": "src/mosaic/plugins/memory.py",
+            "file_path": "src/mosaic-mcp/plugins/memory.py",
         },
         {
             "id": "refinement_plugin",
@@ -154,7 +154,7 @@ def load_mosaic_data():
             "lines": 233,
             "complexity": 10,
             "description": "Semantic reranking with cross-encoder models",
-            "file_path": "src/mosaic/plugins/refinement.py",
+            "file_path": "src/mosaic-mcp/plugins/refinement.py",
         },
         {
             "id": "diagram_plugin",
@@ -163,7 +163,7 @@ def load_mosaic_data():
             "lines": 372,
             "complexity": 14,
             "description": "Mermaid diagram generation for code visualization",
-            "file_path": "src/mosaic/plugins/diagram.py",
+            "file_path": "src/mosaic-mcp/plugins/diagram.py",
         },
         {
             "id": "graph_data_service",
@@ -172,7 +172,7 @@ def load_mosaic_data():
             "lines": 430,
             "complexity": 16,
             "description": "Cosmos DB data access for graph operations",
-            "file_path": "src/mosaic/plugins/graph_data_service.py",
+            "file_path": "src/mosaic-mcp/plugins/graph_data_service.py",
         },
         {
             "id": "ingestion_main",
@@ -181,7 +181,7 @@ def load_mosaic_data():
             "lines": 119,
             "complexity": 10,
             "description": "Main ingestion service with Magentic AI agent coordination",
-            "file_path": "src/mosaic-ingestion/main.py",
+            "file_path": "src/mosaic-mcp-ingestion/main.py",
         },
         {
             "id": "magentic_orchestrator",
@@ -190,7 +190,7 @@ def load_mosaic_data():
             "lines": 350,
             "complexity": 20,
             "description": "Microsoft Semantic Kernel Magentic orchestration coordinator",
-            "file_path": "src/mosaic-ingestion/orchestrator.py",
+            "file_path": "src/mosaic-mcp-ingestion/orchestrator.py",
         },
         {
             "id": "local_ingestion",
@@ -199,7 +199,7 @@ def load_mosaic_data():
             "lines": 369,
             "complexity": 12,
             "description": "Local development ingestion with GitPython",
-            "file_path": "src/mosaic-ingestion/local_main.py",
+            "file_path": "src/mosaic-mcp-ingestion/local_main.py",
         },
         {
             "id": "ingestion_plugin",
@@ -208,7 +208,7 @@ def load_mosaic_data():
             "lines": 3197,
             "complexity": 25,
             "description": "Core ingestion logic with multi-language AST parsing",
-            "file_path": "src/mosaic-ingestion/plugins/ingestion.py",
+            "file_path": "src/mosaic-mcp-ingestion/plugins/ingestion.py",
         },
         {
             "id": "base_agent",
@@ -217,7 +217,7 @@ def load_mosaic_data():
             "lines": 477,
             "complexity": 15,
             "description": "Base class for all AI agents with common functionality",
-            "file_path": "src/mosaic-ingestion/agents/base_agent.py",
+            "file_path": "src/mosaic-mcp-ingestion/agents/base_agent.py",
         },
         {
             "id": "git_sleuth_agent",
@@ -226,7 +226,7 @@ def load_mosaic_data():
             "lines": 147,
             "complexity": 8,
             "description": "Repository cloning and git analysis specialist",
-            "file_path": "src/mosaic-ingestion/agents/git_sleuth.py",
+            "file_path": "src/mosaic-mcp-ingestion/agents/git_sleuth.py",
         },
         {
             "id": "code_parser_agent",
@@ -235,7 +235,7 @@ def load_mosaic_data():
             "lines": 206,
             "complexity": 12,
             "description": "Multi-language AST parsing and entity extraction specialist",
-            "file_path": "src/mosaic-ingestion/agents/code_parser.py",
+            "file_path": "src/mosaic-mcp-ingestion/agents/code_parser.py",
         },
         {
             "id": "graph_architect_agent",
@@ -244,7 +244,7 @@ def load_mosaic_data():
             "lines": 216,
             "complexity": 11,
             "description": "Relationship mapping and graph construction specialist",
-            "file_path": "src/mosaic-ingestion/agents/graph_architect.py",
+            "file_path": "src/mosaic-mcp-ingestion/agents/graph_architect.py",
         },
         {
             "id": "docu_writer_agent",
@@ -253,7 +253,7 @@ def load_mosaic_data():
             "lines": 251,
             "complexity": 9,
             "description": "AI-powered documentation and enrichment specialist",
-            "file_path": "src/mosaic-ingestion/agents/docu_writer.py",
+            "file_path": "src/mosaic-mcp-ingestion/agents/docu_writer.py",
         },
         {
             "id": "graph_auditor_agent",
@@ -262,7 +262,7 @@ def load_mosaic_data():
             "lines": 435,
             "complexity": 13,
             "description": "Quality assurance and validation specialist",
-            "file_path": "src/mosaic-ingestion/agents/graph_auditor.py",
+            "file_path": "src/mosaic-mcp-ingestion/agents/graph_auditor.py",
         },
         {
             "id": "mosaic_settings",
@@ -271,7 +271,7 @@ def load_mosaic_data():
             "lines": 168,
             "complexity": 6,
             "description": "Configuration management with Pydantic validation",
-            "file_path": "src/mosaic/config/settings.py",
+            "file_path": "src/mosaic-mcp/config/settings.py",
         },
         {
             "id": "local_config",
@@ -280,7 +280,7 @@ def load_mosaic_data():
             "lines": 111,
             "complexity": 4,
             "description": "Local development configuration settings",
-            "file_path": "src/mosaic/config/local_config.py",
+            "file_path": "src/mosaic-mcp/config/local_config.py",
         },
         {
             "id": "golden_node_model",
@@ -289,7 +289,7 @@ def load_mosaic_data():
             "lines": 150,
             "complexity": 7,
             "description": "Unified code entity representation for OmniRAG storage",
-            "file_path": "src/mosaic-ingestion/models/golden_node.py",
+            "file_path": "src/mosaic-mcp-ingestion/models/golden_node.py",
         },
     ]
 

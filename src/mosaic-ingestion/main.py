@@ -20,7 +20,7 @@ from pathlib import Path
 # Add the parent directory to the path to import mosaic modules
 sys.path.append(str(Path(__file__).parent.parent))
 
-from mosaic.config.settings import MosaicSettings
+from mosaic_mcp.config.settings import MosaicSettings
 from .orchestrator import MosaicMagenticOrchestrator
 
 # Configure logging for the ingestion service

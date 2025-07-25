@@ -67,7 +67,7 @@ import sys
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from mosaic.config.settings import MosaicSettings
+from mosaic_mcp.config.settings import MosaicSettings
 
 
 logger = logging.getLogger(__name__)

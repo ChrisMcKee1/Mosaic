@@ -71,7 +71,7 @@ resource queryServer 'Microsoft.App/containerApps@2023-05-01' = {
               value: '0.0.0.0'
             }
           ]
-          command: ['python', '-m', 'mosaic.server.main']
+          command: ['python', '-m', 'mosaic_mcp.server.main']
         }
       ]
       scale: {

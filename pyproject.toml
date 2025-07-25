@@ -122,7 +122,7 @@ Repository = "https://github.com/ChrisMcKee1/Mosaic"
 Issues = "https://github.com/ChrisMcKee1/Mosaic/issues"
 
 [project.scripts]
-mosaic-server = "mosaic.server.main:main"
+mosaic-server = "mosaic_mcp.server.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -192,7 +192,7 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--verbose",
-    "--cov=src/mosaic",
+    "--cov=src/mosai-mcp",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
@@ -207,7 +207,7 @@ markers = [
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["src/mosaic"]
+source = ["src/mosaic-mcp"]
 omit = [
     "*/tests/*",
     "*/test_*",
