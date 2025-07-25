@@ -181,7 +181,7 @@ def load_mosaic_data():
             "lines": 119,
             "complexity": 10,
             "description": "Main ingestion service with Magentic AI agent coordination",
-            "file_path": "src/ingestion_service/main.py",
+            "file_path": "src/mosaic-ingestion/main.py",
         },
         {
             "id": "magentic_orchestrator",
@@ -190,7 +190,7 @@ def load_mosaic_data():
             "lines": 350,
             "complexity": 20,
             "description": "Microsoft Semantic Kernel Magentic orchestration coordinator",
-            "file_path": "src/ingestion_service/orchestrator.py",
+            "file_path": "src/mosaic-ingestion/orchestrator.py",
         },
         {
             "id": "local_ingestion",
@@ -199,7 +199,7 @@ def load_mosaic_data():
             "lines": 369,
             "complexity": 12,
             "description": "Local development ingestion with GitPython",
-            "file_path": "src/ingestion_service/local_main.py",
+            "file_path": "src/mosaic-ingestion/local_main.py",
         },
         {
             "id": "ingestion_plugin",
@@ -208,7 +208,7 @@ def load_mosaic_data():
             "lines": 3197,
             "complexity": 25,
             "description": "Core ingestion logic with multi-language AST parsing",
-            "file_path": "src/ingestion_service/plugins/ingestion.py",
+            "file_path": "src/mosaic-ingestion/plugins/ingestion.py",
         },
         {
             "id": "base_agent",
@@ -217,7 +217,7 @@ def load_mosaic_data():
             "lines": 477,
             "complexity": 15,
             "description": "Base class for all AI agents with common functionality",
-            "file_path": "src/ingestion_service/agents/base_agent.py",
+            "file_path": "src/mosaic-ingestion/agents/base_agent.py",
         },
         {
             "id": "git_sleuth_agent",
@@ -226,7 +226,7 @@ def load_mosaic_data():
             "lines": 147,
             "complexity": 8,
             "description": "Repository cloning and git analysis specialist",
-            "file_path": "src/ingestion_service/agents/git_sleuth.py",
+            "file_path": "src/mosaic-ingestion/agents/git_sleuth.py",
         },
         {
             "id": "code_parser_agent",
@@ -235,7 +235,7 @@ def load_mosaic_data():
             "lines": 206,
             "complexity": 12,
             "description": "Multi-language AST parsing and entity extraction specialist",
-            "file_path": "src/ingestion_service/agents/code_parser.py",
+            "file_path": "src/mosaic-ingestion/agents/code_parser.py",
         },
         {
             "id": "graph_architect_agent",
@@ -244,7 +244,7 @@ def load_mosaic_data():
             "lines": 216,
             "complexity": 11,
             "description": "Relationship mapping and graph construction specialist",
-            "file_path": "src/ingestion_service/agents/graph_architect.py",
+            "file_path": "src/mosaic-ingestion/agents/graph_architect.py",
         },
         {
             "id": "docu_writer_agent",
@@ -253,7 +253,7 @@ def load_mosaic_data():
             "lines": 251,
             "complexity": 9,
             "description": "AI-powered documentation and enrichment specialist",
-            "file_path": "src/ingestion_service/agents/docu_writer.py",
+            "file_path": "src/mosaic-ingestion/agents/docu_writer.py",
         },
         {
             "id": "graph_auditor_agent",
@@ -262,7 +262,7 @@ def load_mosaic_data():
             "lines": 435,
             "complexity": 13,
             "description": "Quality assurance and validation specialist",
-            "file_path": "src/ingestion_service/agents/graph_auditor.py",
+            "file_path": "src/mosaic-ingestion/agents/graph_auditor.py",
         },
         {
             "id": "mosaic_settings",
@@ -289,7 +289,7 @@ def load_mosaic_data():
             "lines": 150,
             "complexity": 7,
             "description": "Unified code entity representation for OmniRAG storage",
-            "file_path": "src/ingestion_service/models/golden_node.py",
+            "file_path": "src/mosaic-ingestion/models/golden_node.py",
         },
     ]
 

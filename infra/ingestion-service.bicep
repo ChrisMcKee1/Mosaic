@@ -53,7 +53,7 @@ resource ingestionJob 'Microsoft.App/jobs@2023-05-01' = {
               value: '/app/src'
             }
           ]
-          command: ['python', '-m', 'ingestion_service.main']
+          command: ['python', '-m', 'mosaic_ingestion.main']
           args: ['--repository-url', '$(REPOSITORY_URL)', '--branch', '$(BRANCH)']
         }
       ]
@@ -111,7 +111,7 @@ resource ingestionSchedule 'Microsoft.App/jobs@2023-05-01' = {
               value: 'main'
             }
           ]
-          command: ['python', '-m', 'ingestion_service.main']
+          command: ['python', '-m', 'mosaic_ingestion.main']
           args: ['--repository-url', '$(REPOSITORY_URL)', '--branch', '$(BRANCH)']
         }
       ]

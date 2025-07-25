@@ -16,8 +16,8 @@ The Mosaic MCP Tool is a standardized, high-performance Model Context Protocol (
 - **Resources**: 0.25 CPU, 0.5Gi memory (lightweight, always-on)
 - **Components**: RetrievalPlugin, RefinementPlugin, MemoryPlugin, DiagramPlugin
 
-### Service 2: Ingestion Service (Heavy Processing)
-- **Location**: `src/ingestion_service/`
+### Service 2: Mosaic Ingestion Service (Heavy Processing)
+- **Location**: `src/mosaic-ingestion/`
 - **Purpose**: Repository ingestion and knowledge graph population
 - **Resources**: 2.0 CPU, 4Gi memory (on-demand processing)
 - **Components**: GitPython, tree-sitter AST parsing, entity extraction
@@ -53,8 +53,8 @@ mosaic.memory.save(session_id: str, content: str, type: str)
 mosaic.memory.retrieve(session_id: str, query: str, limit: int) -> List[MemoryEntry]
 mosaic.diagram.generate(description: str) -> str
 
-# Ingestion Service (Background)
-python -m ingestion_service.main --repository-url <url> --branch <branch>
+# Mosaic Ingestion Service (Background)
+python -m mosaic_ingestion.main --repository-url <url> --branch <branch>
 az containerapp job start --name mosaic-ingestion-job-dev --resource-group rg-dev
 ```
 
@@ -111,10 +111,10 @@ python -m mosaic.server.main
 
 # Run Local Development Ingestion Service (minimal dependencies)
 source venv/bin/activate
-python3 -m src.ingestion_service.local_main --repository-url https://github.com/user/repo --branch main --debug
+python3 -m src.mosaic_ingestion.local_main --repository-url https://github.com/user/repo --branch main --debug
 
-# Run Full Ingestion Service (requires complete Azure setup)
-python -m ingestion_service.main --repository-url <url> --branch main
+# Run Full Mosaic Ingestion Service (requires complete Azure setup)
+python -m mosaic_ingestion.main --repository-url <url> --branch main
 ```
 
 ## Data Models and Schemas
@@ -247,8 +247,8 @@ The ingestion service supports **11 programming languages** with tree-sitter AST
 ### Core Implementation
 - `src/mosaic/server/main.py`: FastMCP server entry point
 - `src/mosaic/plugins/`: Query Server plugins (retrieval, refinement, memory, diagram)
-- `src/ingestion_service/main.py`: Ingestion service entry point
-- `src/ingestion_service/plugins/ingestion.py`: Repository processing logic
+- `src/mosaic-ingestion/main.py`: Mosaic Ingestion service entry point
+- `src/mosaic-ingestion/plugins/ingestion.py`: Repository processing logic
 
 ### Infrastructure and Deployment
 - `infra/main.bicep`: Main infrastructure orchestration

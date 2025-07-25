@@ -5,7 +5,7 @@ Azure Container App Job for repository ingestion and knowledge graph population.
 This service runs separately from the real-time Query Server to handle heavy operations.
 
 Usage:
-- Manual execution: python -m ingestion_service.main --repository-url https://github.com/user/repo
+- Manual execution: python -m mosaic_ingestion.main --repository-url https://github.com/user/repo
 - Scheduled execution: Configured via Azure Container App Job triggers
 - Batch processing: Support for multiple repositories via configuration
 """

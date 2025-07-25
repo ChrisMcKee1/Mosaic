@@ -26,7 +26,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("ingestion_service.log", mode="w"),
+        logging.FileHandler("mosaic_ingestion.log", mode="w"),
     ],
 )
 

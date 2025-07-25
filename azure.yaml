@@ -35,7 +35,7 @@ services:
           MCP_OAUTH_PROVIDER: entra_id
           # Note: AZURE_OAUTH_CLIENT_ID must be set after App Registration creation
     ingestion-service:
-        project: ./src/ingestion_service
+        project: ./src/mosaic-ingestion
         host: containerjob
         language: python
         env:
@@ -52,7 +52,7 @@ services:
           AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
           AZURE_USE_MANAGED_IDENTITY: ${AZURE_USE_MANAGED_IDENTITY}
     memory-consolidator:
-        project: ./functions/memory-consolidator
+        project: ./archived/legacy-services/functions/memory-consolidator
         host: function
         language: python
 resources:
