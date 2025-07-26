@@ -63,7 +63,7 @@ def mock_azure_settings():
     settings.database_name = "test-knowledge"
     settings.container_name = "test-golden-nodes"
     settings.openai_api_version = "2024-02-01"
-    settings.embedding_model = "text-embedding-ada-002"
+    settings.embedding_model = "text-embedding-3-small"
     settings.chat_model = "gpt-4"
     return settings
 

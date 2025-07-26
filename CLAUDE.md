@@ -379,21 +379,37 @@ All code must comply with these functional requirements:
 - **Managed Identity**: All Azure service connections use DefaultAzureCredential
 - **No Secrets**: No connection strings or API keys in code
 
-### Environment Variables (Required)
+### Environment Variables (Unified Configuration)
 
+**Single Source of Truth**: All three services use a unified `.env` file in the project root.
+
+**Setup Process**:
 ```bash
-# Core Azure Services
+# Copy the main template for your environment
+cp .env.template .env
+
+# For local development with emulators, also copy:
+cp .env.local.template .env.local
+```
+
+**Environment File Structure**:
+- **`.env.template`** - Main template with all variables for production deployment
+- **`.env.local.template`** - Local development overrides (Cosmos emulator, local Redis, etc.)
+- **`.env`** - Your actual configuration (gitignored)
+- **`.env.local`** - Your local development overrides (gitignored)
+
+**Service Variable Usage**:
+```bash
+# Shared across all services [mosaic-mcp, mosaic-ingestion, mosaic-ui]
 AZURE_OPENAI_ENDPOINT         # Azure OpenAI service endpoint
 AZURE_COSMOS_DB_ENDPOINT      # Cosmos DB endpoint (unified backend)
-AZURE_REDIS_ENDPOINT          # Redis cache endpoint
-AZURE_ML_ENDPOINT_URL         # ML endpoint for semantic reranking
 AZURE_TENANT_ID               # OAuth 2.1 tenant ID
 AZURE_CLIENT_ID               # OAuth 2.1 client ID
 
-# UI Service Configuration (Optional)
-STREAMLIT_SERVER_PORT=8501    # Streamlit server port
-STREAMLIT_SERVER_ADDRESS=0.0.0.0  # Server address
-PYTHONPATH=.                  # Python path for imports
+# Service-specific variables with clear prefixes
+SERVER_PORT=8000              # [mosaic-mcp] MCP server port
+UI_STREAMLIT_PORT=8501        # [mosaic-ui] Streamlit server port  
+INGESTION_BATCH_SIZE=100      # [mosaic-ingestion] Processing batch size
 ```
 
 ## Code Quality Tools (2025 Optimized)

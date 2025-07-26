@@ -1,0 +1,22 @@
+[client]
+# Show full error details in the browser including exceptions, tracebacks, and messages
+showErrorDetails = "full"
+
+[logger]
+# Set logging level to debug for detailed information
+level = "debug"
+messageFormat = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+
+[server]
+# Enable better development experience
+runOnSave = false
+headless = false
+port = 8502
+
+[theme]
+# Dark theme base
+base = "dark"
+primaryColor = "#238636"
+backgroundColor = "#0D1117"
+secondaryBackgroundColor = "#161B22"
+textColor = "#F0F6FC"

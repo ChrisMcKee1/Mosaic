@@ -311,7 +311,7 @@ class TestFileVersionModel:
             has_ai_analyst=True,
             ai_analyst_timestamp="2025-01-21T12:00:00Z",
             embedding=[0.1, 0.2, 0.3],
-            embedding_model="text-embedding-ada-002",
+            embedding_model="text-embedding-3-small",
             rdf_triples_count=5,
             partition_key="repo-123:feature",
         )

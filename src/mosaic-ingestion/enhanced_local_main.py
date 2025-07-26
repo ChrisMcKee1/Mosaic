@@ -16,6 +16,20 @@ from pathlib import Path
 from datetime import datetime
 import json
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+
+    # Load .env from project root (two levels up from src/mosaic-ingestion/)
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+        print(f"✅ Loaded environment variables from {env_path}")
+    else:
+        print(f"⚠️ No .env file found at {env_path}")
+except ImportError:
+    print("⚠️ python-dotenv not available, relying on system environment variables")
+
 # Add the parent directory to the path to import mosaic modules
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -32,6 +46,7 @@ except ImportError:
 
 # Import our dual-mode manager
 from cosmos_mode_manager import CosmosModeManager
+from database_initializer import create_database_initializer
 
 # CRUD-001: Import CommitStateManager for commit state tracking
 from utils.commit_state_manager import CommitStateManager
@@ -84,37 +99,32 @@ class EnhancedLocalIngestionService:
         }
 
     async def initialize(self) -> bool:
-        """Initialize Cosmos DB connection and containers."""
+        """Initialize Cosmos DB connection and containers using Entity Framework pattern."""
         if not AZURE_SDK_AVAILABLE:
             logger.error("❌ Azure SDK not available")
             return False
 
         try:
-            # Get Cosmos client
-            self.cosmos_client = self.cosmos_manager.get_cosmos_client()
-            if not self.cosmos_client:
-                logger.error("❌ Failed to create Cosmos client")
+            # Initialize database with Entity Framework pattern
+            db_initializer = create_database_initializer("mosaic-ingestion")
+
+            if not await db_initializer.initialize_database():
+                logger.error("❌ Failed to initialize database")
                 return False
 
-            # Get database
-            database_name = self.cosmos_manager.config["database"]
-            self.database = self.cosmos_client.get_database_client(database_name)
+            # Store references for service use
+            self.cosmos_client = db_initializer.cosmos_client
+            self.database = db_initializer.database
+            self.containers = db_initializer.get_all_containers()
 
-            # Verify database exists
-            try:
-                self.database.read()
-                logger.info(f"✅ Connected to database: {database_name}")
-            except cosmos_exceptions.CosmosResourceNotFoundError:
-                logger.warning(f"⚠️ Database '{database_name}' not found")
-                return False
-
-            # Initialize containers
-            await self._initialize_containers()
+            logger.info(
+                f"✅ Database initialized with {len(self.containers)} containers"
+            )
 
             # Initialize commit state manager
             try:
                 self.commit_state_manager = CommitStateManager(
-                    self.cosmos_manager.config
+                    db_initializer.cosmos_manager.config
                 )
                 logger.info("✅ CommitStateManager initialized")
             except Exception as e:
@@ -126,34 +136,6 @@ class EnhancedLocalIngestionService:
         except Exception as e:
             logger.error(f"❌ Failed to initialize enhanced service: {e}")
             return False
-
-    async def _initialize_containers(self):
-        """Initialize Cosmos DB containers for data persistence."""
-        container_names = [
-            "knowledge",
-            "memory",
-            "golden_nodes",
-            "diagrams",
-            "code_entities",
-            "code_relationships",
-            "repositories",
-            "mosaic",
-            "context",
-        ]
-
-        for container_name in container_names:
-            try:
-                container = self.database.get_container_client(container_name)
-                # Test container exists
-                container.read()
-                self.containers[container_name] = container
-                logger.debug(f"✅ Container '{container_name}' available")
-            except cosmos_exceptions.CosmosResourceNotFoundError:
-                logger.warning(f"⚠️ Container '{container_name}' not found - skipping")
-            except Exception as e:
-                logger.warning(f"⚠️ Failed to access container '{container_name}': {e}")
-
-        logger.info(f"📋 Initialized {len(self.containers)} containers")
 
     async def ingest_repository(
         self, repository_url: str, branch: str = "main"

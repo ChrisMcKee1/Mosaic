@@ -28,7 +28,7 @@ class MockMosaicSettings:
             "azure_openai_endpoint", "https://test.openai.azure.com"
         )
         self.azure_openai_text_embedding_deployment_name = kwargs.get(
-            "azure_openai_text_embedding_deployment_name", "text-embedding-ada-002"
+            "azure_openai_text_embedding_deployment_name", "text-embedding-3-small"
         )
         self.azure_openai_chat_deployment_name = kwargs.get(
             "azure_openai_chat_deployment_name", "gpt-4"
@@ -206,7 +206,7 @@ class TestMosaicSettingsInitialization:
 
         # OpenAI defaults
         assert (
-            "text-embedding-ada-002"
+            "text-embedding-3-small"
             in settings.azure_openai_text_embedding_deployment_name
         )
         assert "gpt-4" in settings.azure_openai_chat_deployment_name
@@ -397,15 +397,15 @@ class TestConfigurationHelpers:
         """Test OpenAI configuration helper."""
         settings = MockMosaicSettings(
             azure_openai_endpoint="https://test.openai.azure.com",
-            azure_openai_text_embedding_deployment_name="text-embedding-ada-002",
-            azure_openai_chat_deployment_name="gpt-4",
+            azure_openai_text_embedding_deployment_name="text-embedding-3-small",
+            azure_openai_chat_deployment_name="gpt-4.1",
         )
 
         config = settings.get_openai_config()
 
         assert config["endpoint"] == "https://test.openai.azure.com"
-        assert config["text_embedding_deployment"] == "text-embedding-ada-002"
-        assert config["chat_deployment"] == "gpt-4"
+        assert config["text_embedding_deployment"] == "text-embedding-3-small"
+        assert config["chat_deployment"] == "gpt-4.1"
 
     def test_get_oauth_config(self):
         """Test OAuth configuration helper."""

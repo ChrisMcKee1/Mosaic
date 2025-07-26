@@ -28,6 +28,20 @@ azure-cosmos==4.5.1
 azure-identity==1.15.0
 
 # Semantic Kernel and AI
-semantic-kernel==1.3.0
+semantic-kernel==1.35.0
 azure-ai-openai==1.0.0
-openai==1.6.1
+openai==1.97.1
+
+# OpenTelemetry for Semantic Kernel telemetry
+opentelemetry-api==1.35.0
+opentelemetry-sdk==1.35.0
+
+# Additional dependencies for Semantic Kernel
+aiortc==1.13.0
+azure-ai-agents==1.1.0b4
+azure-ai-projects==1.0.0b12
+openapi-core==0.19.5
+openapi-schema-validator==0.6.3
+openapi-spec-validator==0.7.2
+werkzeug==3.1.1
+av==14.4.0

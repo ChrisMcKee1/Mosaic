@@ -81,7 +81,7 @@ def mock_mosaic_settings():
     settings.azure_cosmos_endpoint = "https://test.cosmos.azure.com"
     settings.azure_cosmos_database_name = "mosaic_test"
     settings.azure_openai_endpoint = "https://test.openai.azure.com"
-    settings.azure_openai_text_embedding_deployment_name = "text-embedding-ada-002"
+    settings.azure_openai_text_embedding_deployment_name = "text-embedding-3-small"
     settings.azure_openai_api_version = "2023-12-01-preview"
     settings.oauth_enabled = True
     settings.debug = True

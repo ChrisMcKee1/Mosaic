@@ -70,8 +70,26 @@ test = [
 azure = [
     "azure-cosmos>=4.5.0",
     "azure-identity>=1.15.0",
-    "semantic-kernel>=1.0.0",
+    "semantic-kernel>=1.35.0",
     "azure-ai-openai>=1.0.0",
+    "openai>=1.97.0",
+    
+    # OpenTelemetry for Semantic Kernel telemetry
+    "opentelemetry-api>=1.35.0",
+    "opentelemetry-sdk>=1.35.0",
+    
+    # Additional Semantic Kernel dependencies
+    "aiortc>=1.13.0",
+    "azure-ai-agents>=1.1.0b4",
+    "azure-ai-projects>=1.0.0b12",
+    "openapi-core>=0.19.0",
+    "openapi-schema-validator>=0.6.0",
+    "openapi-spec-validator>=0.7.0",
+    "werkzeug>=3.1.0",
+    "av>=14.4.0",
+    
+    # Graph visualization
+    "streamlit-agraph>=0.0.45",
 ]
 
 [project.urls]

@@ -105,7 +105,7 @@ class AICodeParserPlugin:
     AI-powered code parser using Semantic Kernel prompt functions.
 
     This plugin creates its own isolated chat completion service instances
-    for each function call, using GPT-4o-mini for cost-effective code analysis.
+    for each function call, using GPT-4.1-mini for cost-effective code analysis.
     Each method handles its own AI interaction with zero chat history.
     """
 
@@ -155,7 +155,7 @@ class AICodeParserPlugin:
         AI-powered hierarchical code parsing using isolated chat completion service.
 
         Creates its own chat service instance with zero chat history,
-        uses GPT-4o-mini for cost-effective parsing, and returns structured output.
+        uses GPT-4.1-mini for cost-effective parsing, and returns structured output.
         """
         try:
             self.logger.info(f"AI parsing {language} file: {file_path}")

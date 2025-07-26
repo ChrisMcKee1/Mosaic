@@ -26,7 +26,7 @@ class TestRetrievalPlugin:
         settings.azure_openai_endpoint = "https://test.openai.azure.com/"
         settings.database_name = "test-knowledge"
         settings.container_name = "test-documents"
-        settings.embedding_model = "text-embedding-ada-002"
+        settings.embedding_model = "text-embedding-3-small"
         return settings
 
     @pytest.fixture

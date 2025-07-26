@@ -510,7 +510,7 @@ class TestMosaicMagenticOrchestratorIntegration:
         mock_settings.database_name = "mosaic-knowledge"
         mock_settings.container_name = "golden-nodes"
         mock_settings.openai_api_version = "2024-02-01"
-        mock_settings.embedding_model = "text-embedding-ada-002"
+        mock_settings.embedding_model = "text-embedding-3-small"
         mock_settings.chat_model = "gpt-4"
         return MosaicMagenticOrchestrator(mock_settings)
 
