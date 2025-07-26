@@ -274,7 +274,7 @@ class TestIngestionPlugin:
                     }
                 ],
             ) as mock_parse,
-            patch.object(ingestion_plugin, "_store_entities_in_cosmos") as mock_store,
+            patch.object(ingestion_plugin, "_store_entities_in_cosmos"),
         ):
             mock_parser = Mock()
             mock_setup.return_value = mock_parser

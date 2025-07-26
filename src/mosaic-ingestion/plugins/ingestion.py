@@ -1911,7 +1911,7 @@ Be concise but accurate. Each section should be on its own line with the exact l
         """Call AI to analyze unknown file types."""
         try:
             # Create specialized prompt for file analysis
-            file_analysis_prompt = f"""
+            f"""
 You are a senior software architect analyzing a file. Analyze this file and provide structured information about it.
 
 File: {file_path.name}
@@ -2721,7 +2721,7 @@ Guidelines:
         """Call AI to perform comprehensive code analysis."""
         try:
             # Create enhanced analyst prompt
-            analyst_prompt = self._create_ai_analyst_prompt(entity)
+            self._create_ai_analyst_prompt(entity)
 
             # Prepare arguments for Semantic Kernel
             arguments = KernelArguments(

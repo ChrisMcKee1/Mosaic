@@ -93,9 +93,7 @@ class TestBranchAwareRepository:
         }
         branch_aware_repo.container.upsert_item.return_value = expected_result
 
-        result = await branch_aware_repo.upsert_item(
-            entity_data, repository_url, branch_name
-        )
+        await branch_aware_repo.upsert_item(entity_data, repository_url, branch_name)
 
         # Verify the entity was created with proper partitioning
         branch_aware_repo.container.upsert_item.assert_called_once()

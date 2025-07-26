@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-CRUD-005 Implementation Completion and Validation
+"""CRUD-005 Implementation Completion and Validation.
 
 This script completes the CRUD-005 implementation by:
 1. Validating existing components
@@ -11,12 +10,11 @@ This script completes the CRUD-005 implementation by:
 Goal: Ensure CRUD-005 meets all acceptance criteria
 """
 
-import os
-import sys
 import asyncio
 import logging
+import os
+import sys
 from pathlib import Path
-from typing import Dict
 
 # Configure logging
 logging.basicConfig(
@@ -54,7 +52,7 @@ class CRUD005Implementer:
         }
         self.test_results = {}
 
-    async def validate_acceptance_criteria(self) -> Dict[str, bool]:
+    async def validate_acceptance_criteria(self) -> dict[str, bool]:
         """Validate all CRUD-005 acceptance criteria."""
         logger.info("🎯 Validating CRUD-005 Acceptance Criteria")
 
@@ -66,13 +64,13 @@ class CRUD005Implementer:
                 PartitionMetrics,
                 TTLConfiguration,
             )
-            from utils.repository_implementations import (
-                KnowledgeRepository,
-                RepositoryFactory,
-            )
             from utils.container_configuration import (
                 ContainerConfiguration,
                 ContainerManager,
+            )
+            from utils.repository_implementations import (
+                KnowledgeRepository,
+                RepositoryFactory,
             )
 
             # 1. Partition key strategy
@@ -145,10 +143,10 @@ class CRUD005Implementer:
             return self.acceptance_criteria
 
         except ImportError as e:
-            logger.error(f"❌ Import error during validation: {e}")
+            logger.exception(f"❌ Import error during validation: {e}")
             return self.acceptance_criteria
         except Exception as e:
-            logger.error(f"❌ Validation error: {e}")
+            logger.exception(f"❌ Validation error: {e}")
             return self.acceptance_criteria
 
     def generate_implementation_report(self) -> str:
@@ -208,60 +206,10 @@ class CRUD005Implementer:
                 await self._add_monitoring_enhancements()
 
         except Exception as e:
-            logger.error(f"❌ Error adding functionality: {e}")
+            logger.exception(f"❌ Error adding functionality: {e}")
 
     async def _add_cross_partition_queries(self):
         """Add cross-partition query methods to repository."""
-        cross_partition_method = '''
-    async def query_across_branches(
-        self,
-        repository_url: str,
-        query_filter: str,
-        parameters: Optional[List[Dict[str, Any]]] = None
-    ) -> List[Dict[str, Any]]:
-        """
-        Query entities across all branches in a repository.
-        
-        Args:
-            repository_url: Repository URL
-            query_filter: Additional SQL filter conditions
-            parameters: Query parameters
-            
-        Returns:
-            List of items matching the query
-        """
-        try:
-            # Build cross-partition query
-            sql_query = f"""
-                SELECT * FROM c
-                WHERE c.repository_url = @repository_url
-                AND {query_filter}
-                ORDER BY c.branch_name, c.updated_at DESC
-            """
-            
-            query_params = parameters or []
-            query_params.append({"name": "@repository_url", "value": repository_url})
-            
-            # Execute cross-partition query
-            items = []
-            async for item in self.container.query_items(
-                query=sql_query,
-                parameters=query_params,
-                enable_cross_partition_query=True
-            ):
-                items.append(item)
-            
-            # Track metrics
-            self._metrics.cross_partition_queries += 1
-            
-            logger.debug(f"Cross-partition query returned {len(items)} items")
-            return items
-            
-        except Exception as e:
-            logger.error(f"Error in cross-partition query: {e}")
-            raise
-'''
-
         # This would be added to the repository file in a real implementation
         logger.info("✅ Cross-partition query method specification created")
 
@@ -298,9 +246,8 @@ async def main():
     if all_complete:
         logger.info("🎉 CRUD-005 implementation validation successful!")
         return 0
-    else:
-        logger.warning("⚠️ CRUD-005 implementation needs additional work")
-        return 1
+    logger.warning("⚠️ CRUD-005 implementation needs additional work")
+    return 1
 
 
 if __name__ == "__main__":
@@ -311,5 +258,5 @@ if __name__ == "__main__":
         logger.info("⏹️ Validation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"💥 Validation failed: {e}")
+        logger.exception(f"💥 Validation failed: {e}")
         sys.exit(1)

@@ -89,7 +89,7 @@ def main():
         print(" ".join(cmd))
 
         try:
-            result = subprocess.run(cmd, check=True, capture_output=False)
+            subprocess.run(cmd, check=True, capture_output=False)
             print(f"✅ Test command {i} passed!")
         except subprocess.CalledProcessError as e:
             print(f"❌ Test command {i} failed with exit code {e.returncode}")

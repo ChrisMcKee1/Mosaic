@@ -154,7 +154,7 @@ class TestBranchCreation:
         assert isinstance(result, BranchMetadata)
         assert result.branch_name == branch_name
         assert result.repository_url == repository_url
-        assert result.is_active == True
+        assert result.is_active
         assert result.processing_status == "active"
         assert result.author_name == "Test User"
         assert result.author_email == "test@example.com"
@@ -194,7 +194,7 @@ class TestBranchCreation:
         test_file = Path(temp_dir) / "test.txt"
         test_file.write_text("test content")
         repo.index.add(["test.txt"])
-        second_commit = repo.index.commit("Second commit")
+        repo.index.commit("Second commit")
 
         # Create branch from first commit (parent of current HEAD)
         parent_commit = repo.head.commit.parents[0]
@@ -209,7 +209,7 @@ class TestBranchCreation:
 
         # Verify branch points to parent commit
         assert result.parent_commit_sha == parent_commit.hexsha
-        assert result.is_active == False  # Not switched to
+        assert not result.is_active  # Not switched to
 
         # Verify Git branch
         created_branch = repo.heads[branch_name]
@@ -236,7 +236,7 @@ class TestBranchSwitching:
         repo.index.commit("Initial commit")
 
         # Create feature branch
-        feature_branch = repo.create_head("feature/test")
+        repo.create_head("feature/test")
 
         yield repo, temp_dir
 
@@ -267,7 +267,7 @@ class TestBranchSwitching:
         mock_branch_manager._update_branch_active_status = AsyncMock()
 
         # Switch to branch
-        result = await mock_branch_manager.switch_branch(
+        await mock_branch_manager.switch_branch(
             repo=repo, repository_url=repository_url, target_branch=target_branch
         )
 
@@ -368,7 +368,7 @@ class TestBranchDeletion:
         )
 
         # Verify deletion
-        assert result == True
+        assert result
         assert branch_to_delete not in [head.name for head in repo.heads]
 
         # Verify archiving was called

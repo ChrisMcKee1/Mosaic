@@ -1,12 +1,11 @@
-"""
-End-to-End Test: Real TripleGenerator Integration
+"""End-to-End Test: Real TripleGenerator Integration.
 
 Tests the actual TripleGenerator class with AI Code Parser integration.
 Validates the complete pipeline from parsing to RDF triple generation.
 """
 
-import sys
 import os
+import sys
 
 # Add paths for imports
 sys.path.insert(0, os.path.dirname(__file__))
@@ -38,13 +37,13 @@ class User:
 
 class DatabaseManager:
     """Manages database connections and operations."""
-    
+
     def __init__(self, connection_string: str):
         """Initialize with connection string."""
         self.connection_string = connection_string
         self.connection = None
         self._cache = {}
-    
+
     async def connect(self) -> bool:
         """Establish database connection."""
         try:
@@ -54,12 +53,12 @@ class DatabaseManager:
         except Exception as e:
             print(f"Connection failed: {e}")
             return False
-    
+
     def get_user(self, user_id: int) -> Optional[User]:
         """Retrieve user by ID."""
         if user_id in self._cache:
             return self._cache[user_id]
-        
+
         # Simulate database query
         user_data = query_database(user_id)
         if user_data:
@@ -67,16 +66,16 @@ class DatabaseManager:
             self._cache[user_id] = user
             return user
         return None
-    
+
     def create_user(self, user_data: Dict) -> int:
         """Create new user and return ID."""
         validate_user_data(user_data)
         user_id = generate_user_id()
-        
+
         # Store in cache
         user = User(id=user_id, **user_data)
         self._cache[user_id] = user
-        
+
         return user_id
 
 def validate_user_data(data: Dict) -> bool:
@@ -85,11 +84,11 @@ def validate_user_data(data: Dict) -> bool:
     for field in required_fields:
         if field not in data:
             raise ValueError(f"Missing required field: {field}")
-    
+
     # Email validation
     if "@" not in data["email"]:
         raise ValueError("Invalid email format")
-    
+
     return True
 
 def query_database(user_id: int) -> Optional[Dict]:
@@ -97,7 +96,7 @@ def query_database(user_id: int) -> Optional[Dict]:
     # Simulate database interaction
     if user_id <= 0:
         return None
-    
+
     return {
         "id": user_id,
         "name": f"User {user_id}",
@@ -123,8 +122,8 @@ def test_actual_triple_generator():
     try:
         # Try to import the actual classes
         try:
-            from rdf.triple_generator import TripleGenerator, TripleGenerationError
             from models.golden_node import CodeEntity
+            from rdf.triple_generator import TripleGenerationError, TripleGenerator
 
             print("✓ Successfully imported TripleGenerator and CodeEntity")
         except ImportError as e:
@@ -379,7 +378,7 @@ def test_full_pipeline_simulation():
         class_query = """
         PREFIX python: <http://mosaic.ai/ontology/python#>
         PREFIX code: <http://mosaic.ai/ontology/code_base#>
-        
+
         SELECT ?class ?name WHERE {
             ?class a python:PythonClass .
             ?class code:name ?name .
@@ -529,12 +528,11 @@ def main():
         print("- Ontology-aware validation")
 
         return True
-    else:
-        print(f"✗ {total - passed} tests failed or incomplete")
-        print(
-            "Note: Some failures may be due to missing implementation files in development"
-        )
-        return False
+    print(f"✗ {total - passed} tests failed or incomplete")
+    print(
+        "Note: Some failures may be due to missing implementation files in development"
+    )
+    return False
 
 
 if __name__ == "__main__":

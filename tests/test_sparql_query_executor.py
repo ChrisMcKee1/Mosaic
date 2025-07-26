@@ -1,5 +1,4 @@
-"""
-Unit tests for SPARQL Query Executor
+"""Unit tests for SPARQL Query Executor.
 
 Tests comprehensive SPARQL query execution functionality including
 validation, caching, result formatting, and error handling.
@@ -7,20 +6,19 @@ validation, caching, result formatting, and error handling.
 Task: OMR-P2-001 - Implement SPARQL Query Executor in Query Server
 """
 
-import pytest
 import asyncio
 import json
-from unittest.mock import MagicMock, patch
 from datetime import datetime
+from unittest.mock import MagicMock, patch
 
+import pytest
 import redis
-
 from mosaic_mcp.plugins.sparql_query_executor import (
-    SPARQLQueryExecutor,
+    QueryExecutionResult,
     QueryType,
     ResultFormat,
-    QueryExecutionResult,
     SPARQLQueryError,
+    SPARQLQueryExecutor,
     SPARQLQueryTimeoutError,
 )
 
@@ -78,14 +76,13 @@ def sample_rdf_data():
 @pytest.fixture
 async def query_executor(mock_cosmos_client, mock_redis_client):
     """Create SPARQL Query Executor instance for testing."""
-    executor = SPARQLQueryExecutor(
+    return SPARQLQueryExecutor(
         cosmos_client=mock_cosmos_client,
         redis_client=mock_redis_client,
         default_timeout=5.0,
         default_cache_ttl=3600,
         enable_caching=True,
     )
-    return executor
 
 
 class TestSPARQLQueryExecutor:
@@ -337,8 +334,8 @@ class TestSPARQLQueryExecutor:
         row1 = MagicMock()
         row1.__contains__ = lambda self, key: key in ["name", "age"]
         row1.__getitem__ = lambda self, key: {
-            "name": MagicMock(**{"__str__": lambda x: "John Doe"}),
-            "age": MagicMock(**{"__str__": lambda x: "30"}),
+            "name": MagicMock(__str__=lambda x: "John Doe"),
+            "age": MagicMock(__str__=lambda x: "30"),
         }[key]
 
         result.__iter__ = lambda self: iter([row1])
@@ -508,8 +505,8 @@ class TestSPARQLQueryExecutor:
         row1 = MagicMock()
         row1.__contains__ = lambda self, key: key in ["name", "age"]
         row1.__getitem__ = lambda self, key: {
-            "name": MagicMock(**{"__str__": lambda x: "John Doe"}),
-            "age": MagicMock(**{"__str__": lambda x: "30"}),
+            "name": MagicMock(__str__=lambda x: "John Doe"),
+            "age": MagicMock(__str__=lambda x: "30"),
         }[key]
 
         result.__iter__ = lambda self: iter([row1])
@@ -528,8 +525,8 @@ class TestSPARQLQueryExecutor:
         row1 = MagicMock()
         row1.__contains__ = lambda self, key: key in ["name", "age"]
         row1.__getitem__ = lambda self, key: {
-            "name": MagicMock(**{"__str__": lambda x: "John Doe"}),
-            "age": MagicMock(**{"__str__": lambda x: "30"}),
+            "name": MagicMock(__str__=lambda x: "John Doe"),
+            "age": MagicMock(__str__=lambda x: "30"),
         }[key]
 
         result.__iter__ = lambda self: iter([row1])

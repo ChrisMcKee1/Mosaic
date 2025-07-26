@@ -184,9 +184,7 @@ class OMR_P2_005_Validator:
             from rdflib import Graph, Namespace, URIRef, Literal, RDF
             from rdflib.plugins.sparql import prepareQuery
 
-            rdflib_functional = True
         except ImportError:
-            rdflib_functional = False
             missing_required.append("rdflib.plugins.sparql")
 
         execution_time = (time.time() - start_time) * 1000
@@ -346,14 +344,14 @@ class OMR_P2_005_Validator:
             memory_before = process.memory_info().rss
 
             # Execute query
-            results = list(self.test_graph.query(query))
+            list(self.test_graph.query(query))
 
             memory_after = process.memory_info().rss
             memory_monitoring_works = memory_after >= memory_before
 
             # Test execution time measurement
             query_start = time.time()
-            results = list(self.test_graph.query(query))
+            list(self.test_graph.query(query))
             query_time = (time.time() - query_start) * 1000
 
             timing_works = query_time > 0
@@ -428,7 +426,7 @@ class OMR_P2_005_Validator:
 
             def execute_query(query_str):
                 start_query = time.time()
-                results = list(self.test_graph.query(query_str))
+                list(self.test_graph.query(query_str))
                 return (time.time() - start_query) * 1000
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -474,7 +472,7 @@ class OMR_P2_005_Validator:
             baseline_times = []
             for _ in range(5):
                 start_query = time.time()
-                results = list(self.test_graph.query(query))
+                list(self.test_graph.query(query))
                 baseline_times.append((time.time() - start_query) * 1000)
 
             baseline_avg = sum(baseline_times) / len(baseline_times)
@@ -483,7 +481,7 @@ class OMR_P2_005_Validator:
             current_times = []
             for _ in range(5):
                 start_query = time.time()
-                results = list(self.test_graph.query(query))
+                list(self.test_graph.query(query))
                 current_times.append((time.time() - start_query) * 1000)
 
             current_avg = sum(current_times) / len(current_times)
@@ -594,7 +592,7 @@ class OMR_P2_005_Validator:
             invalid_query = "INVALID SPARQL SYNTAX"
 
             try:
-                results = list(self.test_graph.query(invalid_query))
+                list(self.test_graph.query(invalid_query))
                 invalid_query_handled = False  # Should have thrown an exception
             except Exception:
                 invalid_query_handled = True  # Exception properly thrown
@@ -652,7 +650,7 @@ class OMR_P2_005_Validator:
 
             # Test that we can generate help information
             try:
-                help_str = str(help(Graph.query))
+                str(help(Graph.query))
                 help_available = True
             except Exception:
                 help_available = False

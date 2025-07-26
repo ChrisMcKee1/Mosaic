@@ -1,9 +1,10 @@
-# Mosaic UI Application - Pinned Dependencies for Deployment
+# Mosaic UI Application - Production Dependencies
 
 # Core UI Framework
 streamlit==1.28.2
 
-# Graph Visualization Libraries (FR-UI-003)
+# Graph Visualization Libraries
+streamlit-agraph==0.0.45
 pyvis==0.3.2
 plotly==5.17.0
 networkx==3.2.1
@@ -22,8 +23,11 @@ rich==13.7.0
 # Type Hints
 typing-extensions==4.8.0
 
-# Optional: Full Mosaic integration (uncomment for production)
-# azure-cosmos==4.5.1
-# azure-identity==1.15.0
-# semantic-kernel==1.3.0
-# azure-ai-openai==1.0.0
+# Azure SDK and Cosmos DB
+azure-cosmos==4.5.1
+azure-identity==1.15.0
+
+# Semantic Kernel and AI
+semantic-kernel==1.3.0
+azure-ai-openai==1.0.0
+openai==1.6.1

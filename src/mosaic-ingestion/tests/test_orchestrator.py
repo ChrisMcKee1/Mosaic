@@ -274,7 +274,7 @@ class TestMosaicMagenticOrchestrator:
 
         # Mock tree-sitter operations
         with (
-            patch("tree_sitter.Language") as mock_language,
+            patch("tree_sitter.Language"),
             patch("tree_sitter.Parser") as mock_parser_class,
         ):
             mock_parser = Mock()

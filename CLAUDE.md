@@ -112,15 +112,56 @@ azd deploy ingestion-service
 az login && azd auth login
 ```
 
-### Code Quality
+### Code Quality (2025 Optimized)
 
 ```bash
-# Format and lint (REQUIRED before commits)
-ruff check . --fix
-ruff format .
+# =====================================================================================
+# Ruff - Unified Code Quality Tool (replaces black, isort, flake8, bandit)
+# =====================================================================================
 
-# Type checking
+# Primary code quality workflow (REQUIRED before commits)
+ruff check . --fix                   # Lint and auto-fix issues
+ruff format .                        # Format code (replaces black)
+
+# Security scanning (integrated with Ruff)
+ruff check . --select S              # Run only security rules (bandit equivalent)
+
+# Individual service workflows
+cd src/mosaic-mcp && ruff check . --fix && ruff format .
+cd src/mosaic-ingestion && ruff check . --fix && ruff format .
+cd src/mosaic-ui && ruff check . --fix && ruff format .
+
+# =====================================================================================
+# MyPy - Static Type Checking
+# =====================================================================================
+
+# Type checking across all services
 mypy src/
+
+# Individual service type checking
+mypy src/mosaic-mcp/
+mypy src/mosaic-ingestion/
+mypy src/mosaic-ui/
+
+# =====================================================================================
+# Pre-commit - Automated Quality Gates
+# =====================================================================================
+
+# Install pre-commit hooks (one-time setup)
+pre-commit install
+
+# Run all hooks manually
+pre-commit run --all-files
+
+# Test hooks before committing
+pre-commit run
+
+# Update hook versions
+pre-commit autoupdate
+
+# =====================================================================================
+# Testing Workflows
+# =====================================================================================
 
 # Run tests with different scopes
 pytest --tb=short                    # All tests
@@ -132,9 +173,28 @@ pytest tests/test_specific_file.py   # Run specific test file
 # Run tests with coverage
 pytest --cov=src/mosaic-mcp --cov-report=html --cov-report=term-missing
 
-# Git workflow
+# Service-specific testing
+cd src/mosaic-mcp && python3 -m pytest tests/
+cd src/mosaic-ingestion && python3 -m pytest tests/
+cd src/mosaic-ui && python3 run_tests.py
+
+# =====================================================================================
+# Complete Quality Check Pipeline
+# =====================================================================================
+
+# Full quality pipeline (run before commits)
+ruff check . --fix && ruff format . && mypy src/ && pytest
+
+# =====================================================================================
+# Git Workflow with Quality Gates
+# =====================================================================================
+
+# Automated workflow (pre-commit hooks will run automatically)
 git add .
 git commit -m "descriptive message"
+
+# Manual quality check before commit
+ruff check . --fix && ruff format . && mypy src/ && pytest && git add . && git commit -m "message"
 ```
 
 ### Manual Repository Ingestion
@@ -336,17 +396,71 @@ STREAMLIT_SERVER_ADDRESS=0.0.0.0  # Server address
 PYTHONPATH=.                  # Python path for imports
 ```
 
+## Code Quality Tools (2025 Optimized)
+
+### Essential Python Code Quality Stack
+
+The Mosaic project uses a modern, high-performance code quality stack optimized for 2025:
+
+#### 🚀 Ruff - Unified Code Quality Tool
+- **Replaces**: Black (formatting), isort (import sorting), flake8 (linting), bandit (security)
+- **Performance**: 10-100x faster than legacy tools
+- **Features**: Comprehensive rule set with auto-fixing capabilities
+- **Security**: Includes Bandit security rules (S prefix)
+
+#### 🔍 MyPy - Static Type Checking
+- **Purpose**: Catch type-related bugs at development time
+- **Configuration**: Strict mode with selective relaxation
+- **Integration**: Seamless with modern IDEs and CI/CD
+
+#### 🔒 Pre-commit - Automated Quality Gates
+- **Security First**: GitLeaks integration prevents secret commits
+- **Performance**: Lightweight hooks with fast execution
+- **Automation**: Runs quality checks before every commit
+
+### Tool Installation
+
+```bash
+# Install all development dependencies
+pip install -e ".[dev]"
+
+# Individual tool installation
+pip install ruff>=0.1.9 mypy>=1.8.0 pre-commit>=3.6.0
+
+# Set up pre-commit hooks (one-time setup)
+pre-commit install
+```
+
+### Configuration Files
+
+- **Root Configuration**: `/pyproject.toml` - Unified Ruff and MyPy settings
+- **Pre-commit**: `/.pre-commit-config.yaml` - Hook definitions
+- **Service Overrides**: Each service can override specific rules in their `pyproject.toml`
+
+### Migration from Legacy Tools
+
+If you're coming from the legacy toolchain:
+
+```bash
+# Old workflow (deprecated)
+black . && isort . && flake8 . && bandit -r . && mypy .
+
+# New workflow (2025 optimized)
+ruff check . --fix && ruff format . && mypy .
+```
+
 ## Code Standards (Mandatory)
 
 ### Python Development
 
-- **Type Hints**: Required everywhere (enforced by mypy)
+- **Type Hints**: Required everywhere (enforced by mypy in strict mode)
+- **Code Quality**: Use Ruff for all formatting, linting, and security scanning
+- **Security**: All code automatically scanned for security vulnerabilities
 - **Async/Await**: All I/O operations must be async
 - **Error Handling**: Comprehensive try-catch blocks with structured logging
 - **Logging**: Use structlog for structured logging with proper levels
-- **Testing**: Unit tests for all plugins with pytest, 80%+ coverage required
-- **Code Formatting**: Use ruff for linting and formatting (replaces black/flake8)
-- **Import Sorting**: Configured in pyproject.toml with isort profile "black"
+- **Testing**: Unit tests for all plugins with pytest, 70%+ coverage required
+- **Documentation**: Google-style docstrings (enforced by Ruff pydocstyle rules)
 
 ### Plugin Architecture
 

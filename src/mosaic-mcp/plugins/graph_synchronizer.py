@@ -593,7 +593,7 @@ class GraphSynchronizer:
 
         try:
             # Remove duplicate triples (shouldn't happen with RDFLib but check anyway)
-            original_count = len(self.graph)
+            len(self.graph)
 
             # Remove triples with invalid subjects, predicates, or objects
             invalid_triples = []

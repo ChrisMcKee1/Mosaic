@@ -404,7 +404,7 @@ class TestMainFunctions:
             mock_service_class.return_value = mock_service
 
             # Capture logging output
-            with patch("logging.getLogger") as mock_logger:
+            with patch("logging.getLogger"):
                 await local_main()
 
                 # Verify service calls

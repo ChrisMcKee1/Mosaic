@@ -413,7 +413,7 @@ class TestChatInterface:
             "Ask a question:", value="What AI agents are available?"
         )
 
-        submit_clicked = mock_streamlit.button("Send Question")
+        mock_streamlit.button("Send Question")
 
         # Verify input components
         text_inputs = [
@@ -522,7 +522,7 @@ class TestQuickActions:
     def test_database_connection_test(self, mock_streamlit):
         """Test database connection test button."""
         # Simulate quick action button
-        clicked = mock_streamlit.button("🔄 Test Database Connection")
+        mock_streamlit.button("🔄 Test Database Connection")
 
         # Verify button was created
         buttons = [comp for comp in mock_streamlit.components if comp[0] == "button"]
@@ -531,7 +531,7 @@ class TestQuickActions:
 
     def test_hybrid_search_test(self, mock_streamlit):
         """Test hybrid search test button."""
-        clicked = mock_streamlit.button("🔍 Test Hybrid Search")
+        mock_streamlit.button("🔍 Test Hybrid Search")
 
         # Verify button was created
         buttons = [comp for comp in mock_streamlit.components if comp[0] == "button"]
@@ -540,7 +540,7 @@ class TestQuickActions:
 
     def test_ai_agent_configuration_test(self, mock_streamlit):
         """Test AI agent configuration test button."""
-        clicked = mock_streamlit.button("🤖 Test AI Agent Configuration")
+        mock_streamlit.button("🤖 Test AI Agent Configuration")
 
         # Verify button was created
         buttons = [comp for comp in mock_streamlit.components if comp[0] == "button"]

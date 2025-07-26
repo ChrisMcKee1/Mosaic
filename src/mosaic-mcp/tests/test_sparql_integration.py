@@ -188,7 +188,7 @@ class TestSPARQLOptimizationIntegration:
 
             for iteration in range(iterations):
                 start_time = time.time()
-                results = list(sample_graph.query(query))
+                list(sample_graph.query(query))
                 execution_time = (time.time() - start_time) * 1000
                 query_times.append(execution_time)
 
@@ -233,7 +233,7 @@ class TestSPARQLOptimizationIntegration:
         baseline_times = []
         for _ in range(5):
             start_time = time.time()
-            results = list(sample_graph.query(test_query))
+            list(sample_graph.query(test_query))
             execution_time = (time.time() - start_time) * 1000
             baseline_times.append(execution_time)
 
@@ -243,7 +243,7 @@ class TestSPARQLOptimizationIntegration:
         current_times = []
         for _ in range(5):
             start_time = time.time()
-            results = list(sample_graph.query(test_query))
+            list(sample_graph.query(test_query))
             execution_time = (time.time() - start_time) * 1000
             current_times.append(execution_time)
 

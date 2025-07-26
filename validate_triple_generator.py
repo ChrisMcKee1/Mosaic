@@ -1,11 +1,10 @@
-"""
-Simple validation script for TripleGenerator
+"""Simple validation script for TripleGenerator.
 
 Test basic imports and functionality without complex test framework.
 """
 
-import sys
 import os
+import sys
 
 # Add the src directory to Python path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -40,7 +39,7 @@ def test_basic_imports():
         return False
 
     try:
-        from rdflib import Graph, URIRef, Literal
+        from rdflib import Graph, Literal, URIRef
 
         print("✓ RDFLib imports successful")
     except ImportError as e:
@@ -55,12 +54,12 @@ def test_basic_functionality():
     print("\nTesting basic functionality...")
 
     try:
-        from src.mosaic_ingestion.rdf.triple_generator import TripleGenerator
         from src.mosaic_ingestion.models.golden_node import (
             CodeEntity,
             EntityType,
             LanguageType,
         )
+        from src.mosaic_ingestion.rdf.triple_generator import TripleGenerator
 
         # Create a simple test entity
         entity = CodeEntity(
@@ -89,9 +88,8 @@ def test_basic_functionality():
         if len(turtle_output) > 0:
             print("✓ Graph serialization successful")
             return True
-        else:
-            print("✗ Graph serialization produced empty output")
-            return False
+        print("✗ Graph serialization produced empty output")
+        return False
 
     except Exception as e:
         print(f"✗ Basic functionality test failed: {e}")
@@ -104,12 +102,13 @@ def test_performance_basic():
 
     try:
         import time
-        from src.mosaic_ingestion.rdf.triple_generator import TripleGenerator
+
         from src.mosaic_ingestion.models.golden_node import (
             CodeEntity,
             EntityType,
             LanguageType,
         )
+        from src.mosaic_ingestion.rdf.triple_generator import TripleGenerator
 
         # Create 100 test entities
         entities = []
@@ -169,9 +168,8 @@ def main():
     if passed == total:
         print(f"✓ All {total} tests passed!")
         return True
-    else:
-        print(f"✗ {passed}/{total} tests passed")
-        return False
+    print(f"✗ {passed}/{total} tests passed")
+    return False
 
 
 if __name__ == "__main__":

@@ -296,7 +296,7 @@ class TestPyvisNetworkVisualization:
         # Test network creation with configuration
         from pyvis.network import Network
 
-        net = Network(height="700px", width="700px", directed=True)
+        Network(height="700px", width="700px", directed=True)
 
         # Verify network was created
         mock_network.assert_called_once()
@@ -355,7 +355,7 @@ class TestPlotlyGraphAnalytics:
         # Test figure creation
         import plotly.graph_objects as go
 
-        fig = go.Figure()
+        go.Figure()
 
         # Verify figure was created
         mock_figure.assert_called_once()
@@ -407,9 +407,9 @@ class TestGraphDataBinding:
         relationships = [{"source": "test1", "target": "test2", "type": "imports"}]
 
         # Test all visualization types
-        d3_html = mock_visualizations.create_enhanced_d3_graph(entities, relationships)
-        pyvis_html = mock_visualizations.create_pyvis_graph(entities, relationships)
-        plotly_html = mock_visualizations.create_plotly_graph(entities, relationships)
+        mock_visualizations.create_enhanced_d3_graph(entities, relationships)
+        mock_visualizations.create_pyvis_graph(entities, relationships)
+        mock_visualizations.create_plotly_graph(entities, relationships)
 
         # All should handle the same data
         assert len(entities) == 2
@@ -515,7 +515,7 @@ class TestInteractiveFeatures:
         self, mock_visualizations, sample_graph_entities, sample_graph_relationships
     ):
         """Test tooltip functionality."""
-        html = mock_visualizations.create_enhanced_d3_graph(
+        mock_visualizations.create_enhanced_d3_graph(
             sample_graph_entities, sample_graph_relationships
         )
 
@@ -700,7 +700,7 @@ class TestVisualizationCustomization:
             {"id": "large", "name": "Large", "category": "test", "lines": 500},
         ]
 
-        html = mock_visualizations.create_enhanced_d3_graph(entities_with_sizes, [])
+        mock_visualizations.create_enhanced_d3_graph(entities_with_sizes, [])
 
         # Should include size data for scaling
         nodes_data = json.dumps(entities_with_sizes)

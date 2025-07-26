@@ -260,27 +260,9 @@ class GraphPlugin:
 
             # Build schema discovery SPARQL query
             if entity_type:
-                sparql_query = f"""
-                SELECT DISTINCT ?entityType ?property ?propertyType (COUNT(*) as ?count)
-                WHERE {{
-                    ?entity a <{entity_type}> .
-                    ?entity ?property ?value .
-                    BIND(datatype(?value) as ?propertyType)
-                }}
-                GROUP BY ?entityType ?property ?propertyType
-                ORDER BY DESC(?count)
-                LIMIT {max_results}
-                """
+                pass
             else:
-                sparql_query = f"""
-                SELECT DISTINCT ?entityType (COUNT(*) as ?count)
-                WHERE {{
-                    ?entity a ?entityType .
-                }}
-                GROUP BY ?entityType
-                ORDER BY DESC(?count)
-                LIMIT {max_results}
-                """
+                pass
 
             # Execute schema discovery query via NL2SPARQL service (using translate_and_execute with predefined SPARQL)
             # Since there's no direct execute_sparql method, we'll create a simple NL query that should translate to our SPARQL

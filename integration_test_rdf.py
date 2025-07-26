@@ -1,12 +1,11 @@
-"""
-Integration Test: AI Code Parser + RDF Triple Generator
+"""Integration Test: AI Code Parser + RDF Triple Generator.
 
 Demonstrates the complete pipeline from code parsing to RDF triple generation.
 Tests the integration of AI-powered parsing with semantic RDF representation.
 """
 
-import sys
 import os
+import sys
 
 # Add paths for imports
 sys.path.insert(0, os.path.dirname(__file__))
@@ -30,11 +29,11 @@ from typing import List, Dict
 
 class UserService:
     """Service class for user management operations."""
-    
+
     def __init__(self, database_url: str):
         self.db_url = database_url
         self.connection = None
-        
+
     def connect(self) -> bool:
         """Establish database connection."""
         try:
@@ -45,20 +44,20 @@ class UserService:
         except Exception as e:
             print(f"Connection failed: {e}")
             return False
-    
+
     def get_user(self, user_id: int) -> Dict:
         """Retrieve user by ID."""
         if not self.connection:
             self.connect()
-        
+
         # Simulate database query
         return {"id": user_id, "name": "Test User"}
-    
+
     def create_user(self, user_data: Dict) -> int:
         """Create new user and return ID."""
         # Validate data first
         validate_user_data(user_data)
-        
+
         # Simulate user creation
         user_id = len(user_data) + 1
         return user_id
@@ -280,7 +279,7 @@ def test_relationship_mapping():
 
         # Count different relationship types
         relationship_counts = {}
-        for s, p, o in graph:
+        for _s, p, _o in graph:
             rel_type = str(p).split("#")[-1] if "#" in str(p) else str(p)
             relationship_counts[rel_type] = relationship_counts.get(rel_type, 0) + 1
 
@@ -421,9 +420,8 @@ def main():
         print("✓ RDF triple validation against ontology schemas")
         print("✓ Performance benchmark: process 1000 functions in under 10 seconds")
         return True
-    else:
-        print(f"✗ {total - passed} tests failed")
-        return False
+    print(f"✗ {total - passed} tests failed")
+    return False
 
 
 if __name__ == "__main__":

@@ -63,17 +63,6 @@ class MockOmniRAGPlugin:
         ]
 
         # Database RAG indicators
-        db_keywords = [
-            "what is",
-            "show me",
-            "describe",
-            "definition",
-            "details about",
-            "information about",
-            "tell me about",
-            "find entity",
-            "get",
-        ]
 
         # Vector RAG indicators
         vector_keywords = [

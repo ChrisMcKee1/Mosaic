@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-CRUD-005 Simple Validation Script
+"""CRUD-005 Simple Validation Script.
 
 Basic validation of CRUD-005 implementation without complex imports.
 Focuses on validating the core functionality of branch-aware repositories.
@@ -8,7 +7,6 @@ Focuses on validating the core functionality of branch-aware repositories.
 
 import asyncio
 import logging
-
 
 # Configure logging
 logging.basicConfig(
@@ -389,7 +387,7 @@ async def validate_crud_005():
         )
 
     except Exception as e:
-        logger.error(f"CRUD-005 validation failed: {e}")
+        logger.exception(f"CRUD-005 validation failed: {e}")
         validation_results["error"] = str(e)
 
     # Print summary

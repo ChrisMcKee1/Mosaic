@@ -75,13 +75,13 @@ def test_basic_functionality():
         memory_before = process.memory_info().rss
 
         # Create some data
-        test_data = [i for i in range(10000)]
+        [i for i in range(10000)]
 
         memory_after = process.memory_info().rss
-        memory_diff = memory_after - memory_before
+        memory_after - memory_before
 
         # Test CPU monitoring
-        cpu_percent = process.cpu_percent()
+        process.cpu_percent()
 
         # Test timing
         start_time = time.time()

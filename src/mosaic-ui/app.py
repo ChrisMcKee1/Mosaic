@@ -1,31 +1,55 @@
 #!/usr/bin/env python3
 """
-Mosaic Ingestion Validation Tool - Streamlit Application
-Interactive graph visualization + chat interface for comprehensive system validation
+Mosaic Knowledge Graph UI - Streamlit Application
+Interactive graph visualization and AI-powered chat interface using real Cosmos DB data and Semantic Kernel
 """
 
 import streamlit as st
 import streamlit.components.v1 as components
+import streamlit_agraph as agraph
+from streamlit_agraph import agraph, Node, Edge, Config
 import json
 import asyncio
 import logging
-from typing import Dict, Any
+import os
 import sys
+from typing import Dict, List, Any
 from pathlib import Path
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import uuid
 
-# Add the parent directory to the path to import mosaic modules
-sys.path.append(str(Path(__file__).parent / "src"))
+# Add the parent directories to the path to import mosaic modules
+sys.path.append(str(Path(__file__).parent.parent / "mosaic-ingestion"))
+sys.path.append(str(Path(__file__).parent.parent / "mosaic-mcp"))
 
 # Import Mosaic components for real database integration
 try:
-    from mosaic_mcp.config.settings import MosaicSettings
-    from mosaic_mcp.plugins.graph_data_service import GraphDataService
-    from mosaic_mcp.plugins.retrieval import RetrievalPlugin
+    from cosmos_mode_manager import CosmosModeManager
+    from azure.cosmos import CosmosClient
+    from azure.cosmos.exceptions import (
+        CosmosHttpResponseError,
+        CosmosResourceNotFoundError,
+    )
 
-    MOSAIC_AVAILABLE = True
+    COSMOS_AVAILABLE = True
 except ImportError as e:
-    logging.warning(f"Mosaic components not available: {e}")
-    MOSAIC_AVAILABLE = False
+    logging.warning(f"Cosmos components not available: {e}")
+    COSMOS_AVAILABLE = False
+
+try:
+    import semantic_kernel as sk
+    from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
+    from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
+    from semantic_kernel.prompt_template import PromptTemplateConfig
+    from semantic_kernel.core_plugins.text_memory_plugin import TextMemoryPlugin
+    from semantic_kernel.memory.null_memory import NullMemory
+
+    SEMANTIC_KERNEL_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"Semantic Kernel not available: {e}")
+    SEMANTIC_KERNEL_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -33,7 +57,7 @@ logger = logging.getLogger(__name__)
 
 # Set Streamlit page config
 st.set_page_config(
-    page_title="Mosaic Ingestion Validation Tool",
+    page_title="Mosaic Knowledge Graph",
     page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -50,38 +74,74 @@ st.markdown(
         color: white;
         text-align: center;
         margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
     .metric-card {
         background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 8px;
+        padding: 1.5rem;
+        border-radius: 12px;
         border-left: 4px solid #667eea;
         margin: 0.5rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
-    .node-details {
-        background: #e3f2fd;
+    .data-status {
+        background: #e8f5e8;
         padding: 1rem;
         border-radius: 8px;
         margin: 1rem 0;
+        border-left: 4px solid #4caf50;
+    }
+    
+    .error-status {
+        background: #ffeaa7;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border-left: 4px solid #e17055;
     }
     
     .chat-message {
         background: #f1f3f4;
-        padding: 0.8rem;
-        border-radius: 8px;
+        padding: 1rem;
+        border-radius: 12px;
         margin: 0.5rem 0;
     }
     
     .user-message {
         background: #e8f5e8;
         margin-left: 2rem;
+        border-left: 4px solid #4caf50;
     }
     
     .assistant-message {
         background: #fff3e0;
         margin-right: 2rem;
+        border-left: 4px solid #ff9800;
+    }
+    
+    .graph-controls {
+        background: #f5f5f5;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        background-color: #f0f2f6;
+        border-radius: 8px 8px 0 0;
+        padding: 10px 24px;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: #667eea;
+        color: white;
     }
 </style>
 """,
@@ -89,8 +149,699 @@ st.markdown(
 )
 
 
-def load_mosaic_data():
-    """Load the comprehensive Mosaic system data."""
+class MosaicDataService:
+    """Service for loading and managing Mosaic knowledge graph data."""
+
+    def __init__(self):
+        self.cosmos_manager = None
+        self.cosmos_client = None
+        self.database = None
+        self.containers = {}
+        self.connected = False
+
+    def initialize(self, mode: str = "local") -> bool:
+        """Initialize connection to Cosmos DB."""
+        try:
+            if not COSMOS_AVAILABLE:
+                logger.error("Cosmos SDK not available")
+                return False
+
+            self.cosmos_manager = CosmosModeManager(mode)
+            self.cosmos_client = self.cosmos_manager.get_cosmos_client()
+
+            database_name = self.cosmos_manager.config["database"]
+            self.database = self.cosmos_client.get_database_client(database_name)
+
+            # Initialize containers
+            for container_name in ["knowledge", "memory", "repositories", "diagrams"]:
+                try:
+                    container = self.database.get_container_client(container_name)
+                    # Test the connection
+                    container.read()
+                    self.containers[container_name] = container
+                    logger.info(f"✅ Connected to container: {container_name}")
+                except CosmosResourceNotFoundError:
+                    logger.warning(f"⚠️ Container '{container_name}' not found")
+                except Exception as e:
+                    logger.error(
+                        f"❌ Error connecting to container '{container_name}': {e}"
+                    )
+
+            self.connected = len(self.containers) > 0
+            return self.connected
+
+        except Exception as e:
+            logger.error(f"Failed to initialize Cosmos DB connection: {e}")
+            return False
+
+    def get_container_stats(self) -> Dict[str, int]:
+        """Get document count for each container."""
+        stats = {}
+        for name, container in self.containers.items():
+            try:
+                # Query to count documents
+                query = "SELECT VALUE COUNT(1) FROM c"
+                items = list(
+                    container.query_items(
+                        query=query, enable_cross_partition_query=True
+                    )
+                )
+                stats[name] = items[0] if items else 0
+            except Exception as e:
+                logger.error(f"Error getting stats for {name}: {e}")
+                stats[name] = 0
+        return stats
+
+    def get_entities(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """Get entities from available containers."""
+        entities = []
+
+        # Try repositories first for file entities
+        if "repositories" in self.containers:
+            try:
+                query = f"SELECT TOP {limit} * FROM c WHERE c.entity_type = 'file'"
+                items = list(
+                    self.containers["repositories"].query_items(
+                        query=query, enable_cross_partition_query=True
+                    )
+                )
+                entities.extend(items)
+                logger.info(f"Loaded {len(items)} file entities from repositories")
+            except Exception as e:
+                logger.error(f"Error loading file entities: {e}")
+
+        # Try knowledge container for other entities
+        if "knowledge" in self.containers and len(entities) < limit:
+            try:
+                remaining = limit - len(entities)
+                query = f"SELECT TOP {remaining} * FROM c"
+                items = list(
+                    self.containers["knowledge"].query_items(
+                        query=query, enable_cross_partition_query=True
+                    )
+                )
+                entities.extend(items)
+                logger.info(f"Loaded {len(items)} entities from knowledge")
+            except Exception as e:
+                logger.error(f"Error loading knowledge entities: {e}")
+
+        return entities
+
+    def get_relationships(self, limit: int = 200) -> List[Dict[str, Any]]:
+        """Get relationships from available containers."""
+        relationships = []
+
+        # Try repositories for file relationships
+        if "repositories" in self.containers:
+            try:
+                query = f"SELECT TOP {limit} * FROM c WHERE c.relationship_type != null"
+                items = list(
+                    self.containers["repositories"].query_items(
+                        query=query, enable_cross_partition_query=True
+                    )
+                )
+                relationships.extend(items)
+                logger.info(f"Loaded {len(items)} relationships from repositories")
+            except Exception as e:
+                logger.error(f"Error loading relationships: {e}")
+
+        return relationships
+
+    def search_entities(
+        self, search_term: str, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """Search for entities containing the search term."""
+        results = []
+
+        for container_name, container in self.containers.items():
+            try:
+                # Search in different fields based on container
+                if container_name == "repositories":
+                    query = f"""
+                    SELECT TOP {limit // len(self.containers)} * FROM c 
+                    WHERE CONTAINS(LOWER(c.file_path), LOWER(@search)) 
+                       OR CONTAINS(LOWER(c.file_name), LOWER(@search))
+                       OR CONTAINS(LOWER(c.content), LOWER(@search))
+                    """
+                else:
+                    query = f"""
+                    SELECT TOP {limit // len(self.containers)} * FROM c 
+                    WHERE CONTAINS(LOWER(c.name), LOWER(@search)) 
+                       OR CONTAINS(LOWER(c.description), LOWER(@search))
+                       OR CONTAINS(LOWER(c.content), LOWER(@search))
+                    """
+
+                items = list(
+                    container.query_items(
+                        query=query,
+                        parameters=[{"name": "@search", "value": search_term}],
+                        enable_cross_partition_query=True,
+                    )
+                )
+                results.extend(items)
+
+            except Exception as e:
+                logger.error(f"Error searching in {container_name}: {e}")
+
+        return results[:limit]
+
+
+class SemanticKernelService:
+    """Service for AI-powered chat functionality using Semantic Kernel."""
+
+    def __init__(self):
+        self.kernel = None
+        self.chat_service = None
+        self.initialized = False
+
+    def initialize(self) -> bool:
+        """Initialize Semantic Kernel with Azure OpenAI."""
+        try:
+            if not SEMANTIC_KERNEL_AVAILABLE:
+                logger.error("Semantic Kernel not available")
+                return False
+
+            # Get configuration from environment
+            azure_openai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+            azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+            azure_openai_deployment_name = os.getenv(
+                "AZURE_OPENAI_DEPLOYMENT_NAME", "gpt-4"
+            )
+
+            openai_api_key = os.getenv("OPENAI_API_KEY")
+            openai_model_id = os.getenv("OPENAI_MODEL_ID", "gpt-4")
+
+            # Initialize kernel
+            self.kernel = sk.Kernel()
+
+            # Try Azure OpenAI first, then fallback to OpenAI
+            if azure_openai_endpoint and azure_openai_api_key:
+                logger.info("Initializing Azure OpenAI chat service")
+                self.chat_service = AzureChatCompletion(
+                    deployment_name=azure_openai_deployment_name,
+                    endpoint=azure_openai_endpoint,
+                    api_key=azure_openai_api_key,
+                    service_id="azure_chat_completion",
+                )
+                self.kernel.add_service(self.chat_service)
+
+            elif openai_api_key:
+                logger.info("Initializing OpenAI chat service")
+                self.chat_service = OpenAIChatCompletion(
+                    ai_model_id=openai_model_id,
+                    api_key=openai_api_key,
+                    service_id="openai_chat_completion",
+                )
+                self.kernel.add_service(self.chat_service)
+
+            else:
+                logger.error("No OpenAI configuration found")
+                return False
+
+            # Add memory plugin
+            self.kernel.add_plugin(TextMemoryPlugin(NullMemory()), "memory")
+
+            self.initialized = True
+            logger.info("✅ Semantic Kernel initialized successfully")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to initialize Semantic Kernel: {e}")
+            return False
+
+    async def chat(self, message: str, context: str = "") -> str:
+        """Process a chat message with optional context."""
+        try:
+            if not self.initialized:
+                return "❌ Chat service not available. Please check your OpenAI configuration."
+
+            # Create enhanced prompt with context
+            system_prompt = """You are an AI assistant for the Mosaic Knowledge Graph system. 
+            You help users understand and navigate code repositories, relationships, and system architecture.
+            
+            You have access to repository data including files, dependencies, and code relationships.
+            Provide helpful, accurate answers about the codebase structure and functionality.
+            
+            When discussing code, be specific about file paths, functions, and relationships when possible.
+            """
+
+            if context:
+                system_prompt += f"\n\nCurrent Context:\n{context}"
+
+            user_prompt = f"""
+            System: {system_prompt}
+            
+            User: {message}
+            
+            Assistant: """
+
+            # Execute the prompt using Semantic Kernel
+            result = await self.kernel.invoke_prompt(
+                function_name="chat_response", plugin_name="chat", prompt=user_prompt
+            )
+
+            return str(result)
+
+        except Exception as e:
+            logger.error(f"Error in chat processing: {e}")
+            return f"❌ Error processing your request: {str(e)}"
+
+
+def create_graph_visualization(
+    entities: List[Dict], relationships: List[Dict]
+) -> agraph.Config:
+    """Create an interactive graph visualization using streamlit-agraph."""
+
+    nodes = []
+    edges = []
+
+    # Color mapping for different entity types
+    color_map = {
+        "file": "#4CAF50",  # Green for files
+        "class": "#2196F3",  # Blue for classes
+        "function": "#FF9800",  # Orange for functions
+        "module": "#9C27B0",  # Purple for modules
+        "dependency": "#F44336",  # Red for dependencies
+        "default": "#757575",  # Grey for unknown
+    }
+
+    # Create nodes from entities
+    entity_ids = set()
+    for entity in entities:
+        entity_id = entity.get("id", entity.get("file_path", str(uuid.uuid4())))
+        if entity_id in entity_ids:
+            continue
+        entity_ids.add(entity_id)
+
+        # Determine entity type and color
+        entity_type = entity.get("entity_type", entity.get("type", "default"))
+        color = color_map.get(entity_type, color_map["default"])
+
+        # Create label
+        label = entity.get(
+            "name", entity.get("file_name", entity.get("file_path", "Unknown"))
+        )
+        if len(label) > 30:
+            label = label[:27] + "..."
+
+        # Calculate size based on lines or complexity
+        size = 20
+        if "lines_of_code" in entity:
+            size = min(50, max(15, entity["lines_of_code"] // 10))
+        elif "lines" in entity:
+            size = min(50, max(15, entity["lines"] // 10))
+        elif "complexity" in entity:
+            size = min(50, max(15, entity["complexity"] * 3))
+
+        node = Node(
+            id=entity_id,
+            label=label,
+            size=size,
+            color=color,
+            title=f"Type: {entity_type}\nPath: {entity.get('file_path', 'N/A')}\nLines: {entity.get('lines_of_code', entity.get('lines', 'N/A'))}",
+        )
+        nodes.append(node)
+
+    # Create edges from relationships
+    for relationship in relationships:
+        source = relationship.get(
+            "source_id", relationship.get("from", relationship.get("source"))
+        )
+        target = relationship.get(
+            "target_id", relationship.get("to", relationship.get("target"))
+        )
+
+        if source and target and source in entity_ids and target in entity_ids:
+            rel_type = relationship.get(
+                "relationship_type", relationship.get("type", "related")
+            )
+            edge = Edge(
+                source=source,
+                target=target,
+                label=rel_type,
+                color="#888888",
+                title=f"Relationship: {rel_type}",
+            )
+            edges.append(edge)
+
+    # Configure the graph
+    config = Config(
+        width="100%",
+        height=600,
+        directed=True,
+        physics=True,
+        hierarchical=False,
+        node_spacing=200,
+        spring_length=100,
+        spring_strength=0.05,
+        damping=0.1,
+    )
+
+    return nodes, edges, config
+
+
+def main():
+    """Main Streamlit application."""
+
+    # Header
+    st.markdown(
+        """
+        <div class="main-header">
+            <h1>🎯 Mosaic Knowledge Graph</h1>
+            <p>Interactive repository exploration powered by AI and graph visualization</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Initialize session state
+    if "data_service" not in st.session_state:
+        st.session_state.data_service = MosaicDataService()
+
+    if "sk_service" not in st.session_state:
+        st.session_state.sk_service = SemanticKernelService()
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    if "current_entities" not in st.session_state:
+        st.session_state.current_entities = []
+
+    if "current_relationships" not in st.session_state:
+        st.session_state.current_relationships = []
+
+    # Sidebar for configuration and controls
+    with st.sidebar:
+        st.title("🔧 Configuration")
+
+        # Mode selection
+        mode = st.selectbox(
+            "Database Mode",
+            ["local", "azure"],
+            index=0,
+            help="Select whether to connect to local Cosmos DB emulator or Azure Cosmos DB",
+        )
+
+        # Connection status
+        if st.button("🔌 Connect to Database"):
+            with st.spinner("Connecting to Cosmos DB..."):
+                if st.session_state.data_service.initialize(mode):
+                    st.success("✅ Connected to Cosmos DB")
+                else:
+                    st.error("❌ Failed to connect to Cosmos DB")
+
+        # Display connection status
+        if st.session_state.data_service.connected:
+            st.markdown(
+                '<div class="data-status">🟢 Database Connected</div>',
+                unsafe_allow_html=True,
+            )
+
+            # Show container stats
+            stats = st.session_state.data_service.get_container_stats()
+            st.subheader("📊 Container Stats")
+            for container, count in stats.items():
+                st.metric(container, count)
+        else:
+            st.markdown(
+                '<div class="error-status">🔴 Database Disconnected</div>',
+                unsafe_allow_html=True,
+            )
+
+        # AI Configuration
+        st.title("🤖 AI Configuration")
+
+        # Initialize Semantic Kernel
+        if st.button("🧠 Initialize AI Chat"):
+            with st.spinner("Initializing Semantic Kernel..."):
+                if st.session_state.sk_service.initialize():
+                    st.success("✅ AI Chat Ready")
+                else:
+                    st.error("❌ AI Chat Unavailable")
+
+        # Show AI status
+        if st.session_state.sk_service.initialized:
+            st.markdown(
+                '<div class="data-status">🟢 AI Chat Ready</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                '<div class="error-status">🔴 AI Chat Unavailable</div>',
+                unsafe_allow_html=True,
+            )
+            st.info("""
+            💡 **To enable AI chat:**
+            1. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY for Azure OpenAI
+            2. Or set OPENAI_API_KEY for OpenAI
+            3. Click 'Initialize AI Chat' button
+            """)
+
+    # Main content area with tabs
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["📊 Dashboard", "🕸️ Graph View", "💬 AI Chat", "🔍 Search"]
+    )
+
+    with tab1:
+        st.header("📊 Repository Dashboard")
+
+        if not st.session_state.data_service.connected:
+            st.warning("Please connect to the database first using the sidebar.")
+            return
+
+        # Load and display data overview
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if st.button("📥 Load Repository Data"):
+                with st.spinner("Loading entities and relationships..."):
+                    entities = st.session_state.data_service.get_entities(100)
+                    relationships = st.session_state.data_service.get_relationships(200)
+
+                    st.session_state.current_entities = entities
+                    st.session_state.current_relationships = relationships
+
+                    st.success(
+                        f"✅ Loaded {len(entities)} entities and {len(relationships)} relationships"
+                    )
+
+        with col2:
+            if st.session_state.current_entities:
+                st.metric("Entities Loaded", len(st.session_state.current_entities))
+                st.metric(
+                    "Relationships Loaded", len(st.session_state.current_relationships)
+                )
+
+        # Display entity overview
+        if st.session_state.current_entities:
+            st.subheader("📁 Repository Files")
+
+            # Create DataFrame for display
+            entity_data = []
+            for entity in st.session_state.current_entities[:20]:  # Show first 20
+                entity_data.append(
+                    {
+                        "File": entity.get("file_name", entity.get("name", "Unknown")),
+                        "Path": entity.get("file_path", "N/A"),
+                        "Type": entity.get("entity_type", entity.get("type", "file")),
+                        "Lines": entity.get(
+                            "lines_of_code", entity.get("lines", "N/A")
+                        ),
+                        "Size": entity.get("file_size", "N/A"),
+                    }
+                )
+
+            df = pd.DataFrame(entity_data)
+            st.dataframe(df, use_container_width=True)
+
+            # File type distribution
+            if len(entity_data) > 0:
+                type_counts = df["Type"].value_counts()
+                fig = px.pie(
+                    values=type_counts.values,
+                    names=type_counts.index,
+                    title="Entity Type Distribution",
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+    with tab2:
+        st.header("🕸️ Interactive Graph Visualization")
+
+        if not st.session_state.current_entities:
+            st.warning("Please load repository data from the Dashboard tab first.")
+            return
+
+        # Graph controls
+        st.markdown('<div class="graph-controls">', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            max_nodes = st.slider("Max Nodes", 10, 100, 50)
+        with col2:
+            max_edges = st.slider("Max Edges", 10, 200, 100)
+        with col3:
+            physics_enabled = st.checkbox("Physics", True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # Create and display graph
+        entities_subset = st.session_state.current_entities[:max_nodes]
+        relationships_subset = st.session_state.current_relationships[:max_edges]
+
+        nodes, edges, config = create_graph_visualization(
+            entities_subset, relationships_subset
+        )
+        config.physics = physics_enabled
+
+        if nodes:
+            st.subheader(f"Graph: {len(nodes)} nodes, {len(edges)} edges")
+            selected_node = agraph(nodes=nodes, edges=edges, config=config)
+
+            # Show selected node details
+            if selected_node:
+                st.subheader("🔍 Selected Node Details")
+                for entity in entities_subset:
+                    entity_id = entity.get("id", entity.get("file_path"))
+                    if entity_id == selected_node:
+                        st.json(entity)
+                        break
+        else:
+            st.info(
+                "No graph data available. Please ensure entities are loaded correctly."
+            )
+
+    with tab3:
+        st.header("💬 AI-Powered Repository Chat")
+
+        if not st.session_state.sk_service.initialized:
+            st.warning("Please initialize the AI chat service from the sidebar first.")
+            return
+
+        # Display chat history
+        st.subheader("Chat History")
+        chat_container = st.container()
+
+        with chat_container:
+            for i, message in enumerate(st.session_state.chat_history):
+                if message["role"] == "user":
+                    st.markdown(
+                        f'<div class="chat-message user-message">👤 **You:** {message["content"]}</div>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(
+                        f'<div class="chat-message assistant-message">🤖 **Assistant:** {message["content"]}</div>',
+                        unsafe_allow_html=True,
+                    )
+
+        # Chat input
+        user_input = st.text_input(
+            "Ask about the repository:",
+            placeholder="e.g., What are the main components of this system?",
+        )
+
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            send_button = st.button("Send", type="primary")
+        with col2:
+            clear_button = st.button("Clear History")
+
+        if clear_button:
+            st.session_state.chat_history = []
+            st.rerun()
+
+        if send_button and user_input:
+            # Add user message to history
+            st.session_state.chat_history.append(
+                {"role": "user", "content": user_input}
+            )
+
+            # Create context from current entities
+            context = ""
+            if st.session_state.current_entities:
+                context = f"Repository contains {len(st.session_state.current_entities)} files/entities and {len(st.session_state.current_relationships)} relationships."
+
+                # Add sample entity info
+                sample_entities = st.session_state.current_entities[:5]
+                context += " Key files include: "
+                context += ", ".join(
+                    [
+                        e.get("file_path", e.get("name", "Unknown"))
+                        for e in sample_entities
+                    ]
+                )
+
+            # Get AI response
+            with st.spinner("🤖 Thinking..."):
+
+                async def get_response():
+                    return await st.session_state.sk_service.chat(user_input, context)
+
+                # Run async function
+                response = asyncio.run(get_response())
+
+            # Add assistant response to history
+            st.session_state.chat_history.append(
+                {"role": "assistant", "content": response}
+            )
+
+            # Rerun to show new messages
+            st.rerun()
+
+    with tab4:
+        st.header("🔍 Search Repository")
+
+        if not st.session_state.data_service.connected:
+            st.warning("Please connect to the database first using the sidebar.")
+            return
+
+        # Search interface
+        search_term = st.text_input(
+            "Search for files, functions, or content:",
+            placeholder="e.g., main.py, function, class",
+        )
+
+        if st.button("🔍 Search") and search_term:
+            with st.spinner("Searching repository..."):
+                results = st.session_state.data_service.search_entities(search_term, 50)
+
+            if results:
+                st.success(f"Found {len(results)} results for '{search_term}'")
+
+                # Display results
+                for i, result in enumerate(results):
+                    with st.expander(
+                        f"📄 {result.get('file_name', result.get('name', 'Unknown'))} - {result.get('file_path', 'N/A')}"
+                    ):
+                        col1, col2 = st.columns(2)
+
+                        with col1:
+                            st.write("**Type:**", result.get("entity_type", "Unknown"))
+                            st.write("**Path:**", result.get("file_path", "N/A"))
+                            st.write("**Size:**", result.get("file_size", "N/A"))
+
+                        with col2:
+                            st.write(
+                                "**Lines:**",
+                                result.get("lines_of_code", result.get("lines", "N/A")),
+                            )
+                            st.write(
+                                "**Last Modified:**", result.get("last_modified", "N/A")
+                            )
+
+                        # Show content preview if available
+                        content = result.get("content", result.get("summary", ""))
+                        if content:
+                            st.write("**Content Preview:**")
+                            st.text(
+                                content[:500] + "..." if len(content) > 500 else content
+                            )
+            else:
+                st.info(
+                    f"No results found for '{search_term}'. Try different keywords."
+                )
+
+
+if __name__ == "__main__":
+    main()
 
     entities = [
         {
@@ -456,21 +1207,7 @@ def initialize_session_state():
 def create_interactive_graph():
     """Create the interactive D3.js graph component."""
 
-    entities = st.session_state.entities
-    relationships = st.session_state.relationships
-
     # Category colors
-    category_colors = {
-        "server": "#ff6b6b",
-        "plugin": "#4ecdc4",
-        "ingestion": "#45b7d1",
-        "ai_agent": "#96ceb4",
-        "config": "#ffeaa7",
-        "model": "#fd79a8",
-        "infrastructure": "#dda0dd",
-        "test": "#98d8c8",
-        "function": "#orange",
-    }
 
 
 def create_enhanced_d3_graph():
@@ -1171,7 +1908,6 @@ def create_pyvis_graph():
 
 def create_plotly_graph():
     """Create advanced Plotly graph with modern features."""
-    import plotly.graph_objects as go
     import networkx as nx
 
     entities = st.session_state.entities
@@ -1350,11 +2086,9 @@ def display_node_details(node_data: Dict[str, Any]):
         st.markdown("### 🔗 Relationships")
         for rel in related:
             if rel["source"] == node_data["id"]:
-                direction = "outgoing"
                 other_id = rel["target"]
                 arrow = "→"
             else:
-                direction = "incoming"
                 other_id = rel["source"]
                 arrow = "←"
 

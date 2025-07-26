@@ -1,0 +1,56 @@
+# Cosmos DB Docker Setup for Local Development
+# Microsoft provides an official Cosmos DB Linux emulator in Docker
+
+version: '3.8'
+
+services:
+  cosmos-db:
+    container_name: mosaic-cosmos-emulator
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+    platform: linux/amd64
+    ports:
+      - "8081:8081"
+      - "10251:10251"
+      - "10252:10252"
+      - "10253:10253"
+      - "10254:10254"
+    environment:
+      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=10
+      - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true
+      - AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE=127.0.0.1
+    volumes:
+      - cosmos-data:/opt/azure-cosmos-emulator/data
+    networks:
+      - mosaic-network
+
+  redis:
+    container_name: mosaic-redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass local-dev-password
+    volumes:
+      - redis-data:/data
+    networks:
+      - mosaic-network
+
+  azurite:
+    container_name: mosaic-azurite
+    image: mcr.microsoft.com/azure-storage/azurite
+    ports:
+      - "10000:10000"  # Blob service
+      - "10001:10001"  # Queue service
+      - "10002:10002"  # Table service
+    volumes:
+      - azurite-data:/opt/azurite/folder
+    networks:
+      - mosaic-network
+
+volumes:
+  cosmos-data:
+  redis-data:
+  azurite-data:
+
+networks:
+  mosaic-network:
+    driver: bridge

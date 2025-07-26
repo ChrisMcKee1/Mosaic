@@ -320,7 +320,7 @@ def validate_sparql_builder():
 
         # Test 6: Test clear graph
         try:
-            original_count = len(sparql_builder.graph)
+            len(sparql_builder.graph)
             sparql_builder.clear_graph()
             assert len(sparql_builder.graph) == 0
             logger.info("✓ Clear graph test passed")

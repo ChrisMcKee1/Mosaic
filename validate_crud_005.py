@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-CRUD-005 Validation Script
+"""CRUD-005 Validation Script.
 
 Validates the branch-aware Cosmos DB repository implementation by testing:
 - Hierarchical partitioning by branch
@@ -15,24 +14,23 @@ Usage:
     python validate_crud_005.py            # Full integration test
 """
 
-import asyncio
 import argparse
+import asyncio
 import logging
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 # Add the src directories to Python path for imports
 sys.path.insert(0, str(Path(__file__).parent / "src" / "mosaic-ingestion"))
 sys.path.insert(0, str(Path(__file__).parent / "src" / "mosaic-mcp"))
 
-from utils.branch_aware_repository import BranchAwareRepository
-from utils.repository_implementations import RepositoryFactory
-from utils.container_configuration import ContainerManager, PerformanceMonitor
-from models.golden_node import GoldenNode
 from config.settings import MosaicSettings
-
+from models.golden_node import GoldenNode
+from utils.branch_aware_repository import BranchAwareRepository
+from utils.container_configuration import ContainerManager, PerformanceMonitor
+from utils.repository_implementations import RepositoryFactory
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +51,7 @@ class CRUD005Validator:
             "overall_success": False,
         }
 
-    async def validate_all(self) -> Dict[str, Any]:
+    async def validate_all(self) -> dict[str, Any]:
         """Run all CRUD-005 validation tests."""
         logger.info("Starting CRUD-005 validation...")
 
@@ -105,7 +103,7 @@ class CRUD005Validator:
             return self.validation_results
 
         except Exception as e:
-            logger.error(f"CRUD-005 validation failed: {e}")
+            logger.exception(f"CRUD-005 validation failed: {e}")
             self.validation_results["error"] = str(e)
             return self.validation_results
 
@@ -121,7 +119,7 @@ class CRUD005Validator:
 
     def _create_mock_cosmos_client(self):
         """Create mock Cosmos DB client for dry-run testing."""
-        from unittest.mock import MagicMock, AsyncMock
+        from unittest.mock import AsyncMock, MagicMock
 
         mock_client = MagicMock()
         mock_database = MagicMock()
@@ -163,7 +161,7 @@ class CRUD005Validator:
             self.validation_results["repository_factory"] = True
 
         except Exception as e:
-            logger.error(f"✗ Repository factory test failed: {e}")
+            logger.exception(f"✗ Repository factory test failed: {e}")
             self.validation_results["repository_factory"] = False
 
     async def _test_branch_partitioning(self, cosmos_client) -> None:
@@ -221,7 +219,7 @@ class CRUD005Validator:
                 )
 
         except Exception as e:
-            logger.error(f"✗ Branch partitioning test failed: {e}")
+            logger.exception(f"✗ Branch partitioning test failed: {e}")
             self.validation_results["partitioning"] = False
 
     async def _test_cross_partition_queries(self, cosmos_client) -> None:
@@ -279,7 +277,7 @@ class CRUD005Validator:
                 raise ValueError("Cross-partition query didn't return list results")
 
         except Exception as e:
-            logger.error(f"✗ Cross-partition query test failed: {e}")
+            logger.exception(f"✗ Cross-partition query test failed: {e}")
             self.validation_results["cross_partition_queries"] = False
 
     async def _test_ttl_policies(self, cosmos_client) -> None:
@@ -331,7 +329,7 @@ class CRUD005Validator:
                 raise ValueError("TTL policy configuration or application failed")
 
         except Exception as e:
-            logger.error(f"✗ TTL policy test failed: {e}")
+            logger.exception(f"✗ TTL policy test failed: {e}")
             self.validation_results["ttl_policies"] = False
 
     async def _test_container_optimization(self, cosmos_client) -> None:
@@ -377,7 +375,7 @@ class CRUD005Validator:
                 )
 
         except Exception as e:
-            logger.error(f"✗ Container optimization test failed: {e}")
+            logger.exception(f"✗ Container optimization test failed: {e}")
             self.validation_results["container_optimization"] = False
 
     async def _test_performance_monitoring(self, cosmos_client) -> None:
@@ -420,7 +418,7 @@ class CRUD005Validator:
                 raise ValueError("Performance monitoring didn't track query properly")
 
         except Exception as e:
-            logger.error(f"✗ Performance monitoring test failed: {e}")
+            logger.exception(f"✗ Performance monitoring test failed: {e}")
             self.validation_results["performance_monitoring"] = False
 
     def print_validation_summary(self) -> None:

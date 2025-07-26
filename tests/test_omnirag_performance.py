@@ -1,5 +1,4 @@
-"""
-Performance benchmark tests for the OmniRAG system.
+"""Performance benchmark tests for the OmniRAG system.
 
 Validates that the system meets the 2-second query processing requirement
 and other performance criteria for production deployment.
@@ -7,11 +6,11 @@ and other performance criteria for production deployment.
 
 import asyncio
 import json
+import logging
 import statistics
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Any
-import logging
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -42,7 +41,7 @@ class BenchmarkResult:
     p95_time: float
     p99_time: float
     success_rate: float
-    metrics: List[PerformanceMetric]
+    metrics: list[PerformanceMetric]
 
 
 class OmniRAGPerformanceBenchmark:
@@ -66,7 +65,7 @@ class OmniRAGPerformanceBenchmark:
             await self.mock_orchestrator.cleanup()
 
     async def run_single_query_benchmark(
-        self, query: str, user_context: Dict[str, Any]
+        self, query: str, user_context: dict[str, Any]
     ) -> float:
         """Run a single query and return processing time."""
         start_time = time.time()
@@ -87,7 +86,7 @@ class OmniRAGPerformanceBenchmark:
             return processing_time
 
         except Exception as e:
-            logger.error(f"Query failed: {str(e)}")
+            logger.exception(f"Query failed: {str(e)}")
             return -1.0  # Indicates failure
 
     async def benchmark_simple_queries(self) -> BenchmarkResult:
@@ -238,7 +237,7 @@ class OmniRAGPerformanceBenchmark:
         # Execute all queries concurrently
         tasks = [
             self.run_single_query_benchmark(query, context)
-            for query, context in zip(queries, user_contexts)
+            for query, context in zip(queries, user_contexts, strict=False)
         ]
 
         processing_times = await asyncio.gather(*tasks)
@@ -293,7 +292,7 @@ class OmniRAGPerformanceBenchmark:
     def _calculate_benchmark_result(
         self,
         test_name: str,
-        times: List[float],
+        times: list[float],
         failures: int,
         total_queries: int,
         threshold: float,
@@ -380,7 +379,7 @@ class OmniRAGPerformanceBenchmark:
             metrics=metrics,
         )
 
-    async def run_full_benchmark_suite(self) -> List[BenchmarkResult]:
+    async def run_full_benchmark_suite(self) -> list[BenchmarkResult]:
         """Run the complete benchmark suite."""
         print("[BENCHMARK] Starting OmniRAG Performance Benchmark Suite")
         print("=" * 60)
@@ -427,7 +426,7 @@ class OmniRAGPerformanceBenchmark:
         finally:
             await self.cleanup()
 
-    def print_benchmark_summary(self, results: List[BenchmarkResult]):
+    def print_benchmark_summary(self, results: list[BenchmarkResult]):
         """Print comprehensive benchmark summary."""
         print("\n" + "=" * 60)
         print("[RESULTS] OMNIRAG PERFORMANCE BENCHMARK RESULTS")
@@ -471,7 +470,7 @@ class OmniRAGPerformanceBenchmark:
 
     def export_results_to_json(
         self,
-        results: List[BenchmarkResult],
+        results: list[BenchmarkResult],
         filename: str = "omnirag_benchmark_results.json",
     ):
         """Export benchmark results to JSON file."""

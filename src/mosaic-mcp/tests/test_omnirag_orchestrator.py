@@ -169,7 +169,7 @@ class TestOmniRAGOrchestrator:
         result = await orchestrator.process_query("Test parallel execution")
 
         assert result["status"] == "success"
-        assert result["metadata"]["parallel_execution"] == True
+        assert result["metadata"]["parallel_execution"]
 
     async def test_sequential_execution_disabled(
         self, orchestrator, mock_intent_classifier
@@ -188,7 +188,7 @@ class TestOmniRAGOrchestrator:
         result = await orchestrator.process_query("Test sequential execution")
 
         assert result["status"] == "success"
-        assert result["metadata"]["parallel_execution"] == False
+        assert not result["metadata"]["parallel_execution"]
 
     async def test_error_handling_strategy_failure(
         self, orchestrator, mock_intent_classifier, mock_graph_plugin

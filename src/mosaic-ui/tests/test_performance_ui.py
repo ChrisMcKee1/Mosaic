@@ -276,7 +276,7 @@ class TestRenderingPerformance:
             start_time = performance_monitor.start_timer()
 
             # Simulate component rendering
-            component_data = {
+            {
                 "id": component_id,
                 "content": f"Component {component_id} content" * 100,
                 "metadata": {"rendered_at": time.time()},
@@ -496,7 +496,7 @@ class TestResponseTimeOptimization:
                 results = await mock_database_query(query)
 
             # Simulate response formatting
-            formatted_response = {
+            {
                 "query": query,
                 "results": results,
                 "count": len(results),
@@ -594,27 +594,19 @@ class TestResponseTimeOptimization:
 
             if interaction_type == "node_click":
                 # Simulate node selection and details display
-                selected_node = {
-                    "id": "test_node",
-                    "name": "Test Node",
-                    "details": "..." * 100,
-                }
                 time.sleep(0.002)  # Minimal processing time
 
             elif interaction_type == "search_input":
                 # Simulate search input processing
-                search_query = "test search query"
-                filtered_results = [r for r in range(100) if "test" in f"result_{r}"]
+                [r for r in range(100) if "test" in f"result_{r}"]
                 time.sleep(0.005)  # Search processing time
 
             elif interaction_type == "button_click":
                 # Simulate button click action
-                action_result = {"status": "success", "message": "Action completed"}
                 time.sleep(0.001)  # Minimal action time
 
             elif interaction_type == "zoom_pan":
                 # Simulate graph zoom/pan operations
-                new_transform = {"scale": 1.5, "translate": [100, 50]}
                 time.sleep(0.003)  # Transform calculation time
 
             return performance_monitor.end_timer(start_time)
@@ -888,7 +880,7 @@ class TestResourceUtilization:
         for op_name, operation in operations.items():
             start_time = performance_monitor.start_timer()
 
-            result = operation()
+            operation()
 
             execution_time = performance_monitor.end_timer(start_time)
             operation_times[op_name] = execution_time
@@ -929,7 +921,7 @@ class TestResourceUtilization:
             sequential_start = performance_monitor.start_timer()
 
             for i in range(5):
-                result = await mock_api_request(f"/api/data/{i}", data_size_kb=10)
+                await mock_api_request(f"/api/data/{i}", data_size_kb=10)
 
             sequential_time = performance_monitor.end_timer(sequential_start)
 
@@ -939,7 +931,7 @@ class TestResourceUtilization:
             tasks = [
                 mock_api_request(f"/api/data/{i}", data_size_kb=10) for i in range(5)
             ]
-            results = await asyncio.gather(*tasks)
+            await asyncio.gather(*tasks)
 
             concurrent_time = performance_monitor.end_timer(concurrent_start)
 

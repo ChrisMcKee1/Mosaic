@@ -1,11 +1,10 @@
-"""
-Final OMR-P1-004 Validation Script
+"""Final OMR-P1-004 Validation Script.
 
 Direct validation of TripleGenerator implementation without complex imports.
 """
 
-import sys
 import os
+import sys
 
 # Add current directory to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,7 +12,7 @@ src_dir = os.path.join(current_dir, "src", "mosaic-ingestion")
 sys.path.insert(0, src_dir)
 
 try:
-    from rdflib import Graph, URIRef, Literal, Namespace
+    from rdflib import Graph, Literal, Namespace, URIRef
     from rdflib.namespace import RDF, RDFS, XSD
 
     print("✓ RDFLib imported successfully")
@@ -98,7 +97,7 @@ def test_rdf_generation():
         query = """
         PREFIX python: <http://mosaic.ai/ontology/python#>
         PREFIX code: <http://mosaic.ai/ontology/code_base#>
-        
+
         SELECT ?entity ?name WHERE {
             ?entity a python:PythonClass .
             ?entity code:name ?name .
@@ -301,10 +300,9 @@ def main():
         print("- Production deployment preparation")
 
         return True
-    else:
-        print(f"\n⚠️  {total - passed} validation checks failed")
-        print("Additional work may be needed before moving to next phase")
-        return False
+    print(f"\n⚠️  {total - passed} validation checks failed")
+    print("Additional work may be needed before moving to next phase")
+    return False
 
 
 if __name__ == "__main__":

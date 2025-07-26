@@ -531,7 +531,6 @@ class OmniRAGIntegrationTester:
         """Test backward compatibility with existing Basic RAG functionality."""
         try:
             # Test that basic retrieval still works
-            basic_query = "test query"
 
             # Simulate basic RAG behavior
             compatibility_result = {

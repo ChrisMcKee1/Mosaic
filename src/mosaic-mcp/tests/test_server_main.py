@@ -384,7 +384,7 @@ class TestMosaicMCPServer:
                 {"uri": "mosaic://memory", "type": "collection"},
                 {"uri": "mosaic://diagrams", "type": "collection"},
             ],
-        ) as mock_list:
+        ):
             resources = mcp_server.list_resources()
 
             assert len(resources) == 3

@@ -439,9 +439,7 @@ class NL2SPARQLService:
         # Check translator
         try:
             # Simple translation test
-            test_request = NL2SPARQLRequest(
-                natural_language_query="test query", max_results=1
-            )
+            NL2SPARQLRequest(natural_language_query="test query", max_results=1)
             # Don't actually translate, just check if translator is initialized
             if self.translator.client:
                 health_status["components"]["translator"] = "healthy"

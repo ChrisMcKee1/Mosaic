@@ -252,7 +252,7 @@ class TestCommitStatePersistence:
         """Test updating commit state with minimal parameters."""
         manager, mock_container = mock_cosmos_manager
 
-        result = await manager.update_commit_state(
+        await manager.update_commit_state(
             repository_url="https://github.com/test/repo",
             branch_name="main",
             current_commit_sha="minimal_commit",
@@ -358,7 +358,7 @@ class TestGitPythonIntegration:
 
         # Should return commits after commit2 (commit3, commit4)
         # Note: iter_commits_since_last returns new commits in chronological order (oldest first)
-        expected = [commits[2], commits[3]]  # commit3, commit4
+        [commits[2], commits[3]]  # commit3, commit4
         assert len(result) == 2
         assert result[0].hexsha == "commit3"
         assert result[1].hexsha == "commit4"

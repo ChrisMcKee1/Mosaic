@@ -277,8 +277,8 @@ class TestOntologyValidation:
         results = manager.validate_all_ontologies()
 
         assert len(results) == 2
-        assert results["http://test1.org/onto"] == True
-        assert results["http://test2.org/onto"] == True
+        assert results["http://test1.org/onto"]
+        assert results["http://test2.org/onto"]
 
 
 class TestEntityAccess:
@@ -471,7 +471,7 @@ class TestErrorHandling:
         manager = OntologyManager()
 
         result = manager.reload_ontology("http://nonexistent.org/onto")
-        assert result == False
+        assert not result
 
 
 class TestIntegration:

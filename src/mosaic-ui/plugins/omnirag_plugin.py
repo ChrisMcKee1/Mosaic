@@ -100,17 +100,6 @@ class OmniRAGPlugin:
         ]
 
         # Database RAG indicators
-        db_keywords = [
-            "what is",
-            "show me",
-            "describe",
-            "definition",
-            "details about",
-            "information about",
-            "tell me about",
-            "find entity",
-            "get",
-        ]
 
         # Vector RAG indicators
         vector_keywords = [
@@ -267,7 +256,7 @@ class OmniRAGPlugin:
             relationships_container = self.database.get_container_client(
                 "code_relationships"
             )
-            entities_container = self.database.get_container_client("code_entities")
+            self.database.get_container_client("code_entities")
 
             # Extract entity from query for relationship traversal
             entity_keywords = self._extract_entity_keywords(query)

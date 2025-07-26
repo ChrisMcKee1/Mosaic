@@ -1,5 +1,4 @@
-"""
-Integration tests for the complete OmniRAG system.
+"""Integration tests for the complete OmniRAG system.
 
 Tests the end-to-end functionality including:
 - Intent detection and classification
@@ -13,7 +12,7 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -38,7 +37,7 @@ class MockIntentResult:
 
     strategy: str
     confidence: float
-    fallback_strategies: List[str]
+    fallback_strategies: list[str]
 
 
 class MockPluginBase:
@@ -70,16 +69,13 @@ class MockQueryIntentClassifier(MockPluginBase):
             word in query.lower() for word in ["depend", "inherit", "call", "import"]
         ):
             return MockIntentResult("GRAPH_RAG", 0.9, ["HYBRID"])
-        elif any(
-            word in query.lower() for word in ["find", "search", "similar", "like"]
-        ):
+        if any(word in query.lower() for word in ["find", "search", "similar", "like"]):
             return MockIntentResult("VECTOR_RAG", 0.85, ["HYBRID"])
-        elif any(
+        if any(
             word in query.lower() for word in ["count", "statistics", "filter", "list"]
         ):
             return MockIntentResult("DATABASE_RAG", 0.8, ["HYBRID"])
-        else:
-            return MockIntentResult("HYBRID", 0.7, ["VECTOR_RAG", "GRAPH_RAG"])
+        return MockIntentResult("HYBRID", 0.7, ["VECTOR_RAG", "GRAPH_RAG"])
 
 
 class MockOmniRAGOrchestrator(MockPluginBase):
@@ -97,8 +93,8 @@ class MockOmniRAGOrchestrator(MockPluginBase):
         await self.classifier.initialize()
 
     async def process_complete_query(
-        self, query: str, user_context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, query: str, user_context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Process complete query through OmniRAG pipeline."""
         start_time = time.time()
 
@@ -139,7 +135,7 @@ class MockOmniRAGOrchestrator(MockPluginBase):
             "aggregated_context": aggregated_context,
             "processing_time": processing_time,
             "metadata": {
-                "context_sources": len(set(ctx.source for ctx in contexts)),
+                "context_sources": len({ctx.source for ctx in contexts}),
                 "total_contexts": len(contexts),
                 "session_enhanced": bool(user_context.get("user_id")),
                 "query_count": len(self.query_history),
@@ -148,7 +144,7 @@ class MockOmniRAGOrchestrator(MockPluginBase):
 
     async def _orchestrate_retrieval(
         self, query: str, strategy: str
-    ) -> List[MockQueryResult]:
+    ) -> list[MockQueryResult]:
         """Mock retrieval orchestration."""
         contexts = []
         current_time = time.time()
@@ -210,8 +206,8 @@ class MockOmniRAGOrchestrator(MockPluginBase):
         return contexts
 
     async def _aggregate_contexts(
-        self, contexts: List[MockQueryResult]
-    ) -> Dict[str, Any]:
+        self, contexts: list[MockQueryResult]
+    ) -> dict[str, Any]:
         """Mock context aggregation."""
         if not contexts:
             return {"summary": "No contexts to aggregate", "confidence": 0.0}
@@ -221,7 +217,7 @@ class MockOmniRAGOrchestrator(MockPluginBase):
         avg_confidence = total_confidence / len(contexts)
 
         # Mock semantic deduplication
-        unique_sources = list(set(ctx.source for ctx in contexts))
+        unique_sources = list({ctx.source for ctx in contexts})
 
         return {
             "summary": f"Aggregated {len(contexts)} contexts from {len(unique_sources)} sources",
@@ -243,8 +239,8 @@ class MockOmniRAGOrchestrator(MockPluginBase):
     async def _apply_session_learning(
         self,
         query: str,
-        user_context: Dict[str, Any],
-        aggregated_context: Dict[str, Any],
+        user_context: dict[str, Any],
+        aggregated_context: dict[str, Any],
     ):
         """Mock session learning application."""
         user_id = user_context.get("user_id")
@@ -407,7 +403,7 @@ class TestOmniRAGIntegration:
         assert strategy in ["HYBRID", "GRAPH_RAG", "VECTOR_RAG", "DATABASE_RAG"]
 
         # For complex queries, should have contexts from multiple sources or HYBRID strategy
-        sources = set(ctx.source for ctx in result["contexts"])
+        sources = {ctx.source for ctx in result["contexts"]}
         if strategy == "HYBRID":
             assert len(sources) >= 2  # HYBRID should use multiple sources
         else:
@@ -452,12 +448,12 @@ class TestOmniRAGIntegration:
         query_count_3 = result3["metadata"]["query_count"]
 
         # Validate progression (should increase)
-        assert (
-            query_count_2 > query_count_1
-        ), f"Query count should increase: {query_count_1} -> {query_count_2}"
-        assert (
-            query_count_3 > query_count_2
-        ), f"Query count should increase: {query_count_2} -> {query_count_3}"
+        assert query_count_2 > query_count_1, (
+            f"Query count should increase: {query_count_1} -> {query_count_2}"
+        )
+        assert query_count_3 > query_count_2, (
+            f"Query count should increase: {query_count_2} -> {query_count_3}"
+        )
 
         # All should have session enhancement enabled
         assert result1["metadata"]["session_enhanced"] is True
@@ -468,9 +464,9 @@ class TestOmniRAGIntegration:
         user_id = user_context["user_id"]
         assert user_id in orchestrator.session_data
         final_count = orchestrator.session_data[user_id]["query_count"]
-        assert (
-            final_count >= 3
-        ), f"Final session count should be at least 3, got {final_count}"
+        assert final_count >= 3, (
+            f"Final session count should be at least 3, got {final_count}"
+        )
 
     @pytest.mark.integration
     async def test_performance_requirements(self, orchestrator):
@@ -492,17 +488,17 @@ class TestOmniRAGIntegration:
 
             # Validate performance targets
             if "Simple" in description:
-                assert (
-                    processing_time < 0.5
-                ), f"Simple query took {processing_time:.2f}s, should be < 0.5s"
+                assert processing_time < 0.5, (
+                    f"Simple query took {processing_time:.2f}s, should be < 0.5s"
+                )
             elif "Medium" in description:
-                assert (
-                    processing_time < 1.5
-                ), f"Medium query took {processing_time:.2f}s, should be < 1.5s"
+                assert processing_time < 1.5, (
+                    f"Medium query took {processing_time:.2f}s, should be < 1.5s"
+                )
             elif "Complex" in description:
-                assert (
-                    processing_time < 2.0
-                ), f"Complex query took {processing_time:.2f}s, should be < 2.0s"
+                assert processing_time < 2.0, (
+                    f"Complex query took {processing_time:.2f}s, should be < 2.0s"
+                )
 
     @pytest.mark.integration
     async def test_concurrent_query_processing(self, orchestrator):
@@ -524,7 +520,7 @@ class TestOmniRAGIntegration:
         start_time = time.time()
         tasks = [
             orchestrator.process_complete_query(query, context)
-            for query, context in zip(queries, user_contexts)
+            for query, context in zip(queries, user_contexts, strict=False)
         ]
         results = await asyncio.gather(*tasks)
         total_time = time.time() - start_time
@@ -537,9 +533,9 @@ class TestOmniRAGIntegration:
             assert result["processing_time"] < 2.5
 
         # Concurrent processing should be more efficient than sequential
-        assert (
-            total_time < 5.0
-        ), f"Concurrent processing took {total_time:.2f}s, should be < 5.0s"
+        assert total_time < 5.0, (
+            f"Concurrent processing took {total_time:.2f}s, should be < 5.0s"
+        )
 
     @pytest.mark.integration
     async def test_context_aggregation_quality(self, orchestrator):
@@ -553,7 +549,7 @@ class TestOmniRAGIntegration:
         assert len(result["contexts"]) >= 3
 
         # Should aggregate contexts from multiple sources
-        sources = set(ctx.source for ctx in result["contexts"])
+        sources = {ctx.source for ctx in result["contexts"]}
         assert len(sources) >= 2
 
         # Aggregated context should be meaningful
@@ -625,18 +621,18 @@ class TestOmniRAGIntegration:
             assert result["metadata"]["session_enhanced"] is True
 
         # Should maintain separate session data for new users (plus any existing users)
-        unique_user_ids = set(context["user_id"] for context in contexts)
+        unique_user_ids = {context["user_id"] for context in contexts}
 
         # Check that all our test users are in the session data
         for user_id in unique_user_ids:
-            assert (
-                user_id in orchestrator.session_data
-            ), f"User {user_id} should be in session data"
+            assert user_id in orchestrator.session_data, (
+                f"User {user_id} should be in session data"
+            )
 
         # Session data should contain at least our 3 new users
-        assert (
-            len(orchestrator.session_data) >= 3
-        ), f"Should have at least 3 users, got {len(orchestrator.session_data)}"
+        assert len(orchestrator.session_data) >= 3, (
+            f"Should have at least 3 users, got {len(orchestrator.session_data)}"
+        )
 
 
 if __name__ == "__main__":

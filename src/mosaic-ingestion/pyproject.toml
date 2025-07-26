@@ -82,10 +82,8 @@ dev = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.1.0",
-    "mypy>=1.7.0",
-    "black>=23.10.0",
-    "isort>=5.12.0",
-    "flake8>=6.1.0",
+    "ruff>=0.1.9",  # Unified code quality tool
+    "mypy>=1.8.0",
 ]
 
 test = [
@@ -112,4 +110,13 @@ where = ["."]
 [tool.setuptools.package-data]
 "mosaic_ingestion" = ["*.yaml", "*.yml", "*.json", "*.toml"]
 
-# Tool configurations inherited from root
+# =====================================================================================
+# Tool configurations - inherit from root with service-specific overrides
+# =====================================================================================
+
+# Service-specific Ruff overrides
+[tool.ruff.lint.per-file-ignores]
+# Ingestion service specific ignores
+"plugins/ai_code_parser.py" = ["PLR0913"]  # Allow complex AI analysis methods
+"rdf/*.py" = ["N803"]  # Allow RDF-style naming (uppercase for classes)
+"ontologies/*.py" = ["N803"]  # Allow ontology-style naming
