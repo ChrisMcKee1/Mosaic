@@ -1,0 +1,93 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mosaic-ui-app"
+version = "0.1.0"
+description = "Mosaic UI Application - Interactive web interface for knowledge graph exploration"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Chris McKee", email = "chris@example.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+keywords = ["streamlit", "ui", "graph-visualization", "azure", "knowledge-graph"]
+
+dependencies = [
+    # Core UI Framework
+    "streamlit>=1.28.0",
+    
+    # Graph Visualization Libraries (FR-UI-003)
+    "pyvis>=0.3.2",
+    "plotly>=5.17.0", 
+    "networkx>=3.2.0",
+    "pandas>=2.1.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    
+    # Data Processing and Utilities
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "python-dotenv>=1.0.0",
+    "structlog>=23.2.0",
+    "rich>=13.7.0",
+    
+    # Type Hints
+    "typing-extensions>=4.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "mypy>=1.7.0",
+    "black>=23.10.0",
+    "isort>=5.12.0",
+    "flake8>=6.1.0",
+]
+
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+]
+
+# Optional Azure integration (enable for production)
+azure = [
+    "azure-cosmos>=4.5.0",
+    "azure-identity>=1.15.0",
+    "semantic-kernel>=1.0.0",
+    "azure-ai-openai>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ChrisMcKee1/Mosaic"
+Repository = "https://github.com/ChrisMcKee1/Mosaic"
+Issues = "https://github.com/ChrisMcKee1/Mosaic/issues"
+
+[project.scripts]
+mosaic-ui = "app:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+"mosaic_ui" = ["*.yaml", "*.yml", "*.json", "*.toml"]
+
+# Tool configurations inherited from root
