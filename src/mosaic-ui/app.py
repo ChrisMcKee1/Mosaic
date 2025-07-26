@@ -1035,7 +1035,8 @@ def create_pyvis_graph():
     )
 
     # Configure physics for better layout
-    net.set_options("""
+    net.set_options(
+        """
     {
         "physics": {
             "enabled": true,
@@ -1085,7 +1086,8 @@ def create_pyvis_graph():
             }
         }
     }
-    """)
+    """
+    )
 
     # Add nodes with enhanced styling
     for entity in entities:
@@ -1623,12 +1625,14 @@ def main():
         )
 
         st.markdown("### 🎮 Instructions")
-        st.markdown("""
+        st.markdown(
+            """
         1. **Explore Graph:** Click and drag nodes in the visualization
         2. **Select Components:** Click any node to see detailed information
         3. **Ask Questions:** Use the chat interface to query the system
         4. **Validate System:** Test ingestion capabilities and data access
-        """)
+        """
+        )
 
         # Quick actions
         st.markdown("### ⚡ Quick Actions")

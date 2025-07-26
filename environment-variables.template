@@ -73,6 +73,23 @@ MCP_SERVER_PORT=8080
 LOG_LEVEL=DEBUG
 
 # =============================================================================
+# OMNIRAG RDF CONFIGURATION (OMR-P1-001)
+# =============================================================================
+# Base URL for ontology definitions
+MOSAIC_ONTOLOGY_BASE_URL=http://mosaic.ai/ontology#
+
+# RDF namespace for Mosaic graph elements
+MOSAIC_GRAPH_NAMESPACE=http://mosaic.ai/graph#
+
+# RDF store type (memory, disk, sparql_endpoint)
+MOSAIC_RDF_STORE_TYPE=memory
+
+# Directory paths for RDF assets
+MOSAIC_ONTOLOGY_PATH=src/mosaic-ingestion/ontologies
+MOSAIC_SCHEMAS_PATH=src/mosaic-ingestion/schemas
+MOSAIC_RDF_DATA_PATH=src/mosaic-ingestion/rdf
+
+# =============================================================================
 # PRODUCTION OVERRIDES (uncomment for production deployment)
 # =============================================================================
 # ENVIRONMENT=production

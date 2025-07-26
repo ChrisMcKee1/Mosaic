@@ -1,0 +1,32 @@
+# Mosaic MCP Server - Pinned Dependencies for Deployment
+# Core MCP Server and Communication
+fastmcp==0.1.0
+httpx==0.25.2
+
+# Semantic Kernel Framework  
+semantic-kernel==1.3.0
+
+# Azure Services Integration
+azure-identity==1.15.0
+azure-keyvault-secrets==4.7.0
+azure-storage-blob==12.19.0
+azure-cosmos==4.5.1
+redis==5.0.1
+azure-functions==1.18.0
+
+# Authentication and Security
+PyJWT==2.8.0
+
+# Data Processing and Utilities
+pydantic==2.11.7
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+structlog==23.2.0
+rich==13.7.0
+
+# Async and Networking
+aiofiles==23.2.0
+aiohttp==3.9.1
+
+# Type Hints and Development
+typing-extensions==4.8.0

@@ -20,6 +20,9 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 import git  # GitPython
 
+# CRUD-001: Import CommitStateManager for commit state tracking
+from utils.commit_state_manager import CommitStateManager, CommitState
+
 # Configure production logging
 logging.basicConfig(
     level=logging.INFO,
@@ -80,6 +83,18 @@ class LocalIngestionService:
             "entities_found": 0,
         }
 
+        # CRUD-001: Initialize commit state manager for development (optional)
+        self.commit_state_manager = None
+        try:
+            # Try to initialize CommitStateManager if Cosmos config is available
+            from agents.base_agent import BaseAgent
+            settings = BaseAgent.load_settings()
+            self.commit_state_manager = CommitStateManager.from_settings(settings)
+            logger.info("✅ CommitStateManager initialized for local development")
+        except Exception as e:
+            logger.info(f"ℹ️  CommitStateManager not available (running in simple mode): {e}")
+            self.commit_state_manager = None
+
     async def ingest_repository(
         self, repository_url: str, branch: str = "main"
     ) -> Dict[str, Any]:
@@ -94,18 +109,70 @@ class LocalIngestionService:
             Ingestion summary with statistics
         """
         temp_dir = None
+        repo = None
         try:
             logger.info(
                 f"🚀 Starting repository ingestion: {repository_url} (branch: {branch})"
             )
 
+            # CRUD-001: Check commit state for incremental processing
+            last_commit_state = None
+            if self.commit_state_manager:
+                try:
+                    last_commit_state = await self.commit_state_manager.get_last_commit(
+                        repository_url, branch
+                    )
+                    if last_commit_state:
+                        logger.info(
+                            f"📋 Found previous commit state: {last_commit_state.last_commit_sha[:8]}"
+                        )
+                    else:
+                        logger.info("📋 No previous commit state found (first-time ingestion)")
+                except Exception as e:
+                    logger.warning(f"⚠️  Failed to retrieve commit state: {e}")
+
             # Step 1: Clone repository
-            temp_dir = await self._clone_repository(repository_url, branch)
+            temp_dir, repo = await self._clone_repository(repository_url, branch)
             logger.info(f"✅ Repository cloned to: {temp_dir}")
+
+            # CRUD-001: Process commits since last state
+            commits_processed = 0
+            if self.commit_state_manager and repo:
+                try:
+                    last_commit_sha = last_commit_state.last_commit_sha if last_commit_state else None
+                    new_commits = self.commit_state_manager.iter_commits_since_last(
+                        repo, repository_url, branch, last_commit_sha
+                    )
+                    commits_processed = len(new_commits)
+                    
+                    if commits_processed > 0:
+                        logger.info(f"📈 Processing {commits_processed} new commits")
+                    else:
+                        logger.info("✅ Repository is up to date (no new commits)")
+                except Exception as e:
+                    logger.warning(f"⚠️  Failed to analyze commits: {e}")
 
             # Step 2: Scan and analyze files
             await self._scan_repository(temp_dir)
             logger.info("✅ Repository scan completed")
+
+            # CRUD-001: Update commit state after successful processing
+            current_commit_sha = None
+            if self.commit_state_manager and repo:
+                try:
+                    current_commit_sha = repo.head.commit.hexsha
+                    new_count = (last_commit_state.commit_count if last_commit_state else 0) + commits_processed
+                    
+                    await self.commit_state_manager.update_commit_state(
+                        repository_url=repository_url,
+                        branch_name=branch,
+                        current_commit_sha=current_commit_sha,
+                        commit_count=new_count,
+                        processing_status="completed"
+                    )
+                    logger.info(f"✅ Updated commit state: {current_commit_sha[:8]}")
+                except Exception as e:
+                    logger.warning(f"⚠️  Failed to update commit state: {e}")
 
             # Step 3: Generate summary
             summary = {
@@ -116,6 +183,10 @@ class LocalIngestionService:
                 "languages_detected": list(self.stats["languages_detected"]),
                 "entities_extracted": self.stats["entities_found"],
                 "relationships_found": 0,  # Simplified version doesn't extract relationships
+                "commits_processed": commits_processed,
+                "current_commit": current_commit_sha[:8] if current_commit_sha else None,
+                "last_commit": last_commit_state.last_commit_sha[:8] if last_commit_state else None,
+                "commit_state_tracking": bool(self.commit_state_manager),
                 "timestamp": datetime.utcnow().isoformat(),
                 "status": "completed",
                 "mode": "local_development",
@@ -136,9 +207,12 @@ class LocalIngestionService:
                 except Exception as cleanup_error:
                     logger.warning(f"⚠️  Failed to cleanup {temp_dir}: {cleanup_error}")
 
-    async def _clone_repository(self, repository_url: str, branch: str) -> str:
+    async def _clone_repository(self, repository_url: str, branch: str) -> tuple[str, git.Repo]:
         """
         Clone repository using GitPython with comprehensive error handling.
+        
+        Returns:
+            Tuple of (temp_directory_path, git_repo_object)
         """
         temp_dir = None
         try:
@@ -167,14 +241,20 @@ class LocalIngestionService:
 
             logger.info(f"📥 Cloning {repository_url} (branch: {branch})...")
 
-            # Execute clone
-            repo = git.Repo.clone_from(
-                repository_url,
-                temp_dir,
-                branch=branch,
-                depth=1,  # Shallow clone for speed
-                env=git_env if git_env else None,
-            )
+            # CRUD-001: Use CommitStateManager for full history clone
+            if self.commit_state_manager:
+                repo = self.commit_state_manager.clone_with_full_history(
+                    repository_url, temp_dir, branch
+                )
+            else:
+                # Execute clone with full history (no depth limitation) 
+                repo = git.Repo.clone_from(
+                    repository_url,
+                    temp_dir,
+                    branch=branch,
+                    # CRUD-001: Removed depth=1 shallow clone to enable commit history access
+                    env=git_env if git_env else None,
+                )
 
             # Verify clone success
             if not repo.heads:
@@ -185,7 +265,7 @@ class LocalIngestionService:
             commit_hash = repo.head.commit.hexsha[:8]
             logger.info(f"✅ Clone successful - Commit: {commit_hash}")
 
-            return temp_dir
+            return temp_dir, repo
 
         except git.exc.GitCommandError as git_error:
             error_msg = str(git_error).lower()

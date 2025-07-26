@@ -1,0 +1,214 @@
+{
+  "benchmark_timestamp": 1753491846.7805808,
+  "benchmark_summary": {
+    "total_tests": 5,
+    "overall_passed": true
+  },
+  "results": [
+    {
+      "test_name": "Simple Queries",
+      "query_count": 10,
+      "total_time": 1.1154940128326416,
+      "avg_time": 0.11154940128326415,
+      "min_time": 0.10686898231506348,
+      "max_time": 0.12090563774108887,
+      "p95_time": 0.12090563774108887,
+      "p99_time": 0.12090563774108887,
+      "success_rate": 1.0,
+      "metrics": [
+        {
+          "name": "Average Response Time",
+          "value": 0.11154940128326415,
+          "unit": "seconds",
+          "threshold": 0.5,
+          "passed": true
+        },
+        {
+          "name": "95th Percentile Response Time",
+          "value": 0.12090563774108887,
+          "unit": "seconds",
+          "threshold": 0.6,
+          "passed": true
+        },
+        {
+          "name": "Maximum Response Time",
+          "value": 0.12090563774108887,
+          "unit": "seconds",
+          "threshold": 0.75,
+          "passed": true
+        },
+        {
+          "name": "Success Rate",
+          "value": 1.0,
+          "unit": "percentage",
+          "threshold": 0.95,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "test_name": "Medium Queries",
+      "query_count": 10,
+      "total_time": 1.0993144512176514,
+      "avg_time": 0.10993144512176514,
+      "min_time": 0.10901832580566406,
+      "max_time": 0.11106729507446289,
+      "p95_time": 0.11106729507446289,
+      "p99_time": 0.11106729507446289,
+      "success_rate": 1.0,
+      "metrics": [
+        {
+          "name": "Average Response Time",
+          "value": 0.10993144512176514,
+          "unit": "seconds",
+          "threshold": 1.5,
+          "passed": true
+        },
+        {
+          "name": "95th Percentile Response Time",
+          "value": 0.11106729507446289,
+          "unit": "seconds",
+          "threshold": 1.7999999999999998,
+          "passed": true
+        },
+        {
+          "name": "Maximum Response Time",
+          "value": 0.11106729507446289,
+          "unit": "seconds",
+          "threshold": 2.25,
+          "passed": true
+        },
+        {
+          "name": "Success Rate",
+          "value": 1.0,
+          "unit": "percentage",
+          "threshold": 0.95,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "test_name": "Complex Queries",
+      "query_count": 10,
+      "total_time": 1.092524766921997,
+      "avg_time": 0.1092524766921997,
+      "min_time": 0.10768795013427734,
+      "max_time": 0.11003446578979492,
+      "p95_time": 0.11003446578979492,
+      "p99_time": 0.11003446578979492,
+      "success_rate": 1.0,
+      "metrics": [
+        {
+          "name": "Average Response Time",
+          "value": 0.1092524766921997,
+          "unit": "seconds",
+          "threshold": 2.0,
+          "passed": true
+        },
+        {
+          "name": "95th Percentile Response Time",
+          "value": 0.11003446578979492,
+          "unit": "seconds",
+          "threshold": 2.4,
+          "passed": true
+        },
+        {
+          "name": "Maximum Response Time",
+          "value": 0.11003446578979492,
+          "unit": "seconds",
+          "threshold": 3.0,
+          "passed": true
+        },
+        {
+          "name": "Success Rate",
+          "value": 1.0,
+          "unit": "percentage",
+          "threshold": 0.95,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "test_name": "Concurrent Processing",
+      "query_count": 10,
+      "total_time": 1.0877094268798828,
+      "avg_time": 0.10877094268798829,
+      "min_time": 0.10817098617553711,
+      "max_time": 0.10917091369628906,
+      "p95_time": 0.10917091369628906,
+      "p99_time": 0.10917091369628906,
+      "success_rate": 1.0,
+      "metrics": [
+        {
+          "name": "Average Response Time",
+          "value": 0.10877094268798829,
+          "unit": "seconds",
+          "threshold": 2.5,
+          "passed": true
+        },
+        {
+          "name": "95th Percentile Response Time",
+          "value": 0.10917091369628906,
+          "unit": "seconds",
+          "threshold": 3.0,
+          "passed": true
+        },
+        {
+          "name": "Maximum Response Time",
+          "value": 0.10917091369628906,
+          "unit": "seconds",
+          "threshold": 3.75,
+          "passed": true
+        },
+        {
+          "name": "Success Rate",
+          "value": 1.0,
+          "unit": "percentage",
+          "threshold": 0.95,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "test_name": "Session Learning Impact",
+      "query_count": 20,
+      "total_time": 2.1911139488220215,
+      "avg_time": 0.10955569744110108,
+      "min_time": 0.10789203643798828,
+      "max_time": 0.11166548728942871,
+      "p95_time": 0.11166548728942871,
+      "p99_time": 0.11166548728942871,
+      "success_rate": 1.0,
+      "metrics": [
+        {
+          "name": "Average Response Time",
+          "value": 0.10955569744110108,
+          "unit": "seconds",
+          "threshold": 2.0,
+          "passed": true
+        },
+        {
+          "name": "95th Percentile Response Time",
+          "value": 0.11166548728942871,
+          "unit": "seconds",
+          "threshold": 2.4,
+          "passed": true
+        },
+        {
+          "name": "Maximum Response Time",
+          "value": 0.11166548728942871,
+          "unit": "seconds",
+          "threshold": 3.0,
+          "passed": true
+        },
+        {
+          "name": "Success Rate",
+          "value": 1.0,
+          "unit": "percentage",
+          "threshold": 0.95,
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

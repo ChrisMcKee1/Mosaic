@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mosaic-mcp-server"
+version = "0.1.0"
+description = "Mosaic MCP Server - Model Context Protocol implementation with Azure integration"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Chris McKee", email = "chris@example.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+keywords = ["mcp", "ai", "context", "semantic-kernel", "azure", "llm"]
+
+dependencies = [
+    # Core MCP Server and Communication
+    "fastmcp>=0.1.0",
+    "httpx>=0.25.0",
+    
+    # Semantic Kernel Framework  
+    "semantic-kernel>=1.0.0",
+    
+    # Azure Services Integration
+    "azure-identity>=1.15.0",
+    "azure-keyvault-secrets>=4.7.0",
+    "azure-storage-blob>=12.19.0",
+    "azure-cosmos>=4.5.0",
+    "redis>=5.0.0",
+    "azure-functions>=1.18.0",
+    
+    # Authentication and Security
+    "PyJWT>=2.8.0",
+    
+    # Data Processing and Utilities
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "python-dotenv>=1.0.0",
+    "structlog>=23.2.0",
+    "rich>=13.7.0",
+    
+    # Async and Networking
+    "aiofiles>=23.2.0",
+    "aiohttp>=3.9.0",
+    
+    # Type Hints and Development
+    "typing-extensions>=4.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "httpx>=0.25.0",
+    "fakeredis>=2.20.0",
+    "mypy>=1.7.0",
+    "black>=23.10.0",
+    "isort>=5.12.0",
+    "flake8>=6.1.0",
+]
+
+test = [
+    "pytest>=7.4.0", 
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "httpx>=0.25.0",
+    "fakeredis>=2.20.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ChrisMcKee1/Mosaic"
+Repository = "https://github.com/ChrisMcKee1/Mosaic"
+Issues = "https://github.com/ChrisMcKee1/Mosaic/issues"
+
+[project.scripts]
+mosaic-server = "mosaic_mcp.server.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+"mosaic_mcp" = ["*.yaml", "*.yml", "*.json", "*.toml"]
+
+# Tool configurations inherited from root

@@ -13,12 +13,35 @@ Task Information: ${input:task_info:Provide task title, description, or referenc
 
 ## Workflow Steps
 
-### 1. Gather Task Requirements
+### 1. Intelligent Source Analysis and Context Discovery
 
-- **Source Analysis**: If referencing a Memory MCP decision, use `open_nodes` to retrieve the full proposal details
-- **Requirements Extraction**: Extract clear requirements and acceptance criteria
-- **Priority Assessment**: Determine appropriate priority level
-- **Dependency Identification**: Identify any prerequisite tasks or dependencies
+**Decision Tree for Source Discovery:**
+
+- **If given specific Memory MCP decision entity**: Use `open_nodes --names=["${entity_name}"]` to get the exact decision entity
+- **If given vague reference** (e.g., "based on research", "from planning"):
+  1. First try `search_nodes --query="${user_reference}"` to find matches
+  2. If search returns empty results: Use `read_graph` to discover all available decisions/research
+  3. Filter results by entity type and recency to identify the appropriate source
+  4. Guide user to confirm which decision/research they want to base the task on
+
+**Context Analysis Strategy:**
+
+- **For known sources**: Use `search_nodes --query="${source_entity}"` to get the entity PLUS related context and relationships
+- **Relationship Mapping**: Analyze relationships to understand:
+  - Research decisions that inform this task ("builds_on" relations)
+  - Architectural constraints that apply ("constrained_by" relations)
+  - Related patterns that can be reused ("implements" or "uses" relations)
+  - Dependencies on other tasks or components ("depends_on" relations)
+
+**Fallback Strategies:**
+
+- **If no specific source is provided**: Use `read_graph` to show available research decisions and guide user selection
+- **If source search fails**: Search for related research by topic or technology area
+- **If context is insufficient**: Search for broader project context using entity types and relationships
+
+**Requirements Extraction**: Extract clear requirements and acceptance criteria, enriched by relationship context
+**Priority Assessment**: Determine appropriate priority based on relationships to critical decisions and project goals
+**Integration Analysis**: Use relationships to identify integration points and affected system components
 
 ### 2. Task Structure Definition
 
@@ -27,11 +50,11 @@ Task Information: ${input:task_info:Provide task title, description, or referenc
 - **Acceptance Criteria**: Define specific, testable acceptance criteria
 - **Effort Estimation**: Estimate complexity and time requirements
 
-### 3. Memory MCP Task Creation
+### 3. Relationship-Aware Memory MCP Task Creation
 
-- **Create Task**: Use Memory MCP to create the new task entity:
+- **Create Task Entity**: Use Memory MCP to create the new task entity with enriched context:
 
-```
+```bash
 create_entities --entities=[{
     "name": "${task_id}",
     "entityType": "task",
@@ -41,13 +64,32 @@ create_entities --entities=[{
         "Acceptance Criteria: ${criteria_list}",
         "Priority: ${priority_level}",
         "Status: TODO",
-        "Estimated Effort: ${effort_estimate}"
+        "Estimated Effort: ${effort_estimate}",
+        "Integration Points: ${integration_summary}",
+        "Related Patterns: ${pattern_references}",
+        "Constraints: ${constraint_summary}"
     ]
 }]
-```
 
-- **Link Dependencies**: Link to prerequisite tasks or related decisions using `create_relations`
-- **Assign Resources**: Add resource assignment observations if known
+# Create comprehensive relationships
+create_relations --relations=[{
+    "from": "${task_id}",
+    "to": "${source_decision_entity}",
+    "relationType": "implements"
+}, {
+    "from": "${task_id}",
+    "to": "${prerequisite_task}",
+    "relationType": "depends_on"
+}, {
+    "from": "${task_id}",
+    "to": "${architectural_constraint}",
+    "relationType": "constrained_by"
+}, {
+    "from": "${task_id}",
+    "to": "${reusable_pattern}",
+    "relationType": "uses"
+}]
+```
 
 ### 4. Integration and Linking
 

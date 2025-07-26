@@ -9,12 +9,14 @@ Comprehensive project overview with strategic planning and priority assessment.
 
 ## Workflow Steps
 
-### 1. Memory MCP Review and Analysis
+### 1. Comprehensive Memory MCP Analysis
 
-- **Task Status Review**: Use `search_nodes --query="task"` to find all task entities and their current status
-- **Priority Assessment**: Analyze task priorities and dependencies using `read_graph`
-- **Progress Analysis**: Review completed tasks and velocity metrics from task observations
-- **Blockers Identification**: Search for blocked or at-risk tasks using `search_nodes --query="blocked OR risk"`
+- **Task Ecosystem Review**: Use `search_nodes --query="task"` to find all task entities, then traverse relationships to understand dependencies
+- **Decision Chain Analysis**: Use `search_nodes --query="decision"` and follow relationships to map decision impacts and architectural constraints
+- **Pattern Utilization Review**: Search for pattern entities and analyze "implements" relationships to assess reuse and standardization
+- **Progress Tracking**: Review completed tasks and their relationships to current active work
+- **Blocker Dependencies**: Use relationships to trace blocked tasks back to their root causes and dependency chains
+- **Research Utilization**: Review research decisions and their "builds_on" relationships to ensure findings are being applied
 
 ### 2. Technical Debt and Architecture Review
 
@@ -48,12 +50,25 @@ Comprehensive project overview with strategic planning and priority assessment.
 
 - **Priority Queue**: Update task priorities based on analysis using `add_observations`
 - **Resource Allocation**: Assign resources to highest-priority items
-- **Memory MCP Updates**: Update Memory MCP with new priorities and plans:
+- **Memory MCP Strategic Updates**: Update Memory MCP with new priorities, patterns, and relationships:
 
-```
-add_observations --observations=[{
-    "entityName": "project_status_${date}",
-    "contents": ["Priority updates: ${updates}", "Resource allocation: ${allocation}", "Next actions: ${actions}"]
+```bash
+# Create status review decision
+create_entities --entities=[{
+    "name": "project_status_${date}",
+    "entityType": "decision",
+    "observations": ["Priority updates: ${updates}", "Resource allocation: ${allocation}", "Next actions: ${actions}", "Relationship insights: ${relationship_findings}"]
+}]
+
+# Link status to critical decisions and patterns
+create_relations --relations=[{
+    "from": "project_status_${date}",
+    "to": "${critical_decision_entity}",
+    "relationType": "impacts"
+}, {
+    "from": "project_status_${date}",
+    "to": "${priority_task_entity}",
+    "relationType": "prioritizes"
 }]
 ```
 

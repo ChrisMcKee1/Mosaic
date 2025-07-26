@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://mosaic.ai/ontology/python#"
+     xml:base="http://mosaic.ai/ontology/python"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:code="http://mosaic.ai/ontology/code-base#">
+    <owl:Ontology rdf:about="http://mosaic.ai/ontology/python">
+        <owl:versionIRI rdf:resource="http://mosaic.ai/ontology/python/1.0"/>
+        <owl:imports rdf:resource="http://mosaic.ai/ontology/code-base"/>
+        <rdfs:comment xml:lang="en">Python-specific extensions for the Mosaic Code Base Ontology. Defines Python language constructs, patterns, and specialized behavior.</rdfs:comment>
+        <rdfs:label xml:lang="en">Mosaic Python Ontology</rdfs:label>
+        <owl:versionInfo>1.0.0</owl:versionInfo>
+        <rdfs:seeAlso rdf:resource="https://github.com/ChrisMcKee1/Mosaic"/>
+    </owl:Ontology>
+    
+    
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#decoratedBy -->
+
+    <owl:ObjectProperty rdf:about="http://mosaic.ai/ontology/python#decoratedBy">
+        <rdfs:domain rdf:resource="http://mosaic.ai/ontology/python#PythonFunction"/>
+        <rdfs:range rdf:resource="http://mosaic.ai/ontology/python#Decorator"/>
+        <rdfs:comment xml:lang="en">Indicates that a Python function is decorated by a decorator</rdfs:comment>
+        <rdfs:label xml:lang="en">decorated by</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#hasBaseClass -->
+
+    <owl:ObjectProperty rdf:about="http://mosaic.ai/ontology/python#hasBaseClass">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+        <rdfs:domain rdf:resource="http://mosaic.ai/ontology/python#PythonClass"/>
+        <rdfs:range rdf:resource="http://mosaic.ai/ontology/python#PythonClass"/>
+        <rdfs:comment xml:lang="en">Specifies inheritance relationship between Python classes</rdfs:comment>
+        <rdfs:label xml:lang="en">has base class</rdfs:label>
+    </owl:ObjectProperty>    
+
+    
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#is_async -->
+
+    <owl:DatatypeProperty rdf:about="http://mosaic.ai/ontology/python#is_async">
+        <rdfs:domain rdf:resource="http://mosaic.ai/ontology/python#PythonFunction"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment xml:lang="en">Indicates whether a Python function is asynchronous</rdfs:comment>
+        <rdfs:label xml:lang="en">is async</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#is_generator -->
+
+    <owl:DatatypeProperty rdf:about="http://mosaic.ai/ontology/python#is_generator">
+        <rdfs:domain rdf:resource="http://mosaic.ai/ontology/python#PythonFunction"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment xml:lang="en">Indicates whether a Python function is a generator</rdfs:comment>
+        <rdfs:label xml:lang="en">is generator</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#has_docstring -->
+
+    <owl:DatatypeProperty rdf:about="http://mosaic.ai/ontology/python#has_docstring">
+        <rdfs:domain rdf:resource="http://mosaic.ai/ontology/python#PythonCallable"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment xml:lang="en">Indicates whether a Python callable has a docstring</rdfs:comment>
+        <rdfs:label xml:lang="en">has docstring</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#import_alias -->
+
+    <owl:DatatypeProperty rdf:about="http://mosaic.ai/ontology/python#import_alias">
+        <rdfs:domain rdf:resource="http://mosaic.ai/ontology/python#PythonImport"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment xml:lang="en">The alias used when importing a Python module</rdfs:comment>
+        <rdfs:label xml:lang="en">import alias</rdfs:label>
+    </owl:DatatypeProperty>    
+
+    
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#Decorator -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#Decorator">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/code-base#CodeEntity"/>
+        <rdfs:comment xml:lang="en">A Python decorator that modifies the behavior of functions or classes</rdfs:comment>
+        <rdfs:label xml:lang="en">Decorator</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#PythonCallable -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#PythonCallable">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/code-base#CodeEntity"/>
+        <rdfs:comment xml:lang="en">Abstract class for Python callable entities</rdfs:comment>
+        <rdfs:label xml:lang="en">Python Callable</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#PythonClass -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#PythonClass">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/code-base#Class"/>
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/python#PythonCallable"/>
+        <rdfs:comment xml:lang="en">A Python class definition</rdfs:comment>
+        <rdfs:label xml:lang="en">Python Class</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#PythonFunction -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#PythonFunction">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/code-base#Function"/>
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/python#PythonCallable"/>
+        <rdfs:comment xml:lang="en">A Python function definition</rdfs:comment>
+        <rdfs:label xml:lang="en">Python Function</rdfs:label>
+    </owl:Class>    
+
+
+    <!-- http://mosaic.ai/ontology/python#PythonImport -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#PythonImport">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/code-base#CodeEntity"/>
+        <rdfs:comment xml:lang="en">A Python import statement</rdfs:comment>
+        <rdfs:label xml:lang="en">Python Import</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#PythonMethod -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#PythonMethod">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/python#PythonFunction"/>
+        <rdfs:comment xml:lang="en">A method defined within a Python class</rdfs:comment>
+        <rdfs:label xml:lang="en">Python Method</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#PythonModule -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#PythonModule">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/code-base#Module"/>
+        <rdfs:comment xml:lang="en">A Python module (.py file)</rdfs:comment>
+        <rdfs:label xml:lang="en">Python Module</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#PythonPackage -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#PythonPackage">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/code-base#Container"/>
+        <rdfs:comment xml:lang="en">A Python package containing multiple modules</rdfs:comment>
+        <rdfs:label xml:lang="en">Python Package</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://mosaic.ai/ontology/python#PythonProperty -->
+
+    <owl:Class rdf:about="http://mosaic.ai/ontology/python#PythonProperty">
+        <rdfs:subClassOf rdf:resource="http://mosaic.ai/ontology/code-base#Variable"/>
+        <rdfs:comment xml:lang="en">A Python property with getter/setter behavior</rdfs:comment>
+        <rdfs:label xml:lang="en">Python Property</rdfs:label>
+    </owl:Class>
+
+
+</rdf:RDF>

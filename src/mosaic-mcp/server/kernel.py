@@ -22,6 +22,7 @@ from ..plugins.vector_search import VectorSearchPlugin
 from ..plugins.refinement import RefinementPlugin
 from ..plugins.memory import MemoryPlugin
 from ..plugins.diagram import DiagramPlugin
+from ..plugins.graph_plugin import GraphPlugin
 
 
 logger = logging.getLogger(__name__)
@@ -140,6 +141,12 @@ class SemanticKernelManager:
             await diagram_plugin.initialize()
             self.kernel.add_plugin(diagram_plugin, plugin_name="diagram")
             self.plugins["diagram"] = diagram_plugin
+
+            # Graph Plugin (OMR-P2-003) - Graph queries and visualizations
+            graph_plugin = GraphPlugin(self.settings)
+            await graph_plugin.initialize()
+            self.kernel.add_plugin(graph_plugin, plugin_name="graph")
+            self.plugins["graph"] = graph_plugin
 
             logger.info("Mosaic Query Server plugins registered successfully")
             logger.info(

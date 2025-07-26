@@ -2,28 +2,25 @@
   "mcpServers": {
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
       "env": {}
     },
     "desktop-commander": {
       "command": "npx",
-      "args": ["-y", "@wonderwhy-er/desktop-commander"],
+      "args": [
+        "-y",
+        "@wonderwhy-er/desktop-commander"
+      ],
       "env": {}
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "env": {}
-    },
-    "conport": {
-      "command": "uvx",
       "args": [
-        "--from", "context-portal-mcp",
-        "conport-mcp",
-        "--mode", "stdio",
-        "--workspace_id", "/mnt/c/Users/chrismckee/Documents/GitHub/Mosaic",
-        "--log-file", "./logs/conport.log",
-        "--log-level", "INFO"
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
       ],
       "env": {}
     }

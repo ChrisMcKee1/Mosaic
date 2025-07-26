@@ -174,6 +174,91 @@ class MosaicMCPServer:
             diagram_plugin = await self.kernel_manager.get_plugin("diagram")
             return await diagram_plugin.generate(description)
 
+        # Graph Plugin Tools (OMR-P2-003) - Natural Language and SPARQL Graph Queries
+        @self.app.tool()
+        async def graph_natural_query(
+            query: str, include_visualization: bool = False, max_results: int = 100
+        ) -> Dict[str, Any]:
+            """
+            Execute natural language queries against the graph database.
+
+            Args:
+                query: Natural language query string
+                include_visualization: Whether to generate visualization of results
+                max_results: Maximum number of results to return
+
+            Returns:
+                Dict containing query results, metadata, and optional visualization
+            """
+            graph_plugin = await self.kernel_manager.get_plugin("graph")
+            return await graph_plugin.natural_language_query(
+                query, include_visualization, max_results
+            )
+
+        @self.app.tool()
+        async def graph_sparql_query(
+            sparql_query: str,
+            include_visualization: bool = False,
+            max_results: int = 100,
+        ) -> Dict[str, Any]:
+            """
+            Execute SPARQL queries directly against the graph database.
+
+            Args:
+                sparql_query: SPARQL query string
+                include_visualization: Whether to generate visualization of results
+                max_results: Maximum number of results to return
+
+            Returns:
+                Dict containing query results, metadata, and optional visualization
+            """
+            graph_plugin = await self.kernel_manager.get_plugin("graph")
+            return await graph_plugin.execute_sparql_query(
+                sparql_query, include_visualization, max_results
+            )
+
+        @self.app.tool()
+        async def graph_visualize_results(
+            results: List[Dict[str, Any]],
+            title: str = "Graph Query Results",
+            layout: str = "force",
+        ) -> str:
+            """
+            Create interactive visualizations of graph query results.
+
+            Args:
+                results: List of graph query results to visualize
+                title: Title for the visualization
+                layout: Layout algorithm (force, circular, hierarchical)
+
+            Returns:
+                HTML string containing interactive graph visualization
+            """
+            graph_plugin = await self.kernel_manager.get_plugin("graph")
+            return await graph_plugin.visualize_graph_results(results, title, layout)
+
+        @self.app.tool()
+        async def graph_discover_schema(
+            entity_type: Optional[str] = None,
+            include_counts: bool = True,
+            max_results: int = 50,
+        ) -> Dict[str, Any]:
+            """
+            Explore and discover graph database schema and relationships.
+
+            Args:
+                entity_type: Optional filter for specific entity type
+                include_counts: Whether to include entity/relationship counts
+                max_results: Maximum number of schema elements to return
+
+            Returns:
+                Dict containing schema information and metadata
+            """
+            graph_plugin = await self.kernel_manager.get_plugin("graph")
+            return await graph_plugin.discover_graph_schema(
+                entity_type, include_counts, max_results
+            )
+
         # Graph Visualization Plugin Tools (Interactive Graphs)
         @self.app.tool()
         async def visualize_repository_structure(

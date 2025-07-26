@@ -27,6 +27,8 @@ from semantic_kernel.connectors.ai.open_ai import (
 from semantic_kernel.contents import ChatHistory
 
 from ..models.golden_node import CodeEntity, EntityType, LanguageType
+from ..rdf.triple_generator import generate_triples_for_entities
+from rdflib import Graph
 
 
 # Pydantic models for structured outputs following Microsoft's 2025 patterns
@@ -552,3 +554,171 @@ Focus on both explicit code relationships and implicit semantic connections.
         path = parent_path + ([parent_uuid] if parent_uuid else [])
 
         return level, path
+
+    @kernel_function(
+        name="extract_entities_with_rdf_triples",
+        description="Extract code entities and generate RDF triples - complete AI+RDF pipeline",
+    )
+    async def extract_entities_with_rdf_triples(
+        self,
+        file_content: str,
+        file_path: str,
+        language: str = "auto-detect",
+        base_namespace: str = "http://mosaic.ai/graph#",
+        validate_rdf: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Complete pipeline: AI parsing + RDF triple generation.
+
+        This method provides the full OmniRAG pipeline integration:
+        1. AI-powered code parsing with isolated chat service
+        2. CodeEntity object generation
+        3. RDF triple generation using defined ontologies
+        4. Validation against ontology schemas
+
+        Args:
+            file_content: Source code content to parse
+            file_path: File path for context and URI generation
+            language: Programming language (auto-detect if not specified)
+            base_namespace: Base namespace for RDF URIs
+            validate_rdf: Whether to validate RDF triples against ontologies
+
+        Returns:
+            Dictionary with both CodeEntity objects and RDF Graph:
+            {
+                "entities": List[CodeEntity],
+                "rdf_graph": Graph,
+                "statistics": {
+                    "entities_count": int,
+                    "triples_count": int,
+                    "relationships_count": int
+                }
+            }
+        """
+        try:
+            self.logger.info(f"Full AI+RDF pipeline for {file_path}")
+
+            # Step 1: AI-powered entity extraction
+            entities = await self.extract_entities_from_code(
+                file_content=file_content, file_path=file_path, language=language
+            )
+
+            if not entities:
+                self.logger.warning(f"No entities extracted from {file_path}")
+                return {
+                    "entities": [],
+                    "rdf_graph": Graph(),
+                    "statistics": {
+                        "entities_count": 0,
+                        "triples_count": 0,
+                        "relationships_count": 0,
+                    },
+                }
+
+            # Step 2: RDF triple generation
+            rdf_graph = await self.generate_rdf_triples_for_entities(
+                entities=entities,
+                file_path=file_path,
+                base_namespace=base_namespace,
+                validate=validate_rdf,
+            )
+
+            # Step 3: Compile statistics
+            statistics = {
+                "entities_count": len(entities),
+                "triples_count": len(rdf_graph),
+                "relationships_count": self._count_relationships_in_entities(entities),
+            }
+
+            self.logger.info(
+                f"AI+RDF pipeline completed: {statistics['entities_count']} entities, "
+                f"{statistics['triples_count']} triples, {statistics['relationships_count']} relationships"
+            )
+
+            return {
+                "entities": entities,
+                "rdf_graph": rdf_graph,
+                "statistics": statistics,
+            }
+
+        except Exception as e:
+            self.logger.error(f"AI+RDF pipeline failed for {file_path}: {e}")
+            # Return empty results to allow processing to continue
+            return {
+                "entities": [],
+                "rdf_graph": Graph(),
+                "statistics": {
+                    "entities_count": 0,
+                    "triples_count": 0,
+                    "relationships_count": 0,
+                },
+            }
+
+    @kernel_function(
+        name="generate_rdf_triples_for_entities",
+        description="Generate RDF triples from CodeEntity objects using ontologies",
+    )
+    async def generate_rdf_triples_for_entities(
+        self,
+        entities: List[CodeEntity],
+        file_path: str,
+        base_namespace: str = "http://mosaic.ai/graph#",
+        validate: bool = True,
+    ) -> Graph:
+        """
+        Generate RDF triples from CodeEntity objects.
+
+        This method uses the TripleGenerator to convert parsed entities
+        into semantic RDF representation using the defined ontologies.
+
+        Args:
+            entities: List of CodeEntity objects to convert
+            file_path: Source file path for URI generation context
+            base_namespace: Base namespace for RDF URIs
+            validate: Whether to validate against ontology schemas
+
+        Returns:
+            RDF Graph containing generated triples
+        """
+        try:
+            if not entities:
+                return Graph()
+
+            self.logger.info(
+                f"Generating RDF triples for {len(entities)} entities from {file_path}"
+            )
+
+            # Use the TripleGenerator to create RDF representation
+            rdf_graph = generate_triples_for_entities(
+                entities=entities,
+                file_path=file_path,
+                base_namespace=base_namespace,
+                validate=validate,
+            )
+
+            self.logger.info(f"Generated {len(rdf_graph)} RDF triples for {file_path}")
+            return rdf_graph
+
+        except Exception as e:
+            self.logger.error(f"RDF triple generation failed for {file_path}: {e}")
+            # Return empty graph to allow processing to continue
+            return Graph()
+
+    def _count_relationships_in_entities(self, entities: List[CodeEntity]) -> int:
+        """Count total relationships across all entities."""
+        relationship_count = 0
+
+        for entity in entities:
+            # Count parent relationships
+            if entity.parent_entity:
+                relationship_count += 1
+
+            # Count function calls
+            if hasattr(entity, "calls") and entity.calls:
+                relationship_count += len(entity.calls)
+
+            # Count imports
+            if hasattr(entity, "imports") and entity.imports:
+                relationship_count += len(entity.imports)
+
+        return relationship_count

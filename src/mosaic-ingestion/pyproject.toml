@@ -1,0 +1,115 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mosaic-ingestion-service"
+version = "0.1.0"
+description = "Mosaic Ingestion Service - Code analysis and knowledge graph construction"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Chris McKee", email = "chris@example.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+keywords = ["code-analysis", "knowledge-graph", "tree-sitter", "rdf", "azure"]
+
+dependencies = [
+    # Code Ingestion and Analysis
+    "GitPython>=3.1.40",
+    "tree-sitter>=0.20.0",
+    "tree-sitter-python>=0.20.0",
+    "tree-sitter-javascript>=0.20.0",
+    "tree-sitter-typescript>=0.20.0",
+    "tree-sitter-java>=0.20.0",
+    "tree-sitter-go>=0.20.0",
+    "tree-sitter-rust>=0.20.0",
+    "tree-sitter-c>=0.20.0",
+    "tree-sitter-cpp>=0.20.0",
+    "tree-sitter-c-sharp>=0.20.0",
+    "tree-sitter-html>=0.20.0",
+    "tree-sitter-css>=0.20.0",
+    
+    # RDF and Knowledge Graph
+    "rdflib>=7.1.4",
+    "owlready2>=0.48",
+    "SPARQLWrapper>=2.0.0",
+    "networkx>=3.5",
+    
+    # Semantic Kernel and Azure
+    "semantic-kernel>=1.0.0",
+    "azure-cosmos>=4.5.0",
+    "azure-identity>=1.15.0",
+    
+    # Machine Learning and AI
+    "transformers>=4.35.0",
+    "torch>=2.1.0",
+    "sentence-transformers>=2.2.0",
+    
+    # Agent Orchestration
+    "magentic>=0.29.0",
+    
+    # OpenTelemetry for Monitoring (core only)
+    "opentelemetry-api>=1.21.0",
+    "opentelemetry-sdk>=1.21.0",
+    
+    # Data Processing and Utilities
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "pydantic-extra-types>=2.7.0",
+    "python-dotenv>=1.0.0",
+    "structlog>=23.2.0",
+    "rich>=13.7.0",
+    
+    # Type Hints
+    "typing-extensions>=4.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "mypy>=1.7.0",
+    "black>=23.10.0",
+    "isort>=5.12.0",
+    "flake8>=6.1.0",
+]
+
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+]
+
+# Optional Azure monitoring integration
+azure-monitoring = [
+    "opentelemetry-exporter-azure-monitor>=1.0.0b21",
+    "opentelemetry-instrumentation>=0.46b0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ChrisMcKee1/Mosaic"
+Repository = "https://github.com/ChrisMcKee1/Mosaic"
+Issues = "https://github.com/ChrisMcKee1/Mosaic/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+"mosaic_ingestion" = ["*.yaml", "*.yml", "*.json", "*.toml"]
+
+# Tool configurations inherited from root
