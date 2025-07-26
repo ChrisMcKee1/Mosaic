@@ -669,9 +669,9 @@ class TestOmniRAGIntegration:
         """Test intent classification accuracy across all scenarios."""
         results = await integration_tester.run_comprehensive_tests()
         intent_accuracy = results["quality_metrics"]["intent_detection_accuracy"]
-        assert (
-            intent_accuracy >= 0.8
-        ), f"Intent detection accuracy {intent_accuracy} below 80%"
+        assert intent_accuracy >= 0.8, (
+            f"Intent detection accuracy {intent_accuracy} below 80%"
+        )
 
     @pytest.mark.asyncio
     async def test_performance_thresholds(self, integration_tester):

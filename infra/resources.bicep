@@ -318,7 +318,7 @@ module memoryConsolidatorFunction 'br/public:avm/res/web/site:0.11.1' = {
       // OmniRAG Configuration for Functions
       MOSAIC_COSMOS_ENDPOINT: omniragCosmos.outputs.cosmosEndpoint
       MOSAIC_DATABASE_NAME: omniragCosmos.outputs.databaseName
-      MOSAIC_MEMORIES_CONTAINER: omniragCosmos.outputs.memoriesContainerName
+      MOSAIC_MEMORIES_CONTAINER: omniragCosmos.outputs.memoryContainerName
       AZURE_USE_MANAGED_IDENTITY: 'true'
       AZURE_OPENAI_ENDPOINT: aiServices.properties.endpoint
       AZURE_CLIENT_ID: mosaicIdentity.outputs.clientId
@@ -350,6 +350,7 @@ module memoryConsolidatorFunction 'br/public:avm/res/web/site:0.11.1' = {
 // Outputs - OmniRAG Configuration + Standard Infrastructure
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.loginServer
 output AZURE_RESOURCE_MOSAIC_ID string = containerApps.outputs.mosaicAppResourceId
+output CONTAINER_APPS_ENVIRONMENT_ID string = containerApps.outputs.containerAppsEnvironmentResourceId
 output AZURE_CLIENT_ID string = mosaicIdentity.outputs.clientId
 output AZURE_USE_MANAGED_IDENTITY string = 'true'
 
@@ -357,8 +358,8 @@ output AZURE_USE_MANAGED_IDENTITY string = 'true'
 output MOSAIC_COSMOS_ENDPOINT string = omniragCosmos.outputs.cosmosEndpoint
 output MOSAIC_DATABASE_NAME string = omniragCosmos.outputs.databaseName
 output MOSAIC_LIBRARIES_CONTAINER string = omniragCosmos.outputs.librariesContainerName
-output MOSAIC_MEMORIES_CONTAINER string = omniragCosmos.outputs.memoriesContainerName
-output MOSAIC_DOCUMENTS_CONTAINER string = omniragCosmos.outputs.documentsContainerName
+output MOSAIC_MEMORIES_CONTAINER string = omniragCosmos.outputs.memoryContainerName
+output MOSAIC_DOCUMENTS_CONTAINER string = omniragCosmos.outputs.knowledgeContainerName
 output MOSAIC_CONFIG_CONTAINER string = omniragCosmos.outputs.configContainerName
 
 // Service Endpoints

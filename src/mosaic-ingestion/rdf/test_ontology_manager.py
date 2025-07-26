@@ -20,20 +20,12 @@ import os
 import pytest
 import tempfile
 import shutil
-from pathlib import Path
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, MagicMock
 
-import owlready2
-from owlready2 import get_ontology
 
 # Import the module under test
-import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-
-from src.mosaic_ingestion.rdf.ontology_manager import (
+from .ontology_manager import (
     OntologyManager,
-    OntologyError,
     OntologyLoadError,
     OntologyValidationError,
     OntologyNotFoundError,

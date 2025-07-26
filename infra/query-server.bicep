@@ -22,6 +22,12 @@ param redisEndpoint string
 @description('Azure ML endpoint URL for reranking')
 param azureMLEndpointUrl string
 
+@description('Container Registry Login Server')
+param containerRegistryLoginServer string
+
+@description('Managed Identity Principal ID for ACR access')
+param managedIdentityPrincipalId string
+
 resource queryServer 'Microsoft.App/containerApps@2023-05-01' = {
   name: 'mosaic-query-server-${environmentName}'
   location: location
@@ -40,7 +46,7 @@ resource queryServer 'Microsoft.App/containerApps@2023-05-01' = {
       containers: [
         {
           name: 'query-server'
-          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest' // TODO: Replace with actual image
+          image: '${containerRegistryLoginServer}/mosaic-mcp:latest'
           resources: {
             cpu: json('0.25')
             memory: '0.5Gi'
@@ -91,7 +97,10 @@ resource queryServer 'Microsoft.App/containerApps@2023-05-01' = {
     }
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${managedIdentityPrincipalId}': {}
+    }
   }
 }
 

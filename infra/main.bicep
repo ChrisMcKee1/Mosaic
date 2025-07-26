@@ -57,7 +57,9 @@ module queryServer 'query-server.bicep' = {
     azureOpenAIEndpoint: resources.outputs.AZURE_OPENAI_ENDPOINT
     cosmosDbEndpoint: resources.outputs.MOSAIC_COSMOS_ENDPOINT
     redisEndpoint: resources.outputs.AZURE_REDIS_ENDPOINT
-    azureMLEndpointUrl: resources.outputs.AZURE_ML_ENDPOINT_URL
+    azureMLEndpointUrl: resources.outputs.AZURE_ML_WORKSPACE_NAME
+    containerRegistryLoginServer: resources.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT
+    managedIdentityPrincipalId: resources.outputs.AZURE_RESOURCE_MOSAIC_ID
   }
 }
 
@@ -70,6 +72,21 @@ module ingestionService 'ingestion-service.bicep' = {
     containerAppsEnvironmentId: resources.outputs.CONTAINER_APPS_ENVIRONMENT_ID
     azureOpenAIEndpoint: resources.outputs.AZURE_OPENAI_ENDPOINT
     cosmosDbEndpoint: resources.outputs.MOSAIC_COSMOS_ENDPOINT
+    containerRegistryLoginServer: resources.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT
+    managedIdentityPrincipalId: resources.outputs.AZURE_RESOURCE_MOSAIC_ID
+  }
+}
+
+// Three-Service Architecture: Query Server + Ingestion Service + UI Service
+module uiService 'ui-service.bicep' = {
+  scope: rg
+  name: 'ui-service'
+  params: {
+    environmentName: environmentName
+    location: location
+    containerAppsEnvironmentId: resources.outputs.CONTAINER_APPS_ENVIRONMENT_ID
+    containerRegistryLoginServer: resources.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT
+    managedIdentityPrincipalId: resources.outputs.AZURE_RESOURCE_MOSAIC_ID
   }
 }
 // Core Infrastructure Outputs
@@ -103,3 +120,7 @@ output QUERY_SERVER_PRINCIPAL_ID string = queryServer.outputs.queryServerPrincip
 output INGESTION_JOB_NAME string = ingestionService.outputs.ingestionJobName
 output INGESTION_SCHEDULE_NAME string = ingestionService.outputs.ingestionScheduleName
 output INGESTION_JOB_PRINCIPAL_ID string = ingestionService.outputs.ingestionJobPrincipalId
+
+// Three-Service Architecture Outputs  
+output UI_SERVICE_URL string = uiService.outputs.uiServiceUrl
+output UI_SERVICE_PRINCIPAL_ID string = uiService.outputs.uiServicePrincipalId

@@ -21,7 +21,7 @@ from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import RDF, RDFS, XSD
 
 from .ontology_manager import ontology_manager
-from ..models.golden_node import CodeEntity, EntityType, LanguageType
+from models.golden_node import CodeEntity, EntityType, LanguageType
 
 
 class TripleGeneratorError(Exception):

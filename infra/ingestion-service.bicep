@@ -16,6 +16,12 @@ param azureOpenAIEndpoint string
 @description('Azure Cosmos DB endpoint')
 param cosmosDbEndpoint string
 
+@description('Container Registry Login Server')
+param containerRegistryLoginServer string
+
+@description('Managed Identity Principal ID for ACR access')
+param managedIdentityPrincipalId string
+
 resource ingestionJob 'Microsoft.App/jobs@2023-05-01' = {
   name: 'mosaic-ingestion-job-${environmentName}'
   location: location
@@ -34,7 +40,7 @@ resource ingestionJob 'Microsoft.App/jobs@2023-05-01' = {
       containers: [
         {
           name: 'ingestion-service'
-          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest' // TODO: Replace with actual image
+          image: '${containerRegistryLoginServer}/mosaic-ingestion:latest'
           resources: {
             cpu: json('2.0')      // Higher CPU for AST parsing
             memory: '4Gi'         // Higher memory for large repositories
@@ -60,7 +66,10 @@ resource ingestionJob 'Microsoft.App/jobs@2023-05-01' = {
     }
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${managedIdentityPrincipalId}': {}
+    }
   }
 }
 
@@ -118,7 +127,10 @@ resource ingestionSchedule 'Microsoft.App/jobs@2023-05-01' = {
     }
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${managedIdentityPrincipalId}': {}
+    }
   }
 }
 

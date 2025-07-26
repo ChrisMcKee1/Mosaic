@@ -76,15 +76,18 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from mosaic_mcp.config.settings import MosaicSettings
 
 # CRUD-001: Import CommitStateManager for git state tracking
-from ..utils.commit_state_manager import CommitStateManager, CommitState
+from ..utils.commit_state_manager import CommitStateManager
 
 # CRUD-004: Import BranchLifecycleManager for branch operations
-from ..utils.branch_lifecycle_manager import BranchLifecycleManager, BranchMetadata, BranchConflict
+from ..utils.branch_lifecycle_manager import BranchLifecycleManager
 
 # CRUD-005: Branch-aware repository imports
-from ..utils.branch_aware_repository import BranchAwareRepository, TTLConfiguration, PartitionMetrics
+from ..utils.branch_aware_repository import TTLConfiguration
 from ..utils.repository_implementations import (
-    KnowledgeRepository, RepositoryStateRepository, MemoryRepository, RepositoryFactory
+    KnowledgeRepository,
+    RepositoryStateRepository,
+    MemoryRepository,
+    RepositoryFactory,
 )
 from ..utils.container_configuration import ContainerManager, PerformanceMonitor
 
@@ -132,8 +135,8 @@ class IngestionPlugin:
         self.performance_monitor: Optional[PerformanceMonitor] = None
         self.ttl_config = TTLConfiguration(
             active_branch_ttl=30 * 24 * 60 * 60,  # 30 days for active branches
-            stale_branch_ttl=7 * 24 * 60 * 60,    # 7 days for stale branches
-            deleted_branch_ttl=24 * 60 * 60       # 1 day for deleted branches
+            stale_branch_ttl=7 * 24 * 60 * 60,  # 7 days for stale branches
+            deleted_branch_ttl=24 * 60 * 60,  # 1 day for deleted branches
         )
 
         # RDF Infrastructure Components (OMR-P1-006)
@@ -222,6 +225,9 @@ class IngestionPlugin:
             # Initialize Cosmos DB client with managed identity
             await self._initialize_cosmos()
 
+            # CRUD-005: Initialize branch-aware repository infrastructure
+            await self._initialize_repository_infrastructure()
+
             # CRUD-001: Initialize Commit State Manager
             await self._initialize_commit_state_manager()
 
@@ -274,8 +280,10 @@ class IngestionPlugin:
         try:
             # Requires CommitStateManager to be initialized first
             if not self.commit_state_manager:
-                raise ValueError("CommitStateManager must be initialized before BranchLifecycleManager")
-            
+                raise ValueError(
+                    "CommitStateManager must be initialized before BranchLifecycleManager"
+                )
+
             self.branch_lifecycle_manager = BranchLifecycleManager(
                 commit_state_manager=self.commit_state_manager
             )
@@ -289,42 +297,50 @@ class IngestionPlugin:
         try:
             # Requires Cosmos DB client to be initialized first
             if not self.cosmos_client:
-                raise ValueError("Cosmos DB client must be initialized before repositories")
-            
+                raise ValueError(
+                    "Cosmos DB client must be initialized before repositories"
+                )
+
             # Initialize repository factory
             self.repository_factory = RepositoryFactory(
                 cosmos_client=self.cosmos_client,
                 database_name=self.settings.azure_cosmos_database_name,
-                ttl_config=self.ttl_config
+                ttl_config=self.ttl_config,
             )
-            
+
             # Create repository instances
-            self.knowledge_repository = self.repository_factory.create_knowledge_repository(
-                container_name=self.settings.azure_cosmos_container_name
+            self.knowledge_repository = (
+                self.repository_factory.create_knowledge_repository(
+                    container_name=self.settings.azure_cosmos_container_name
+                )
             )
-            
-            self.repository_state_repository = self.repository_factory.create_repository_state_repository(
-                container_name=self.settings.azure_cosmos_repositories_container
+
+            self.repository_state_repository = (
+                self.repository_factory.create_repository_state_repository(
+                    container_name=self.settings.azure_cosmos_repositories_container
+                )
             )
-            
+
             self.memory_repository = self.repository_factory.create_memory_repository(
                 container_name=self.settings.azure_cosmos_memory_container
             )
-            
+
             # Initialize container manager for optimizations
             self.container_manager = ContainerManager(
                 cosmos_client=self.cosmos_client,
-                database_name=self.settings.azure_cosmos_database_name
+                database_name=self.settings.azure_cosmos_database_name,
             )
-            
+
             # Initialize performance monitor
             self.performance_monitor = PerformanceMonitor(self.container_manager)
-            
+
             # Configure container optimizations
             await self._configure_container_optimizations()
-            
-            logger.info("Branch-aware repository infrastructure initialized successfully")
-            
+
+            logger.info(
+                "Branch-aware repository infrastructure initialized successfully"
+            )
+
         except Exception as e:
             logger.error(f"Failed to initialize repository infrastructure: {e}")
             raise
@@ -335,18 +351,16 @@ class IngestionPlugin:
             container_names = [
                 self.settings.azure_cosmos_container_name,
                 self.settings.azure_cosmos_repositories_container,
-                self.settings.azure_cosmos_memory_container
+                self.settings.azure_cosmos_memory_container,
             ]
-            
+
             # Optimize all containers
             results = await self.container_manager.optimize_all_containers(
-                container_names=container_names,
-                enable_ttl=True,
-                update_indexing=True
+                container_names=container_names, enable_ttl=True, update_indexing=True
             )
-            
+
             logger.info(f"Container optimization results: {results}")
-            
+
         except Exception as e:
             logger.warning(f"Error optimizing containers (non-critical): {e}")
             # Don't fail initialization if optimization fails
@@ -502,50 +516,58 @@ Be concise but accurate. Each section should be on its own line with the exact l
             logger.info(
                 f"Starting enhanced repository ingestion with branch management: {repository_url} (branch: {branch})"
             )
-            
+
             # Clone repository first to enable branch operations
             temp_dir = await self._clone_repository(repository_url, branch)
             repo = git.Repo(temp_dir)
-            
+
             # Setup branch for processing (create if missing, ensure metadata exists)
-            branch_metadata, commit_state = await self.branch_lifecycle_manager.setup_branch_for_processing(
+            (
+                branch_metadata,
+                commit_state,
+            ) = await self.branch_lifecycle_manager.setup_branch_for_processing(
                 repo=repo,
                 repository_url=repository_url,
                 branch_name=branch,
-                create_if_missing=True
+                create_if_missing=True,
             )
-            
+
             logger.info(
                 f"Branch '{branch}' setup complete - Active: {branch_metadata.is_active}, "
                 f"Current commit: {branch_metadata.current_commit_sha[:8]}"
             )
-            
+
             # Detect potential conflicts with main branch (if not main branch)
             if branch != "main" and "main" in [head.name for head in repo.heads]:
                 conflict = await self.branch_lifecycle_manager.detect_conflicts(
                     repo=repo,
                     repository_url=repository_url,
                     source_branch=branch,
-                    target_branch="main"
+                    target_branch="main",
                 )
-                
+
                 if conflict:
                     logger.warning(
                         f"Detected {conflict.severity} conflicts between '{branch}' and 'main': "
                         f"{conflict.description}"
                     )
                     if conflict.severity == "critical":
-                        logger.error(f"Critical conflicts detected - aborting ingestion")
-                        raise ValueError(f"Critical branch conflicts: {conflict.description}")
-            
+                        logger.error("Critical conflicts detected - aborting ingestion")
+                        raise ValueError(
+                            f"Critical branch conflicts: {conflict.description}"
+                        )
+
             # Step 1: CRUD-001 - Check commit state for incremental processing (now uses branch-aware state)
             last_commit_state = commit_state
-            
+
             # Repository already cloned in Step 0, no need to clone again
             current_commit_sha = repo.head.commit.hexsha
-            
+
             # CRUD-001: Check if we need to process any commits
-            if last_commit_state and last_commit_state.last_commit_sha == current_commit_sha:
+            if (
+                last_commit_state
+                and last_commit_state.last_commit_sha == current_commit_sha
+            ):
                 logger.info(
                     f"Repository {repository_url}#{branch} is up to date "
                     f"(commit: {current_commit_sha[:8]}). No processing needed."
@@ -555,7 +577,7 @@ Be concise but accurate. Each section should be on its own line with the exact l
                     "branch": branch,
                     "status": "up_to_date",
                     "last_commit": current_commit_sha,
-                    "message": "No new commits to process"
+                    "message": "No new commits to process",
                 }
 
             # Check for incremental update possibility
@@ -632,17 +654,17 @@ Be concise but accurate. Each section should be on its own line with the exact l
             }
 
             logger.info(f"Enhanced repository ingestion completed: {summary}")
-            
+
             # CRUD-001: Update commit state after successful processing
             await self.commit_state_manager.update_commit_state(
                 repository_url=repository_url,
                 branch_name=branch,
                 current_commit_sha=repo.head.commit.hexsha,
                 commit_count=len(list(repo.iter_commits())),
-                processing_status="completed"
+                processing_status="completed",
             )
             logger.info(f"Commit state updated to {repo.head.commit.hexsha[:8]}")
-            
+
             return summary
 
         except Exception as e:
@@ -694,21 +716,21 @@ Be concise but accurate. Each section should be on its own line with the exact l
             changed_files = []
             deleted_files = []
             renamed_files = []
-            
+
             for item in diff:
                 # Use GitPython's change_type to distinguish operation types
                 change_type = item.change_type
-                
-                if change_type == 'D':  # Deleted file
+
+                if change_type == "D":  # Deleted file
                     if item.a_path:
                         deleted_files.append(item.a_path)
                         changed_files.append(item.a_path)  # Include for cleanup
-                elif change_type == 'R':  # Renamed file
+                elif change_type == "R":  # Renamed file
                     if item.a_path and item.b_path:
                         renamed_files.append((item.a_path, item.b_path))
                         changed_files.append(item.a_path)  # Old path for cleanup
                         changed_files.append(item.b_path)  # New path for processing
-                elif change_type in ['A', 'M']:  # Added or Modified file
+                elif change_type in ["A", "M"]:  # Added or Modified file
                     if item.b_path:
                         changed_files.append(item.b_path)
                 # Fallback for any other change types
@@ -733,14 +755,14 @@ Be concise but accurate. Each section should be on its own line with the exact l
                 f"Git diff analysis: {len(changed_files)} total changes, "
                 f"{len(deleted_files)} deletions, {len(renamed_files)} renames"
             )
-            
+
             # Store change metadata for use in incremental processing
             self._change_metadata = {
-                'deleted_files': deleted_files,
-                'renamed_files': renamed_files,
-                'all_changed': filtered_files
+                "deleted_files": deleted_files,
+                "renamed_files": renamed_files,
+                "all_changed": filtered_files,
             }
-            
+
             return filtered_files
 
         except Exception as e:
@@ -769,8 +791,12 @@ Be concise but accurate. Each section should be on its own line with the exact l
             logger.info(f"Processing incremental update for {len(changed_files)} files")
 
             # Step 1: Delete existing entities for changed files with enhanced deletion logic
-            deletion_stats = await self._delete_entities_by_filepath(changed_files, "update")
-            logger.info(f"Deletion completed: {deletion_stats['entities_deleted']} entities, {deletion_stats['soft_deletions']} soft deletes, {deletion_stats['cascade_deletions']} cascade deletes")
+            deletion_stats = await self._delete_entities_by_filepath(
+                changed_files, "update"
+            )
+            logger.info(
+                f"Deletion completed: {deletion_stats['entities_deleted']} entities, {deletion_stats['soft_deletions']} soft deletes, {deletion_stats['cascade_deletions']} cascade deletes"
+            )
 
             # Step 2: Build entity map for only changed files
             entity_map = {}
@@ -859,23 +885,25 @@ Be concise but accurate. Each section should be on its own line with the exact l
             }
 
             logger.info(f"Incremental update completed: {summary}")
-            
+
             # CRUD-001: Update commit state after successful incremental processing
             await self.commit_state_manager.update_commit_state(
                 repository_url=repository_url,
                 branch_name=branch,
                 current_commit_sha=repo.head.commit.hexsha,
-                processing_status="completed"
+                processing_status="completed",
             )
             logger.info(f"Commit state updated to {repo.head.commit.hexsha[:8]}")
-            
+
             return summary
 
         except Exception as e:
             logger.error(f"Incremental update failed: {e}")
             raise
 
-    async def _delete_entities_by_filepath(self, changed_files: list[str], operation_type: str = "update") -> dict:
+    async def _delete_entities_by_filepath(
+        self, changed_files: list[str], operation_type: str = "update"
+    ) -> dict:
         """
         Delete existing entities for files that have changed with cascade and audit support.
 
@@ -895,58 +923,67 @@ Be concise but accurate. Each section should be on its own line with the exact l
             "cascade_deletions": 0,
             "soft_deletions": 0,
             "errors": [],
-            "audit_entries": []
+            "audit_entries": [],
         }
-        
+
         try:
-            deleted_files = getattr(self, '_change_metadata', {}).get('deleted_files', [])
-            
+            deleted_files = getattr(self, "_change_metadata", {}).get(
+                "deleted_files", []
+            )
+
             for file_path in changed_files:
                 # Determine if this is a true file deletion
                 is_file_deletion = file_path in deleted_files
-                current_operation = 'delete' if is_file_deletion else operation_type
-                
+                current_operation = "delete" if is_file_deletion else operation_type
+
                 # Query for entities matching this file path
                 query = "SELECT * FROM c WHERE c.file_path CONTAINS @file_path"
                 parameters = [{"name": "@file_path", "value": file_path}]
 
-                items = self.knowledge_container.query_items(
-                    query=query,
-                    parameters=parameters,
-                    enable_cross_partition_query=True,
+                # CRUD-005: Use branch-aware repository for cross-partition queries
+                items = await self.knowledge_repository.query_entities_cross_partition(
+                    query=query, parameters=parameters
                 )
 
                 file_entities_deleted = 0
-                
+
                 # Process each matching entity
                 for item in items:
                     try:
                         entity_id = item.get("id", "unknown")
                         entity_type = item.get("type", "unknown")
-                        
-                        if current_operation == 'delete' and is_file_deletion:
+
+                        if current_operation == "delete" and is_file_deletion:
                             # Perform soft delete for file deletions
-                            await self._soft_delete_entity(item, file_path, deletion_stats)
-                            
+                            await self._soft_delete_entity(
+                                item, file_path, deletion_stats
+                            )
+
                             # Perform cascade delete for related entities
-                            await self._cascade_delete_related_entities(entity_id, entity_type, deletion_stats)
+                            await self._cascade_delete_related_entities(
+                                entity_id, entity_type, deletion_stats
+                            )
                         else:
                             # Hard delete for updates/modifications
-                            await self.knowledge_container.delete_item(
-                                item=entity_id, partition_key=entity_type
+                            await self.knowledge_repository.delete_entity(
+                                entity_id=entity_id, partition_key=entity_type
                             )
-                            
+
                         file_entities_deleted += 1
                         deletion_stats["entities_deleted"] += 1
-                        
+
                     except Exception as e:
-                        error_msg = f"Error deleting entity {item.get('id', 'unknown')}: {e}"
+                        error_msg = (
+                            f"Error deleting entity {item.get('id', 'unknown')}: {e}"
+                        )
                         logger.debug(error_msg)
                         deletion_stats["errors"].append(error_msg)
                         continue
 
                 deletion_stats["files_processed"] += 1
-                logger.debug(f"Processed {file_path}: {file_entities_deleted} entities deleted")
+                logger.debug(
+                    f"Processed {file_path}: {file_entities_deleted} entities deleted"
+                )
 
             logger.info(
                 f"Entity cleanup completed: {deletion_stats['files_processed']} files, "
@@ -954,7 +991,7 @@ Be concise but accurate. Each section should be on its own line with the exact l
                 f"{deletion_stats['cascade_deletions']} cascade deletions, "
                 f"{deletion_stats['soft_deletions']} soft deletions"
             )
-            
+
             return deletion_stats
 
         except Exception as e:
@@ -964,10 +1001,12 @@ Be concise but accurate. Each section should be on its own line with the exact l
             # Don't fail the entire process if cleanup has issues
             return deletion_stats
 
-    async def _soft_delete_entity(self, entity: dict, file_path: str, stats: dict) -> None:
+    async def _soft_delete_entity(
+        self, entity: dict, file_path: str, stats: dict
+    ) -> None:
         """
         Perform soft delete by adding deleted_at timestamp and audit information.
-        
+
         Args:
             entity: Entity document to soft delete
             file_path: File path that was deleted
@@ -975,15 +1014,15 @@ Be concise but accurate. Each section should be on its own line with the exact l
         """
         try:
             from datetime import datetime, timezone
-            
+
             # Add soft delete fields
             entity["deleted_at"] = datetime.now(timezone.utc).isoformat()
             entity["deletion_reason"] = f"File deleted: {file_path}"
             entity["deletion_type"] = "soft_delete"
-            
-            # Update the entity with soft delete markers
-            await self.knowledge_container.upsert_item(entity)
-            
+
+            # CRUD-005: Use branch-aware repository for entity operations
+            await self.knowledge_repository.upsert_entity(entity)
+
             # Create audit entry
             audit_entry = {
                 "id": f"audit_{entity.get('id', 'unknown')}_{int(datetime.now().timestamp())}",
@@ -993,79 +1032,98 @@ Be concise but accurate. Each section should be on its own line with the exact l
                 "entity_type": entity.get("type"),
                 "file_path": file_path,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "reason": f"File deletion detected via git diff",
+                "reason": "File deletion detected via git diff",
                 "metadata": {
                     "original_entity_type": entity.get("type"),
                     "file_extension": Path(file_path).suffix,
-                    "deletion_method": "git_diff_change_type"
-                }
+                    "deletion_method": "git_diff_change_type",
+                },
             }
-            
-            await self.knowledge_container.create_item(audit_entry)
-            
+
+            # CRUD-005: Use repository for audit operations
+            await self.knowledge_repository.create_item(audit_entry)
+
             stats["soft_deletions"] += 1
             stats["audit_entries"].append(audit_entry["id"])
-            
-            logger.debug(f"Soft deleted entity {entity.get('id')} from {file_path}")
-            
-        except Exception as e:
-            logger.warning(f"Failed to soft delete entity {entity.get('id', 'unknown')}: {e}")
-            stats["errors"].append(f"Soft delete failed for {entity.get('id', 'unknown')}: {e}")
 
-    async def _cascade_delete_related_entities(self, entity_id: str, entity_type: str, stats: dict) -> None:
+            logger.debug(f"Soft deleted entity {entity.get('id')} from {file_path}")
+
+        except Exception as e:
+            logger.warning(
+                f"Failed to soft delete entity {entity.get('id', 'unknown')}: {e}"
+            )
+            stats["errors"].append(
+                f"Soft delete failed for {entity.get('id', 'unknown')}: {e}"
+            )
+
+    async def _cascade_delete_related_entities(
+        self, entity_id: str, entity_type: str, stats: dict
+    ) -> None:
         """
         Perform cascade delete of entities related to the deleted entity.
-        
+
         This deletes FileVersion -> related entities following the branch-aware entity model.
-        
+
         Args:
             entity_id: ID of the primary entity being deleted
-            entity_type: Type of the primary entity 
+            entity_type: Type of the primary entity
             stats: Statistics dictionary to update
         """
         try:
             from datetime import datetime, timezone
-            
+
             # For FileVersion entities, cascade delete related CodeEntity and Relationship entities
             if entity_type == "FileVersion":
                 cascade_queries = [
                     # Delete CodeEntities that belong to this FileVersion
                     {
                         "query": "SELECT * FROM c WHERE c.type = 'CodeEntity' AND c.file_version_id = @entity_id",
-                        "description": "CodeEntity cascade delete"
+                        "description": "CodeEntity cascade delete",
                     },
                     # Delete Relationships where this entity is source or target
                     {
                         "query": "SELECT * FROM c WHERE c.type = 'Relationship' AND (c.source_id = @entity_id OR c.target_id = @entity_id)",
-                        "description": "Relationship cascade delete"
-                    }
+                        "description": "Relationship cascade delete",
+                    },
                 ]
-                
+
                 for cascade_query in cascade_queries:
                     parameters = [{"name": "@entity_id", "value": entity_id}]
-                    
-                    related_items = self.knowledge_container.query_items(
-                        query=cascade_query["query"],
-                        parameters=parameters,
-                        enable_cross_partition_query=True,
+
+                    # CRUD-005: Use branch-aware repository for cross-partition queries
+                    related_items = (
+                        await self.knowledge_repository.query_entities_cross_partition(
+                            query=cascade_query["query"], parameters=parameters
+                        )
                     )
-                    
+
                     for related_item in related_items:
                         try:
                             # Soft delete related entities as well
-                            related_item["deleted_at"] = datetime.now(timezone.utc).isoformat()
-                            related_item["deletion_reason"] = f"Cascade delete from {entity_type} {entity_id}"
+                            related_item["deleted_at"] = datetime.now(
+                                timezone.utc
+                            ).isoformat()
+                            related_item["deletion_reason"] = (
+                                f"Cascade delete from {entity_type} {entity_id}"
+                            )
                             related_item["deletion_type"] = "cascade_delete"
-                            
-                            await self.knowledge_container.upsert_item(related_item)
+
+                            # CRUD-005: Use repository for upsert
+                            await self.knowledge_repository.upsert_entity(related_item)
                             stats["cascade_deletions"] += 1
-                            
-                            logger.debug(f"Cascade deleted {related_item.get('type')} {related_item.get('id')}")
-                            
+
+                            logger.debug(
+                                f"Cascade deleted {related_item.get('type')} {related_item.get('id')}"
+                            )
+
                         except Exception as e:
-                            logger.warning(f"Failed to cascade delete {related_item.get('id', 'unknown')}: {e}")
-                            stats["errors"].append(f"Cascade delete failed for {related_item.get('id', 'unknown')}: {e}")
-            
+                            logger.warning(
+                                f"Failed to cascade delete {related_item.get('id', 'unknown')}: {e}"
+                            )
+                            stats["errors"].append(
+                                f"Cascade delete failed for {related_item.get('id', 'unknown')}: {e}"
+                            )
+
         except Exception as e:
             logger.warning(f"Failed to cascade delete for {entity_id}: {e}")
             stats["errors"].append(f"Cascade delete failed for {entity_id}: {e}")
@@ -3455,9 +3513,9 @@ Be concise but accurate. Each section should be on its own line with the exact l
                     }
                     documents.append(doc)
 
-                # Batch upsert to Cosmos DB
+                # Batch upsert to Cosmos DB using CRUD-005 repository pattern
                 for doc in documents:
-                    await self.knowledge_container.upsert_item(doc)
+                    await self.knowledge_repository.upsert_entity(doc)
 
                 logger.info(
                     f"Stored batch {i // batch_size + 1} of {(len(entities) + batch_size - 1) // batch_size}"
@@ -3570,7 +3628,7 @@ Be concise but accurate. Each section should be on its own line with the exact l
             batch = relationships[i : i + batch_size]
 
             try:
-                # Store relationships in Cosmos DB
+                # Store relationships in Cosmos DB using CRUD-005 repository pattern
                 for relationship in batch:
                     # Format according to OmniRAG graph pattern
                     doc = {
@@ -3583,7 +3641,7 @@ Be concise but accurate. Each section should be on its own line with the exact l
                         "target_file": relationship["target_file"],
                         "timestamp": relationship["timestamp"],
                     }
-                    await self.knowledge_container.upsert_item(doc)
+                    await self.knowledge_repository.upsert_entity(doc)
 
                 logger.info(f"Stored relationship batch {i // batch_size + 1}")
 
@@ -3695,9 +3753,9 @@ Be concise but accurate. Each section should be on its own line with the exact l
                         }
                         documents.append(doc)
 
-                    # Batch upsert to Cosmos DB
+                    # Batch upsert to Cosmos DB using CRUD-005 repository pattern
                     for doc in documents:
-                        await self.knowledge_container.upsert_item(doc)
+                        await self.knowledge_repository.upsert_entity(doc)
 
                     logger.info(
                         f"Stored RDF triple batch {i // batch_size + 1} ({len(documents)} triples)"

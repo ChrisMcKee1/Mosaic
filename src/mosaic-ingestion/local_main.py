@@ -21,7 +21,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 import git  # GitPython
 
 # CRUD-001: Import CommitStateManager for commit state tracking
-from utils.commit_state_manager import CommitStateManager, CommitState
+from utils.commit_state_manager import CommitStateManager
 
 # Configure production logging
 logging.basicConfig(
@@ -88,11 +88,14 @@ class LocalIngestionService:
         try:
             # Try to initialize CommitStateManager if Cosmos config is available
             from agents.base_agent import BaseAgent
+
             settings = BaseAgent.load_settings()
             self.commit_state_manager = CommitStateManager.from_settings(settings)
             logger.info("✅ CommitStateManager initialized for local development")
         except Exception as e:
-            logger.info(f"ℹ️  CommitStateManager not available (running in simple mode): {e}")
+            logger.info(
+                f"ℹ️  CommitStateManager not available (running in simple mode): {e}"
+            )
             self.commit_state_manager = None
 
     async def ingest_repository(
@@ -127,7 +130,9 @@ class LocalIngestionService:
                             f"📋 Found previous commit state: {last_commit_state.last_commit_sha[:8]}"
                         )
                     else:
-                        logger.info("📋 No previous commit state found (first-time ingestion)")
+                        logger.info(
+                            "📋 No previous commit state found (first-time ingestion)"
+                        )
                 except Exception as e:
                     logger.warning(f"⚠️  Failed to retrieve commit state: {e}")
 
@@ -139,12 +144,14 @@ class LocalIngestionService:
             commits_processed = 0
             if self.commit_state_manager and repo:
                 try:
-                    last_commit_sha = last_commit_state.last_commit_sha if last_commit_state else None
+                    last_commit_sha = (
+                        last_commit_state.last_commit_sha if last_commit_state else None
+                    )
                     new_commits = self.commit_state_manager.iter_commits_since_last(
                         repo, repository_url, branch, last_commit_sha
                     )
                     commits_processed = len(new_commits)
-                    
+
                     if commits_processed > 0:
                         logger.info(f"📈 Processing {commits_processed} new commits")
                     else:
@@ -161,14 +168,16 @@ class LocalIngestionService:
             if self.commit_state_manager and repo:
                 try:
                     current_commit_sha = repo.head.commit.hexsha
-                    new_count = (last_commit_state.commit_count if last_commit_state else 0) + commits_processed
-                    
+                    new_count = (
+                        last_commit_state.commit_count if last_commit_state else 0
+                    ) + commits_processed
+
                     await self.commit_state_manager.update_commit_state(
                         repository_url=repository_url,
                         branch_name=branch,
                         current_commit_sha=current_commit_sha,
                         commit_count=new_count,
-                        processing_status="completed"
+                        processing_status="completed",
                     )
                     logger.info(f"✅ Updated commit state: {current_commit_sha[:8]}")
                 except Exception as e:
@@ -184,8 +193,12 @@ class LocalIngestionService:
                 "entities_extracted": self.stats["entities_found"],
                 "relationships_found": 0,  # Simplified version doesn't extract relationships
                 "commits_processed": commits_processed,
-                "current_commit": current_commit_sha[:8] if current_commit_sha else None,
-                "last_commit": last_commit_state.last_commit_sha[:8] if last_commit_state else None,
+                "current_commit": current_commit_sha[:8]
+                if current_commit_sha
+                else None,
+                "last_commit": last_commit_state.last_commit_sha[:8]
+                if last_commit_state
+                else None,
                 "commit_state_tracking": bool(self.commit_state_manager),
                 "timestamp": datetime.utcnow().isoformat(),
                 "status": "completed",
@@ -207,10 +220,12 @@ class LocalIngestionService:
                 except Exception as cleanup_error:
                     logger.warning(f"⚠️  Failed to cleanup {temp_dir}: {cleanup_error}")
 
-    async def _clone_repository(self, repository_url: str, branch: str) -> tuple[str, git.Repo]:
+    async def _clone_repository(
+        self, repository_url: str, branch: str
+    ) -> tuple[str, git.Repo]:
         """
         Clone repository using GitPython with comprehensive error handling.
-        
+
         Returns:
             Tuple of (temp_directory_path, git_repo_object)
         """
@@ -247,7 +262,7 @@ class LocalIngestionService:
                     repository_url, temp_dir, branch
                 )
             else:
-                # Execute clone with full history (no depth limitation) 
+                # Execute clone with full history (no depth limitation)
                 repo = git.Repo.clone_from(
                     repository_url,
                     temp_dir,

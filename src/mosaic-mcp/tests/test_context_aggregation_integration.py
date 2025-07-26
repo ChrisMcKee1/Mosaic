@@ -472,12 +472,12 @@ class TestContextAggregationIntegration:
         result = await context_aggregator.aggregate_results(request)
 
         # Verify deduplication occurred
-        assert (
-            result.duplicates_removed > 0
-        ), "Should have detected and removed duplicates"
-        assert len(result.aggregated_items) < len(
-            similar_items
-        ), "Should have fewer items after deduplication"
+        assert result.duplicates_removed > 0, (
+            "Should have detected and removed duplicates"
+        )
+        assert len(result.aggregated_items) < len(similar_items), (
+            "Should have fewer items after deduplication"
+        )
 
         # Verify the highest confidence item was kept
         kept_contents = [item.content for item in result.aggregated_items]
